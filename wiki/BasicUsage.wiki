@@ -1,7 +1,5 @@
 #summary Basic usage for the TimeMap library.
 
-See below for basic usage:
-
 {{{
 
 // Make a new TimeMap object, passing the ids of the map and timeline DOM elements.
