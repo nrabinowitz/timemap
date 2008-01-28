@@ -1,0 +1,51 @@
+#summary Basic usage for the TimeMap library.
+
+See below for basic usage:
+
+{{{
+
+// Make a new TimeMap object, passing the ids of the map and timeline DOM elements.
+// This will initialize the map.
+var tm = new TimeMap(
+    document.getElementById("timeline"), 
+    document.getElementById("map"),
+    {}
+);
+
+// Make a new dataset with the id "sample" and green markers.
+// You can load multiple datasets with different visual themes.
+var sample = tm.createDataset("sample", {
+    title:  "Sample",
+    theme:  TimeMapDataset.greenTheme()
+});
+
+// Create band information for the timeline as you would for any SIMILE timeline,
+// but using the eventSource from the dataset object.
+// See http://simile.mit.edu/timeline/docs/ for more info.
+var bands = [
+    Timeline.createBandInfo({
+        eventSource:    sample.eventSource,
+        width:          "100%",
+        intervalUnit:   Timeline.DateTime.YEAR
+    })
+];
+
+// Initialize the timeline with the band info
+tm.initTimeline(bands);
+
+// Load some data!
+// Data should be an array of objects - see the code comments for format details
+sample.loadItems(items);
+
+// scroll to a given date - this is often necessary to make the timeline events appear
+var earliestDate = sample.eventSource.getLatestDate();
+tm.timeline.getBand(0).setCenterVisibleDate();
+
+// or, load a KML file with TimeStamp and TimeSpan elements
+GDownloadUrl("sample.kml", function(result) {
+    var data = TimeMapDataset.parseKML(result);
+    sample.loadItems(data);
+    tm.timeline.getBand(0).setCenterVisibleDate(sample.eventSource.getLatestDate());
+});
+
+}}}
