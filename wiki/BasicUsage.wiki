@@ -36,8 +36,8 @@ tm.initTimeline(bands);
 sample.loadItems(items);
 
 // scroll to a given date - this is often necessary to make the timeline events appear
-var earliestDate = sample.eventSource.getLatestDate();
-tm.timeline.getBand(0).setCenterVisibleDate();
+var latestDate = sample.eventSource.getLatestDate();
+tm.timeline.getBand(0).setCenterVisibleDate(latestDate);
 
 // or, load a KML file with TimeStamp and TimeSpan elements
 GDownloadUrl("sample.kml", function(result) {
