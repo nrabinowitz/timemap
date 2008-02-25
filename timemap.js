@@ -424,6 +424,7 @@ TimeMapDataset.parseKML = function(kml) {
     var items = [];
     kmlnode = GXml.parse(kml);
     var placemarks = kmlnode.getElementsByTagName("Placemark");
+    var timeCheck = false;
     for (var i=0; i<placemarks.length; i++) {
         var pm = placemarks[i];
         var nList, data = {};
@@ -442,14 +443,19 @@ TimeMapDataset.parseKML = function(kml) {
         nList = pm.getElementsByTagName("TimeStamp");
         if (nList.length > 0) {
             data["start"] = nList[0].getElementsByTagName("when")[0].firstChild.nodeValue;
+            timeCheck = true;
         }
         // otherwise look for span
-        if (!data["start"]) {
+        if (!timeCheck) {
             nList = pm.getElementsByTagName("TimeSpan");
             if (nList.length > 0) {
                 data["start"] = nList[0].getElementsByTagName("begin")[0].firstChild.nodeValue;
                 data["end"] = nList[0].getElementsByTagName("end")[0].firstChild.nodeValue;
+                timeCheck = true;
             }
+        }
+        if (!timeCheck) {
+          data.push(TimeMapDataset.parseParentNode(pm));
         }
         // look for marker
         nList = pm.getElementsByTagName("Point");
@@ -498,6 +504,33 @@ TimeMapDataset.parseKML = function(kml) {
     kmlnode = null;
     nList = null;
     return items;
+}
+
+TimeMapDataset.parseParentNode = function(pm){
+
+  check = false;
+  var data = {};
+  pn = pm.parentNode;
+  if (pn.nodename == "Folder" || pn.nodename="Document"){
+    for (ele in pn.childNodes) {
+      if (ele.nodename == "TimeStamp") {
+        data["start"] = ele.getElementsByTagName("when")[0].firstChild.nodeValue;
+        check = true;
+      }
+      else if (ele.nodename = "TimeStamp"){
+        beginNodes = ele.getElementsByTagName("begin");
+        if (beginNodes.length > 0) data["start"] = beginNodes[0].firstChild.nodeValue;
+        if (endNodes.length > 0) data["end"] = endNodes[0].firstChild.nodeValue;
+        check = true;
+      }
+    }
+  }
+  else check = true;
+  if (!check) {
+    data = TimeMapDataset.parseParentNode(pn);
+  }
+         
+  return data;
 }
 
 /*----------------------------------------------------------------------------
