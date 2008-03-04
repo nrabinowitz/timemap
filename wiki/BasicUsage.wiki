@@ -9,10 +9,8 @@ The easiest way to get the script working may be to copy code from the [http://w
   * In the `<head>` of your HTML page, include the Google maps script, the SIMILE script, and the TimeMap script (you'll need to get an [http://code.google.com/apis/maps/signup.html API key] from Google, of course):
 
 {{{
-<script src="http://maps.google.com/maps?file=api&v=2&key=[API-KEY]"
-type="text/javascript"></script>
-<script type="text/javascript"
-src="http://simile.mit.edu/timeline/api/timeline-api.js"></script>
+<script src="http://maps.google.com/maps?file=api&v=2&key=[API-KEY]" type="text/javascript"></script>
+<script src="http://simile.mit.edu/timeline/api/timeline-api.js" type="text/javascript"></script>
 <script src="timemap-1.0.js" type="text/javascript"></script>
 }}}
 
