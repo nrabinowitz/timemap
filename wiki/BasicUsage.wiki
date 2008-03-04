@@ -4,8 +4,7 @@ The easiest way to get the script working may be to copy code from the [http://w
 
   * Make an HTML page with a `<div>` tag you want to hold the map, and another to hold the timeline. Give them unique ids (e.g. "map" and "timeline") and size them with CSS.
 
-  * [http://code.google.com/p/timemap/downloads/list Download the timemap-1.0.js script]. You may also want the images, which are just round dots color-coded to match the Google
-map markers in various colors. Put timemap-1.0.js somewhere on your server.
+  * [http://code.google.com/p/timemap/downloads/list Download the timemap-1.0.js script]. You may also want the images, which are just round dots color-coded to match the Google map markers in various colors. Put timemap-1.0.js somewhere on your server.
 
   * In the `<head>` of your HTML page, include the Google maps script, the
 SIMILE script, and the TimeMap script (you'll need to get an [http://code.google.com/apis/maps/signup.html API key]
