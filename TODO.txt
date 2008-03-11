@@ -1,8 +1,0 @@
-To Do.
-
-- Support for online authoring of placemark events
-- Highlight effects for selected markers/events
-x Debug on IE6
-x Investigate memory leak
-x Style info windows a little better
-x Pack timemap.js
