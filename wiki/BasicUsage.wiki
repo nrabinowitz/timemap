@@ -1,67 +1,111 @@
 #summary Basic usage for the TimeMap library.
+#labels Featured
 
 The easiest way to get the script working may be to copy code from the [http://www.nickrabinowitz.com/projects/timemap/artists.html artist mashup]. But here's a quick primer that might also help:
 
-  * Make an HTML page with a `<div>` tag you want to hold the map, and another to hold the timeline. Give them unique ids (e.g. "map" and "timeline") and size them with CSS.
+  * Make an HTML page with a `<div>` tag you want to hold the map, and another to hold the timeline. Give them unique ids (e.g. "map" and "timeline") and size them with CSS. I've found that the CSS can be a little easier if you put the map and timeline `div` tags inside container `div` tags that can be sized separately.
 
-  * [http://code.google.com/p/timemap/downloads/list Download the timemap-1.0.js script]. You may also want the images, which are just round dots color-coded to match the Google map markers in various colors. Put timemap-1.0.js somewhere on your server.
+  * [http://code.google.com/p/timemap/downloads/list Download the timemap.js script]. You may also want the images, which are just round dots color-coded to match the Google map markers in various colors. Put `timemap.js` somewhere on your server.
 
-  * In the `<head>` of your HTML page, include the Google maps script, the SIMILE script, and the TimeMap script (you'll need to get an [http://code.google.com/apis/maps/signup.html API key] from Google, of course):
+  * In the `<head>` of your HTML page, include the Google maps script, the SIMILE script, and the TimeMap script (you'll need to get an [http://code.google.com/apis/maps/signup.html API key] from Google, of course).
 
-{{{
-<script src="http://maps.google.com/maps?file=api&v=2&key=[API-KEY]" type="text/javascript"></script>
-<script src="http://simile.mit.edu/timeline/api/timeline-api.js" type="text/javascript"></script>
-<script src="timemap-1.0.js" type="text/javascript"></script>
+  The page should look something like this (though of course you can put other things in here besides just the map and timeline if you want):
+
+  {{{
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Map Timeline Mashup</title>
+    <script src="http://maps.google.com/maps?file=api&v=2&key=[API-KEY]" type="text/javascript"></script>
+    <script src="http://simile.mit.edu/timeline/api/timeline-api.js" type="text/javascript"></script>
+    <script src="timemap-1.0.js" type="text/javascript"></script>
+    <link href="your-css-file.css" type="text/css" rel="stylesheet"/>
+  </head>
+  <body onLoad="onLoad()" onunload="GUnload();">
+    <div id="timelinecontainer">
+      <div id="timeline"></div>
+    </div>
+    <div id="mapcontainer">
+      <div id="map"></div>
+    </div>
+  </body>
+</html>
 }}}
 
-  * Then you should be able to use a script like the one below to load and display your data. Note that you'll need to figure out how to make your data available to the script - where it says `sample.loadItems(items);`, I'm assuming you are setting up the `items` array.
+  * Now use an `onLoad()` script like the one below to set up your map and timeline. 
+
+{{{
+function onLoad() {
+
+    // Make a new TimeMap object, passing the ids of the map and timeline DOM elements.
+    // This will initialize the map.
+    var tm = new TimeMap(
+        document.getElementById("timeline"), 
+        document.getElementById("map"),
+        {}
+    );
+
+    // Make a new dataset with the id "sample" and green markers.
+    // You can load multiple datasets with different visual themes.
+    var sample = tm.createDataset("sample", {
+        title:  "Sample",
+        theme:  TimeMapDataset.greenTheme()
+    });
+
+    // Create band information for the timeline as you would for any SIMILE timeline,
+    // but using the eventSource from the dataset object.
+    // See http://simile.mit.edu/timeline/docs/ for more info.
+    var bands = [
+        Timeline.createBandInfo({
+            eventSource:    sample.eventSource,
+            width:          "100%",
+            intervalUnit:   Timeline.DateTime.YEAR
+        })
+    ];
+
+    // Initialize the timeline with the band info
+    tm.initTimeline(bands);
+
+    /*
+     * LOAD YOUR DATA HERE
+     */
+
+} // end onLoad()
+}}}
+
+  * Where it says `LOAD YOUR DATA HERE` in the script above, you have two basic options: you can load data in JSON format, or you can load KML, which the script can parse into JSON.
+
+  To load JSON, use something like the following code:
+
+{{{
+    // Data should be an array of objects - see the code comments for format details
+    sample.loadItems(items);
+
+    // scroll to a given date - this is often necessary to make the timeline events appear
+    var latestDate = sample.eventSource.getLatestDate();
+    tm.timeline.getBand(0).setCenterVisibleDate(latestDate);
+}}}
+
+  To load KML data, use a dowload-and-callback function, like this:
+
+{{{
+    // Load a KML file with TimeStamp and TimeSpan elements
+    GDownloadUrl("sample.kml", function(result) {
+        var data = TimeMapDataset.parseKML(result);
+        sample.loadItems(data);
+        tm.timeline.getBand(0).setCenterVisibleDate(sample.eventSource.getLatestDate());
+    });
+}}}
+
+*Troubleshooting*
 
   * One problem I've found that can be hard to diagnose is actually the size of the divs, as set by CSS - if they are sized so that they have 0 height, for example, the javascript may throw an error. Try giving them absolute pixel sizes first, and see if you can get that working.
 
+  * As noted in the code above, you may need to make the timeline scroll to a given date to make the events appear. Scrolling forces it to refresh, but the way I've written the code above it will throw an error if there are no events (or if the events haven't loaded yet). If you run into problems, try replacing the `setCenterVisibleDate` line with this:
+
 {{{
-
-// Make a new TimeMap object, passing the ids of the map and timeline DOM elements.
-// This will initialize the map.
-var tm = new TimeMap(
-    document.getElementById("timeline"), 
-    document.getElementById("map"),
-    {}
-);
-
-// Make a new dataset with the id "sample" and green markers.
-// You can load multiple datasets with different visual themes.
-var sample = tm.createDataset("sample", {
-    title:  "Sample",
-    theme:  TimeMapDataset.greenTheme()
-});
-
-// Create band information for the timeline as you would for any SIMILE timeline,
-// but using the eventSource from the dataset object.
-// See http://simile.mit.edu/timeline/docs/ for more info.
-var bands = [
-    Timeline.createBandInfo({
-        eventSource:    sample.eventSource,
-        width:          "100%",
-        intervalUnit:   Timeline.DateTime.YEAR
-    })
-];
-
-// Initialize the timeline with the band info
-tm.initTimeline(bands);
-
-// Load some data! As noted above, it's up to you to provide the items array.
-// Data should be an array of objects - see the code comments for format details
-sample.loadItems(items);
-
-// scroll to a given date - this is often necessary to make the timeline events appear
-var latestDate = sample.eventSource.getLatestDate();
-tm.timeline.getBand(0).setCenterVisibleDate(latestDate);
-
-// or, load a KML file with TimeStamp and TimeSpan elements
-GDownloadUrl("sample.kml", function(result) {
-    var data = TimeMapDataset.parseKML(result);
-    sample.loadItems(data);
-    tm.timeline.getBand(0).setCenterVisibleDate(sample.eventSource.getLatestDate());
-});
-
+tm.timeline.layout();
 }}}
+
+  For example, this may be necessary if you want to scroll to the latest date, and the latest date is now - this is the default, so the timeline may not scroll anywhere in this case.
