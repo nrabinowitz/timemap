@@ -60,7 +60,8 @@ function onLoad() {
         Timeline.createBandInfo({
             eventSource:    sample.eventSource,
             width:          "100%",
-            intervalUnit:   Timeline.DateTime.YEAR
+            intervalPixels: 100,
+            intervalUnit:   Timeline.DateTime.DAY
         })
     ];
 
@@ -85,6 +86,8 @@ function onLoad() {
     // scroll to a given date - this is often necessary to make the timeline events appear
     var latestDate = sample.eventSource.getLatestDate();
     tm.timeline.getBand(0).setCenterVisibleDate(latestDate);
+    // this line may be necessary if your events don't appear on the timeline
+    tm.timeline.layout();
 }}}
 
   To load KML data, use a dowload-and-callback function, like this:
@@ -95,6 +98,8 @@ function onLoad() {
         var data = TimeMapDataset.parseKML(result);
         sample.loadItems(data);
         tm.timeline.getBand(0).setCenterVisibleDate(sample.eventSource.getLatestDate());
+        // this line may be necessary if your events don't appear on the timeline
+        tm.timeline.layout();
     });
 }}}
 
