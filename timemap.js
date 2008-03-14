@@ -338,7 +338,8 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
         if (tm.settings.centerMapOnItems) {
             tm.mapBounds.extend(point);
         }
-        placemark = new GMarker(point, { icon: this._theme.icon });
+        markerIcon = ("icon" in data) ? data["icon"] : this._theme.icon;
+        placemark = new GMarker(point, { icon: markerIcon });
         type = "marker";
     } else if ("polyline" in data || "polygon" in data) {
         var points = [];
@@ -511,7 +512,7 @@ TimeMapDataset.parseParentNode = function(pm){
   check = false;
   var data = {};
   pn = pm.parentNode;
-  if (pn.nodename == "Folder" || pn.nodename="Document"){
+  if (pn.nodename == "Folder" || pn.nodename=="Document"){
     for (ele in pn.childNodes) {
       if (ele.nodename == "TimeStamp") {
         data["start"] = ele.getElementsByTagName("when")[0].firstChild.nodeValue;
