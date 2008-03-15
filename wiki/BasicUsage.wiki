@@ -1,8 +1,6 @@
 #summary Basic usage for the TimeMap library.
 #labels Featured
 
-==Basic Usage==
-
 The easiest way to get the script working may be to copy code from the [http://www.nickrabinowitz.com/projects/timemap/artists.html artist mashup]. But here's a quick primer that might also help:
 
   * Make an HTML page with a `<div>` tag you want to hold the map, and another to hold the timeline. Give them unique ids (e.g. "map" and "timeline") and size them with CSS. I've found that the CSS can be a little easier if you put the map and timeline `div` tags inside container `div` tags that can be sized separately.
