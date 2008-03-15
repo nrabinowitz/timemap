@@ -1,6 +1,8 @@
 #summary Basic usage for the TimeMap library.
 #labels Featured
 
+==Basic Usage==
+
 The easiest way to get the script working may be to copy code from the [http://www.nickrabinowitz.com/projects/timemap/artists.html artist mashup]. But here's a quick primer that might also help:
 
   * Make an HTML page with a `<div>` tag you want to hold the map, and another to hold the timeline. Give them unique ids (e.g. "map" and "timeline") and size them with CSS. I've found that the CSS can be a little easier if you put the map and timeline `div` tags inside container `div` tags that can be sized separately.
@@ -103,7 +105,7 @@ function onLoad() {
     });
 }}}
 
-*Troubleshooting*
+==Troubleshooting==
 
   * One problem I've found that can be hard to diagnose is actually the size of the divs, as set by CSS - if they are sized so that they have 0 height, for example, the javascript may throw an error. Try giving them absolute pixel sizes first, and see if you can get that working.
 
@@ -113,4 +115,24 @@ function onLoad() {
 tm.timeline.layout();
 }}}
 
-  For example, this may be necessary if you want to scroll to the latest date, and the latest date is now - this is the default, so the timeline may not scroll anywhere in this case.
+  For example, this may be necessary if you want to scroll to the latest date, and the latest date is now - this is the default, so the timeline may not scroll anywhere in this case. 
+
+  * If you're loading multiple files by JSON, you may need to make sure that the _last_ callback function makes the timeline call layout() (either explicitly or by making the timeline scroll to a date). Otherwise the events may lay out funny (overlapping) on the timeline.
+
+  * Be aware that trailing commas and missing semicolons in JSON declarations can throw an error in IE. So this:
+
+{{{
+var test = {
+  title: "Test title",
+  description: "A description!", // <--- problem comma
+} // <--- missing semicolon
+}}}
+
+  needs to be this:
+
+{{{
+var test = {
+  title: "Test title",
+  description: "A description!"
+};
+}}}
