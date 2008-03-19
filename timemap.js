@@ -61,7 +61,7 @@ function TimeMap(tElement, mElement, options) {
         mapCenter : ("mapCenter" in options) ? options.mapCenter : 
             new GLatLng(0,0), 
         mapZoom : ("mapZoom" in options) ? options.mapZoom : 
-            4,
+            1,
         mapType : ("mapType" in options) ? options.mapType : 
             G_PHYSICAL_MAP,
         showMapTypeCtrl : ("showMapTypeCtrl" in options) ? options.showMapTypeCtrl : 
@@ -373,6 +373,8 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
             type = "polygon";
         }
     }
+     // XXX: It would be nice to handle missing placemarks better
+    if (placemark == null) return;
     
     // define the center point of this item
     if (type == "marker") {
