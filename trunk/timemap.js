@@ -55,25 +55,17 @@ function TimeMap(tElement, mElement, options) {
     
     // default settings, can be overridden by options
     // other options can be set directly on the map or timeline
+    options = options || {}; // make sure the options object isn't null
     this.settings = {
-        syncBands : ("syncBands" in options) ? options.syncBands : 
-            true,
-        mapCenter : ("mapCenter" in options) ? options.mapCenter : 
-            new GLatLng(0,0), 
-        mapZoom : ("mapZoom" in options) ? options.mapZoom : 
-            1,
-        mapType : ("mapType" in options) ? options.mapType : 
-            G_PHYSICAL_MAP,
-        showMapTypeCtrl : ("showMapTypeCtrl" in options) ? options.showMapTypeCtrl : 
-            true,
-        showMapCtrl : ("showMapCtrl" in options) ? options.showMapCtrl : 
-            true,
-        hidePastFuture : ("hidePastFuture" in options) ? options.hidePastFuture : 
-            true,
-        hideOffMap : ("hideOffMap" in options) ? options.hideOffMap : 
-            false, // I don't like the way this works, really
-        centerMapOnItems : ("centerMapOnItems" in options) ? options.centerMapOnItems : 
-            true
+        syncBands:        options['syncBands'] || true,
+        mapCenter:        options['mapCenter'] || new GLatLng(0,0), 
+        mapZoom:          options['mapZoom'] || 4,
+        mapType:          options['mapType'] || G_PHYSICAL_MAP,
+        showMapTypeCtrl:  options['showMapTypeCtrl'] || true,
+        showMapCtrl:      options['showMapCtrl'] || true,
+        hidePastFuture:   options['hidePastFuture'] || true,
+        hideOffMap:       options['hideOffMap'] || false, // I don't like the way this works, really
+        centerMapOnItems: options['centerMapOnItems'] || true
     };
     
     // initialize map
@@ -560,30 +552,19 @@ TimeMapDataset.parseParentNode = function(pm){
  */
 function TimeMapDatasetTheme(options) {
     // work out various defaults - the default theme is Google's reddish color
-    this.icon = ("icon" in options) ? options.icon : 
-        G_DEFAULT_ICON;
-    this.color = ("color" in options) ? options.color : 
-        "#FE766A";
-    this.lineColor = ("lineColor" in options) ? options.lineColor : 
-        this.color;
-    this.polygonLineColor = ("polygonLineColor" in options) ? options.polygonLineColor : 
-        this.lineColor;
-    this.lineOpacity = ("lineOpacity" in options) ? options.lineOpacity : 
-        1;
-    this.polgonLineOpacity = ("polgonLineOpacity" in options) ? options.polgonLineOpacity : 
-        this.lineOpacity;
-    this.lineWeight = ("lineWeight" in options) ? options.lineWeight : 
-        2;
-    this.polygonLineWeight = ("polygonLineWeight" in options) ? options.polygonLineWeight : 
-        this.lineWeight;
-    this.fillColor = ("fillColor" in options) ? options.fillColor : 
-        this.color;
-    this.fillOpacity = ("fillOpacity" in options) ? options.fillOpacity : 
-        0.25;
-    this.eventColor = ("eventColor" in options) ? options.eventColor : 
-        this.color;
-    this.eventIcon = ("eventIcon" in options) ? options.eventIcon : 
-        "timemap/images/red-circle.png"; // XXX: probably need to work out the URLs better here
+    options = options || {};
+    this.icon =              options['icon'] || G_DEFAULT_ICON; //("icon" in options) ? options.icon : G_DEFAULT_ICON;
+    this.color =             options['color'] || "#FE766A";
+    this.lineColor =         options['lineColor'] || this.color;
+    this.polygonLineColor =  options['polygonLineColor'] || this.lineColor;
+    this.lineOpacity =       options['lineOpacity'] || 1;
+    this.polgonLineOpacity = options['polgonLineOpacity'] || this.lineOpacity;
+    this.lineWeight =        options['lineWeight'] || 2;
+    this.polygonLineWeight = options['polygonLineWeight'] || this.lineWeight;
+    this.fillColor =         options['fillColor'] || this.color;
+    this.fillOpacity =       options['fillOpacity'] || 0.25;
+    this.eventColor =        options['eventColor'] || this.color;
+    this.eventIcon =         options['eventIcon'] || "timemap/images/red-circle.png"; // XXX: probably need to work out the URLs better here
 }
 
 TimeMapDataset.redTheme = function() {
@@ -677,18 +658,20 @@ TimeMapDataset.purpleTheme = function() {
 function TimeMapItem(placemark, event, map, options) {
     // initialize vars
     this.placemark = placemark;
-    this.event = event;
-    this.map = map;
+    this.event =     event;
+    this.map =       map;
+    
     // get vars from options
-    this._type = ("type" in options) ? options.type : "";
-    this._title = ("title" in options) ? options.title : "";
-    this._description = ("description" in options) ? options.description : "";
-    this._infoPoint =  ("infoPoint" in options) ? options.infoPoint : null;
-    this._infoHtml = ("infoHtml" in options) ? options.infoHtml : "";
-    this._infoUrl = ("infoUrl" in options) ? options.infoUrl : "";
-    this._maxInfoHtml = ("maxInfoHtml" in options) ? options.maxInfoHtml : "";
-    this._maxInfoUrl = ("maxInfoUrl" in options) ? options.maxInfoUrl : "";
-    this._maxOnly = ("maxInfoUrl" in options) ? options.maxOnly : false;
+    options = options || {};
+    this._type =        options['type'] || '';
+    this._title =       options['title'] || '';
+    this._description = options['description'] || '';
+    this._infoPoint =   options['infoPoint'] || null;
+    this._infoHtml =    options['infoHtml'] || '';
+    this._infoUrl =     options['infoUrl'] || '';
+    this._maxInfoHtml = options['maxInfoHtml'] || '';
+    this._maxInfoUrl =  options['maxInfoUrl'] || '';
+    this._maxOnly =     options['maxInfoUrl'] || false;
     
     // get functions
     this.getType = function() { return this._type; };
