@@ -41,7 +41,6 @@
  *   {Boolean} showMapTypeCtrl      Whether to display the map type control
  *   {Boolean} showMapCtrl          Whether to show map navigation control
  *   {Boolean} hidePastFuture       Whether to hide map placemarks for events not visible on timeline
- *   {Boolean} hideOffMap           Whether to hide events for map placemarks not visible on map
  *   {Boolean} centerMapOnItems     Whether to center and zoom the map based on loaded item positions
  */
 function TimeMap(tElement, mElement, options) {
@@ -64,7 +63,6 @@ function TimeMap(tElement, mElement, options) {
         showMapTypeCtrl:  options['showMapTypeCtrl'] || true,
         showMapCtrl:      options['showMapCtrl'] || true,
         hidePastFuture:   options['hidePastFuture'] || true,
-        hideOffMap:       options['hideOffMap'] || false, // I don't like the way this works, really
         centerMapOnItems: options['centerMapOnItems'] || true
     };
     
@@ -244,16 +242,7 @@ TimeMapDataset.prototype.getItems = function() {
  * Add items to map and timeline. 
  * Each item has both a timeline event and a map placemark.
  *
- * @param {Object} data             Data to be loaded, in the following format:
- *        {String} title                Title of the item (visible on timeline and info window)
- *        {Iso8601DateTime} start       Start time of the event on the timeline
- *        {Iso8601DateTime} end         End time of the event on the timeline (duration events only)
- *        {String} description          Description to be shown in the info window
- *        {Object} point                Data for a single-point placemark: 
- *          {Float} lat                   Latitude of map marker
- *          {Float} lon                   Longitude of map marker
- *        {Array of points} polyline    Data for a polyline placemark, in format above
- *        {Array of points} polygon     Data for a polygon placemark, in format above
+ * @param {Object} data             Data to be loaded. See loadItem() below for the format.
  * @param {Function} transform      If data is not in the above format, transformation function to make it so
  */
 TimeMapDataset.prototype.loadItems = function(data, transform) {
@@ -275,7 +264,7 @@ TimeMapDataset.prototype.loadItems = function(data, transform) {
  * Each item has both a timeline event and a map placemark.
  *
  * @param {Object} data             Data to be loaded, in the following format:
- *      {String} title                  Title of the item (visible on timeline and info window)
+ *      {String} title                  Title of the item (visible on timeline)
  *      {Iso8601DateTime} start         Start time of the event on the timeline
  *      {Iso8601DateTime} end           End time of the event on the timeline (duration events only)
  *      {Object} point                  Data for a single-point placemark: 
@@ -285,7 +274,7 @@ TimeMapDataset.prototype.loadItems = function(data, transform) {
  *      {Array of points} polygon       Data for a polygon placemark, in format above
  *      {Object} options                Optional arguments to be passed to the TimeMapItem:
  *          {String} description            Description to be shown in the info window
- *          {String} infoHtml               Full HTML for the info window
+ *          {String} infoHtml               Full HTML for the info window, defaults to title + description
  *          {String} infoUrl                URL from which to retrieve full HTML for the info window
  *          {String} maxInfoHtml            Full HTML for the maximized info window
  *          {String} maxInfoUrl             URL from which to retrieve full HTML for the maximized info window
@@ -411,7 +400,6 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
 
 /*
  * Static function to parse KML with time data and load it.
- * !! This depends on jQuery, and possibly even jQuery 1.2.2!
  *
  * @param {XML text} kml        KML to be parsed
  */
@@ -501,8 +489,8 @@ TimeMapDataset.parseKML = function(kml) {
     return items;
 }
 
-TimeMapDataset.parseParentNode = function(pm){
 
+TimeMapDataset.parseParentNode = function(pm){
   check = false;
   var data = {};
   pn = pm.parentNode;
