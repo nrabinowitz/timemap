@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------
- * TimeMap v. 1.0 
+ * TimeMap
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
  * The TimeMap object is intended to sync a SIMILE Timeline with a Google Map.
@@ -17,8 +17,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details. 
  * See <http://www.gnu.org/licenses/>.
- *
- * $Id: timemap.js,v 1.94 2008/01/28 00:51:31 nickrabi Exp $
  *---------------------------------------------------------------------------*/
 
  
