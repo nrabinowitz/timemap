@@ -657,7 +657,7 @@ function TimeMapItem(placemark, event, map, options) {
     this._infoUrl =     options['infoUrl'] || '';
     this._maxInfoHtml = options['maxInfoHtml'] || '';
     this._maxInfoUrl =  options['maxInfoUrl'] || '';
-    this._maxOnly =     options['maxInfoUrl'] || false;
+    this._maxOnly =     options['maxOnly'] || false;
     
     // get functions
     this.getType = function() { return this._type; };
