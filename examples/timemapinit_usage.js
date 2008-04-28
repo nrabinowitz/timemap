@@ -126,7 +126,7 @@ timemapInit({
         // See http://simile.mit.edu/timeline/docs/create-timelines.html for details.
         // If this is empty, a default setup will be used, with the intervals below.
         // Put in the object parameters for Timeline.createBandInfo(), not the function,
-        // and don't specify an eventSource.
+        // and don't specify an eventSource, unless you want it to be null.
         {
            width:          "80%", 
            intervalUnit:   Timeline.DateTime.WEEK, 

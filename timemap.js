@@ -550,14 +550,17 @@ function TimeMapDatasetTheme(options) {
     this.fillColor =         options['fillColor'] || this.color;
     this.fillOpacity =       options['fillOpacity'] || 0.25;
     this.eventColor =        options['eventColor'] || this.color;
-    this.eventIcon =         options['eventIcon'] || "timemap/images/red-circle.png"; // XXX: probably need to work out the URLs better here
+    this.eventIconPath =     options['eventIconPath'] || "timemap/images/";
+    this.eventIconImage =    options['eventIconImage'] || "red-circle.png";
+    this.eventIcon =         options['eventIcon'] || this.eventIconPath + this.eventIconImage;
 }
 
-TimeMapDataset.redTheme = function() {
-    return new TimeMapDatasetTheme({});
+TimeMapDataset.redTheme = function(options) {
+    return new TimeMapDatasetTheme(options);
 }
 
-TimeMapDataset.blueTheme = function() {
+TimeMapDataset.blueTheme = function(options) {
+    options = options || {};
     // marker icon
     var markerIcon = new GIcon(G_DEFAULT_ICON);
     markerIcon.image = "http://www.google.com/intl/en_us/mapfiles/ms/icons/blue-dot.png";
@@ -565,14 +568,14 @@ TimeMapDataset.blueTheme = function() {
     markerIcon.shadow = "http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png"
     markerIcon.shadowSize = new GSize(59, 32);
 
-    return new TimeMapDatasetTheme({
-        icon: markerIcon, 
-        color: "#5A7ACF",
-        eventIcon: "timemap/images/blue-circle.png"
-    });
+    options['icon'] =           markerIcon;
+    options['color'] =          "#5A7ACF";
+    options['eventIconImage'] = "blue-circle.png";
+    return new TimeMapDatasetTheme(options);
 }
 
-TimeMapDataset.greenTheme = function() {
+TimeMapDataset.greenTheme = function(options) {
+    options = options || {};
     // marker icon
     var markerIcon = new GIcon(G_DEFAULT_ICON);
     markerIcon.image = "http://www.google.com/intl/en_us/mapfiles/ms/icons/green-dot.png";
@@ -580,14 +583,14 @@ TimeMapDataset.greenTheme = function() {
     markerIcon.shadow = "http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png"
     markerIcon.shadowSize = new GSize(59, 32);
 
-    return new TimeMapDatasetTheme({
-        icon: markerIcon, 
-        color: "#19CF54",
-        eventIcon: "timemap/images/green-circle.png"
-    });
+    options['icon'] =           markerIcon;
+    options['color'] =          "#19CF54";
+    options['eventIconImage'] = "green-circle.png";
+    return new TimeMapDatasetTheme(options);
 }
 
-TimeMapDataset.ltblueTheme = function() {
+TimeMapDataset.ltblueTheme = function(options) {
+    options = options || {};
     // marker icon
     var markerIcon = new GIcon(G_DEFAULT_ICON);
     markerIcon.image = "http://www.google.com/intl/en_us/mapfiles/ms/icons/ltblue-dot.png";
@@ -595,14 +598,14 @@ TimeMapDataset.ltblueTheme = function() {
     markerIcon.shadow = "http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png"
     markerIcon.shadowSize = new GSize(59, 32);
 
-    return new TimeMapDatasetTheme({
-        icon: markerIcon, 
-        color: "#5ACFCF",
-        eventIcon: "timemap/images/ltblue-circle.png"
-    });
+    options['icon'] =           markerIcon;
+    options['color'] =          "#5ACFCF";
+    options['eventIconImage'] = "ltblue-circle.png";
+    return new TimeMapDatasetTheme(options);
 }
 
-TimeMapDataset.purpleTheme = function() {
+TimeMapDataset.purpleTheme = function(options) {
+    options = options || {};
     // marker icon
     var markerIcon = new GIcon(G_DEFAULT_ICON);
     markerIcon.image = "http://www.google.com/intl/en_us/mapfiles/ms/icons/purple-dot.png";
@@ -610,11 +613,10 @@ TimeMapDataset.purpleTheme = function() {
     markerIcon.shadow = "http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png"
     markerIcon.shadowSize = new GSize(59, 32);
 
-    return new TimeMapDatasetTheme({
-        icon: markerIcon, 
-        color: "#8E67FD",
-        eventIcon: "timemap/images/purple-circle.png"
-    });
+    options['icon'] =           markerIcon;
+    options['color'] =          "#8E67FD";
+    options['eventIconImage'] = "purple-circle.png";
+    return new TimeMapDatasetTheme(options);
 }
  
 
