@@ -56,7 +56,7 @@ function TimeMap(tElement, mElement, options) {
     this.settings = {
         syncBands:        options['syncBands'] || true,
         mapCenter:        options['mapCenter'] || new GLatLng(0,0), 
-        mapZoom:          options['mapZoom'] || 4,
+        mapZoom:          options['mapZoom'] || 0,
         mapType:          options['mapType'] || G_PHYSICAL_MAP,
         showMapTypeCtrl:  options['showMapTypeCtrl'] || true,
         showMapCtrl:      options['showMapCtrl'] || true,
