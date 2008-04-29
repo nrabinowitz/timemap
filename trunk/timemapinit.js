@@ -116,49 +116,47 @@ function timemapInit(config) {
     
     // load data!
     for (var x=0; x < config['datasets'].length; x++) {
-        var data = config['datasets'][x]['data'];
-        // use dummy function as default
-        var dummy = function(data) { return data; }
-        var preload = config['datasets'][x]['preloadFunction'] || dummy;
-        var transform = config['datasets'][x]['transformFunction'] || dummy;
-        switch(data['type']) {
-            case 'basic':
-                // data already loaded
-                var ds = datasets[loadMgr.count];
-                var items = preload(data['value']);
-                ds.loadItems(items, transform);
-                loadMgr.ifLoaded();
-                break;
-            case 'json':
-                // data to be loaded from remote json
-                JSONLoader.read(data['url'], function(result) {
-                    // weird closure issues require an object here
-                    var ds = datasets[loadMgr.count];
-                    var items = preload(result);
+        (function(x) { // magic trick to deal with closure issues
+            var data = config['datasets'][x]['data'];
+            var ds = datasets[x];
+            // use dummy function as default
+            var dummy = function(data) { return data; }
+            var preload = config['datasets'][x]['preloadFunction'] || dummy;
+            var transform = config['datasets'][x]['transformFunction'] || dummy;
+            switch(data['type']) {
+                case 'basic':
+                    // data already loaded
+                    var items = preload(data['value']);
                     ds.loadItems(items, transform);
                     loadMgr.ifLoaded();
-                });
-                break;
-            case 'kml':
-                // data to be loaded from kml file
-                GDownloadUrl(data['url'], function(result) {
-                    var ds = datasets[loadMgr.count];
-                    var items = TimeMapDataset.parseKML(result);
-                    items = preload(items);
-                    ds.loadItems(items, transform);
-            	    loadMgr.ifLoaded();
-                });
-                break;
-            case 'metaweb':
-                // data to be loaded from freebase query
-                Metaweb.read(data['query'], function(result) {
-                    var ds = datasets[loadMgr.count];
-                    var items = preload(result);
-                    ds.loadItems(result, transform);
-            	    loadMgr.ifLoaded();
-                });
-                break;
-        }
+                    break;
+                case 'json':
+                    // data to be loaded from remote json
+                    JSONLoader.read(data['url'], function(result) {
+                        var items = preload(result);
+                        ds.loadItems(items, transform);
+                        loadMgr.ifLoaded();
+                    });
+                    break;
+                case 'kml':
+                    // data to be loaded from kml file
+                    GDownloadUrl(data['url'], function(result) {
+                        var items = TimeMapDataset.parseKML(result);
+                        items = preload(items);
+                        ds.loadItems(items, transform);
+                	    loadMgr.ifLoaded();
+                    });
+                    break;
+                case 'metaweb':
+                    // data to be loaded from freebase query
+                    Metaweb.read(data['query'], function(result) {
+                        var items = preload(result);
+                        ds.loadItems(result, transform);
+                	    loadMgr.ifLoaded();
+                    });
+                    break;
+            }
+        })(x);
     }
 }
  
