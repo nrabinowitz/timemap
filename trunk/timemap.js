@@ -224,8 +224,10 @@ function TimeMapDataset(timemap, options) {
     // initialize array of items
     this._items = [];
     // initialize vars
-    this.title = ("title" in options) ? options.title : "";
-    this._theme = ("theme" in options) ? options.theme : new TimeMapDatasetTheme({});
+    this.title = options["title"] || "";
+    this._theme = options["theme"] || new TimeMapDatasetTheme({});
+    // allow for other data parsers (e.g. Gregorgian)
+    this._dateParser = options["dateParser"] || Timeline.DateTime.parseIso8601DateTime;
 }
 
 /*
@@ -287,12 +289,13 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     if (data == null) return;
     
     var tm = this.timemap;
+    console.log(this._dateParser(data.start));
     
     // create timeline event
     var start = (data.start == undefined||data.start == "") ? null :
-        Timeline.DateTime.parseIso8601DateTime(data.start);
+        this._dateParser(data.start);
     var end = (data.end == undefined||data.end == "") ? null : 
-        Timeline.DateTime.parseIso8601DateTime(data.end);
+        this._dateParser(data.end);
     var instant = (data.end == undefined);
     var eventIcon = instant ? this._theme.eventIcon : null;
     var title = data.title;
