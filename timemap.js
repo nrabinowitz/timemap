@@ -290,7 +290,6 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     if (data == null) return;
     
     var tm = this.timemap;
-    console.log(this._dateParser(data.start));
     
     // create timeline event
     var start = (data.start == undefined||data.start == "") ? null :
