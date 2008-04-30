@@ -213,7 +213,8 @@ TimeMap.prototype.createLegend = function(legendId) {
  * @param {TimeMap} timemap             Reference to the timemap object
  * @param {Object} options              Object holding optional arguments:
  *      {String} title                      Title of the dataset (for the legend)
- *      {TimeMapDatasetTheme}  theme        Theme settings
+ *      {TimeMapDatasetTheme} theme         Theme settings
+ *      {Function}  dateParser              Function to replace default date parser
  *
  */
 function TimeMapDataset(timemap, options) {
