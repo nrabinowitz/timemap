@@ -45,6 +45,9 @@ timemapInit({
         {
             title: "Remote JSON Dataset", 
             theme: TimeMapDataset.redTheme(),
+            // It's unlikely that you'll ever need this, but you can change the
+            // date parsing function if you want to use years earlier than 1000AD
+            dateParser: Timeline.DateTime.parseGregorianDateTime,
             data: {
                 type: "json",    // Data to be loaded in JSON from a remote URL
                 // Leave the name of the callback function off the url.
