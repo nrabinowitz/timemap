@@ -266,8 +266,8 @@ TimeMapDataset.prototype.loadItems = function(data, transform) {
  *
  * @param {Object} data             Data to be loaded, in the following format:
  *      {String} title                  Title of the item (visible on timeline)
- *      {Iso8601DateTime} start         Start time of the event on the timeline
- *      {Iso8601DateTime} end           End time of the event on the timeline (duration events only)
+ *      {DateTime} start         Start time of the event on the timeline
+ *      {DateTime} end           End time of the event on the timeline (duration events only)
  *      {Object} point                  Data for a single-point placemark: 
  *          {Float} lat                   Latitude of map marker
  *          {Float} lon                   Longitude of map marker
@@ -280,6 +280,7 @@ TimeMapDataset.prototype.loadItems = function(data, transform) {
  *          {String} maxInfoHtml            Full HTML for the maximized info window
  *          {String} maxInfoUrl             URL from which to retrieve full HTML for the maximized info window
  *          {String} maxOnly                Whether to auto-maximize on open
+ *          {TimeMapDatasetTheme} theme     Theme to apply to this item (overriding dataset theme)
  * @param {Function} transform      If data is not in the above format, transformation function to make it so
  */
 TimeMapDataset.prototype.loadItem = function(data, transform) {
@@ -289,6 +290,9 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     // transform functions can return a null value to skip a datum in the set
     if (data == null) return;
     
+    // use item theme if provided
+    var theme = data["options"]["theme"] || this._theme;
+    
     var tm = this.timemap;
     
     // create timeline event
@@ -297,13 +301,13 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     var end = (data.end == undefined||data.end == "") ? null : 
         this._dateParser(data.end);
     var instant = (data.end == undefined);
-    var eventIcon = instant ? this._theme.eventIcon : null;
+    var eventIcon = instant ? theme.eventIcon : null;
     var title = data.title;
     // allow event-less placemarks - these will be always present
     if (start != null)
         var event = new Timeline.DefaultEventSource.Event(start, end, null, null,
                                                       instant, title, null, null, null, 
-                                                      eventIcon, this._theme.eventColor, null);
+                                                      eventIcon, theme.eventColor, null);
     else var event = null;
     
     // create map placemark
@@ -320,7 +324,7 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
         if (tm.settings.centerMapOnItems) {
             tm.mapBounds.extend(point);
         }
-        markerIcon = ("icon" in data) ? data["icon"] : this._theme.icon;
+        markerIcon = ("icon" in data) ? data["icon"] : theme.icon;
         placemark = new GMarker(point, { icon: markerIcon });
         type = "marker";
     } else if ("polyline" in data || "polygon" in data) {
@@ -341,17 +345,17 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
         }
         if ("polyline" in data) {
             placemark = new GPolyline(points, 
-                                      this._theme.lineColor, 
-                                      this._theme.lineWeight,
-                                      this._theme.lineOpacity);
+                                      theme.lineColor, 
+                                      theme.lineWeight,
+                                      theme.lineOpacity);
             type = "polyline";
         } else {
             placemark = new GPolygon(points, 
-                                     this._theme.polygonLineColor, 
-                                     this._theme.polygonLineWeight,
-                                     this._theme.polygonLineOpacity,
-                                     this._theme.fillColor,
-                                     this._theme.fillOpacity);
+                                     theme.polygonLineColor, 
+                                     theme.polygonLineWeight,
+                                     theme.polygonLineOpacity,
+                                     theme.fillColor,
+                                     theme.fillOpacity);
             type = "polygon";
         }
     }
