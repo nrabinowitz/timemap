@@ -625,6 +625,36 @@ TimeMapDataset.purpleTheme = function(options) {
     options['eventIconImage'] = "purple-circle.png";
     return new TimeMapDatasetTheme(options);
 }
+
+TimeMapDataset.orangeTheme = function(options) {
+    options = options || {};
+    // marker icon
+    var markerIcon = new GIcon(G_DEFAULT_ICON);
+    markerIcon.image = "http://www.google.com/intl/en_us/mapfiles/ms/icons/orange-dot.png";
+    markerIcon.iconSize = new GSize(32, 32);
+    markerIcon.shadow = "http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png"
+    markerIcon.shadowSize = new GSize(59, 32);
+
+    options['icon'] =           markerIcon;
+    options['color'] =          "#FF9900";
+    options['eventIconImage'] = "orange-circle.png";
+    return new TimeMapDatasetTheme(options);
+}
+
+TimeMapDataset.yellowTheme = function(options) {
+    options = options || {};
+    // marker icon
+    var markerIcon = new GIcon(G_DEFAULT_ICON);
+    markerIcon.image = "http://www.google.com/intl/en_us/mapfiles/ms/icons/yellow-dot.png";
+    markerIcon.iconSize = new GSize(32, 32);
+    markerIcon.shadow = "http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png"
+    markerIcon.shadowSize = new GSize(59, 32);
+
+    options['icon'] =           markerIcon;
+    options['color'] =          "#ECE64A";
+    options['eventIconImage'] = "yellow-circle.png";
+    return new TimeMapDatasetTheme(options);
+}
  
 
 
