@@ -149,5 +149,7 @@ timemapInit({
         // Only the first two items will be used, as the default has only two bands
         Timeline.DateTime.WEEK, 
         Timeline.DateTime.MONTH 
-    ]
+    ],
+    // whether to scroll to the earliest or latest date on load
+    scrollTo: "latest" // or "earliest" - default
 });
