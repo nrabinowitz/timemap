@@ -41,6 +41,7 @@ function timemapInit(config) {
     config['options'] = config['options'] || {};
     config['datasets'] = config['datasets'] || [];
     config['bandInfo'] = config['bandInfo'] || false;
+    config['scrollTo'] = config['scrollTo'] || "earliest";
     if (!config['bandInfo']) {
         var intervals = config['bandIntervals'] || 
             [Timeline.DateTime.WEEK, Timeline.DateTime.MONTH];
@@ -106,7 +107,9 @@ function timemapInit(config) {
     loadMgr.count = 0;
     loadMgr.loadTarget = config['datasets'].length;
     loadMgr.ifLoadedFunction = function() {
-        tm.timeline.getBand(0).setCenterVisibleDate(eventSource.getEarliestDate());
+        if (config['scrollTo']=="earliest")
+            tm.timeline.getBand(0).setCenterVisibleDate(eventSource.getEarliestDate());
+        else tm.timeline.getBand(0).setCenterVisibleDate(eventSource.getLatestDate());
         tm.timeline.layout();
     };
     loadMgr.ifLoaded = function() {
