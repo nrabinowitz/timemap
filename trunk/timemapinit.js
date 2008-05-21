@@ -162,5 +162,7 @@ function timemapInit(config) {
             }
         })(x);
     }
+    // return timemap object for later manipulation
+    return tm;
 }
  
