@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Artists of the Renaissance TimeMap</title>
+    <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRQHs9wgZpGwRjGwil_qtDm9gEic5BTUz8hqqsNZYYfvNUhOqSJ-Bmk30A"
+      type="text/javascript"></script>
+    <script type="text/javascript" src="http://simile.mit.edu/timeline/api/timeline-api.js"></script>
+    <script src="../timemap.js" type="text/javascript"></script>
+    <script src="../metawebloader.js" type="text/javascript"></script>
+    <script src="../timemapinit.js" type="text/javascript"></script>
+	<script type="text/javascript">
+
+function onLoad() {
+
+    // These two queries are in the Metaweb Query Language syntax.
+    // See http://www.freebase.com/view/freebase/api for more details.
+    var artistQuery = [
+        {
+          "/common/topic/image" : {
+            "limit" : 1,
+            "id" : null,
+            "optional" : true
+          },
+          "/people/deceased_person/date_of_death" : null,
+          "/people/person/date_of_birth" : null,
+          "/people/person/date_of_birth<" : "1700",
+          "/people/person/date_of_birth>" : "1400",
+          "/people/person/place_of_birth" : {
+            "geolocation" : {
+              "latitude" : null,
+              "longitude" : null
+            },
+            "name" : null
+          },
+          "name" : null,
+          "sort" : "/people/person/date_of_birth",
+          "type" : "/visual_art/visual_artist"
+        }
+    ];
+    
+    var authorQuery = [
+        {
+          "/common/topic/image" : {
+            "limit" : 1,
+            "id" : null,
+            "optional" : true
+          },
+          "/people/deceased_person/date_of_death" : null,
+          "/people/person/date_of_birth" : null,
+          "/people/person/date_of_birth<" : "1700",
+          "/people/person/date_of_birth>" : "1400",
+          "/people/person/place_of_birth" : {
+            "geolocation" : {
+              "latitude" : null,
+              "longitude" : null
+            },
+            "name" : null
+          },
+          "name" : null,
+          "sort" : "/people/person/date_of_birth",
+          "type" : "/book/author"
+        }
+    ];
+
+
+    timemapInit({
+        mapId: "map",               // Id of map div element (required)
+        timelineId: "timeline",     // Id of timeline div element (required) 
+        datasets: [
+            {
+                title: "Artists",
+                theme: TimeMapDataset.greenTheme({eventIconPath: "../images/"}),
+                data: {
+                    type: "metaweb",    // Data to be loaded from freebase.com
+                    query: artistQuery
+                },
+                transformFunction: transformPersonData
+            },
+            {
+                title: "Authors",
+                theme: TimeMapDataset.redTheme({eventIconPath: "../images/"}),
+                data: {
+                    type: "metaweb",    // Data to be loaded from freebase.com
+                    query: authorQuery
+                },
+                transformFunction: transformPersonData
+            }
+        ],
+        bandInfo: [    
+            {
+		             width:          "85%", 
+		             intervalUnit:   Timeline.DateTime.DECADE, 
+		             intervalPixels: 200,
+		             trackHeight:    1.2,
+		             trackGap:       0.2
+		    },
+		    {
+		             eventSource:    null,
+		             width:          "15%", 
+		             intervalUnit:   Timeline.DateTime.CENTURY, 
+		             intervalPixels: 300,
+		             trackHeight:    0.75,
+		             trackGap:       0.2
+            }
+        ]
+    });
+}
+
+
+function transformPersonData(data) {
+	var start = data["/people/person/date_of_birth"];
+	var end = data["/people/deceased_person/date_of_death"];
+	var strBirth = data["/people/person/date_of_birth"].substr(0, 4);
+    if (data["/people/deceased_person/date_of_death"] != null)
+	    var strDeath = data["/people/deceased_person/date_of_death"].substr(0, 4);
+    else return null;
+	var title = data["name"] + " (" + strBirth + "-" + strDeath + ")";
+	var description = data["/people/person/place_of_birth"]["name"];
+    var newData = {
+		"title" : title,
+		"start" : start,
+		"end" : end,
+        "options" : {
+    		"description" : description
+        }
+	};
+    var lat = parseFloat(data["/people/person/place_of_birth"]["geolocation"]["latitude"]);
+	var lon = parseFloat(data["/people/person/place_of_birth"]["geolocation"]["longitude"]);
+    newData["point"] = {
+		"lat" : lat,
+        "lon" : lon
+    };
+    if ("/common/topic/image" in data && data["/common/topic/image"] != null) {
+        var imageUrl = "http://www.freebase.com/api/trans/image_thumb" + 
+            data["/common/topic/image"]["id"] + 
+            "?maxheight=120&maxwidth=120";
+        var infoHtml = '<div class="infotitle"><b>' + title + '</b></div>';
+        infoHtml += '<div style="padding:5px;width:130px;height:130px;"><img src="' + imageUrl + '"></div>';
+        newData["options"]["infoHtml"] = infoHtml;
+    }
+	return newData;
+}
+    </script>
+	<link href="examples.css" type="text/css" rel="stylesheet"/>
+    <style>
+    div#timelinecontainer{ height: 300px; }
+    div#mapcontainer{ height: 300px; }
+    </style>
+  </head>
+
+  <body onload="onLoad();" onunload="GUnload();">
+    <div id="help">
+    <h1>Metaweb Datasets</h1>
+    In this example, we're loading two Metaweb datasets from freebase.com.
+    </div>
+    <div id="timemap">
+        <div id="timelinecontainer">
+          <div id="timeline"></div>
+        </div>
+        <div id="mapcontainer">
+          <div id="map"></div>
+        </div>
+    </div>
+  </body>
+</html>
