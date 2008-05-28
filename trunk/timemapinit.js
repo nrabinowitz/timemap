@@ -165,4 +165,3 @@ function timemapInit(config) {
     // return timemap object for later manipulation
     return tm;
 }
- 

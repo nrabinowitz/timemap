@@ -40,3 +40,19 @@ div#map {
  background: #EEEEEE;
 }
 
+div.infotitle {
+    font-size: 14px;
+    font-weight: bold;
+}
+div.infodescription {
+    font-size: 14px;
+    font-style: italic;
+}
+
+div.custominfostyle {
+    font-family: Georgia, Garamond, serif;
+    font-size: 1.5em;
+    font-style: italic;
+    width: 20em;
+}
+
