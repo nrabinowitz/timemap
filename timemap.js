@@ -683,9 +683,8 @@ TimeMapDataset.yellowTheme = function(options) {
  *   {GLatLng} infoPoint                Point indicating the center of this item
  *   {String} infoHtml                  Full HTML for the info window
  *   {String} infoUrl                   URL from which to retrieve full HTML for the info window
- *   {String} maxInfoHtml               Full HTML for the maximized info window
- *   {String} maxInfoUrl                URL from which to retrieve full HTML for the maximized info window
- *   {String} maxOnly                   Whether to auto-maximize on open
+ *   {Function} openInfoWindow          Function redefining how info window opens
+ *   {Function} closeInfoWindow         Function redefining how info window closes
  */
 function TimeMapItem(placemark, event, map, options) {
     // initialize vars
@@ -701,83 +700,68 @@ function TimeMapItem(placemark, event, map, options) {
     this._infoPoint =   options['infoPoint'] || null;
     this._infoHtml =    options['infoHtml'] || '';
     this._infoUrl =     options['infoUrl'] || '';
-    this._maxInfoHtml = options['maxInfoHtml'] || '';
-    this._maxInfoUrl =  options['maxInfoUrl'] || '';
-    this._maxOnly =     options['maxOnly'] || false;
     
     // get functions
     this.getType = function() { return this._type; };
     this.getTitle = function() { return this._title; };
     this.getInfoPoint = function() { return this._infoPoint; };
     
+    // allow for custom open/close functions
+    if ('openInfoWindow' in options) {
+        this.openInfoWindow = options['openInfoWindow'];
+    } else {
+        // load via AJAX if URL is provided
+        if (this._infoUrl != "")
+            this.openInfoWindow = TimeMapItem.openInfoWindowAjax;
+        // otherwise default to basic window
+        else this.openInfoWindow = TimeMapItem.openInfoWindowBasic;    
+    }
+    this.closeInfoWindow = options['closeInfoWindow'] || TimeMapItem.closeInfoWindowBasic;
+}
+
+/*
+ * Standard open info window function, using static text in map window
+ */
+TimeMapItem.openInfoWindowBasic = function() {
     // create content for info window if none is provided
-    if (this._infoHtml == "" && this._infoUrl == "" && !this._maxOnly) {
+    if (this._infoHtml == "" && this._infoUrl == "") {
         this._infoHtml = '<div class="infotitle">' + this._title + '</div>';
         if (this._description != "") 
             this._infoHtml += '<div class="infodescription">' + this._description + '</div>';
     }
-}
-
-/*
- * Open the info window at an appropriate point
- *
- * @param {GMap2} map   Reference to the map object
- */
-TimeMapItem.prototype.openInfoWindow = function() {
-    // support for max content loaded via ajax
-    var infoWindowOptions;
-    var hasMax = false;
-    if (this._maxInfoHtml != ""||this._maxInfoUrl != "") {
-        hasMax = true;
-        var maxContentDiv = document.createElement('div');
-        if (this._maxInfoHtml != "")
-            // load straight from data
-            maxContentDiv.innerHTML = this._maxInfoHtml;
-        else maxContentDiv.innerHTML = 'Loading...';
-        infoWindowOptions = {maxContent: maxContentDiv};
-        if (this._maxInfoHtml == "") {
-            // load via ajax instead
-            var iw = this.map.getInfoWindow();
-            var ajaxUrl = this._maxInfoUrl;
-            GEvent.addListener(iw, "maximizeclick", function() {
-                GDownloadUrl(ajaxUrl, function(data) {
-                    maxContentDiv.innerHTML = data;
-                });
-            });
-        }
-    } else infoWindowOptions = {};
-    // standard version - text already loaded
-    if (this._infoHtml != ""||(hasMax && this._maxOnly)) {
-        if (this.getType() == "marker") {
-            this.placemark.openInfoWindowHtml(this._infoHtml, infoWindowOptions);
-        } else {
-            this.map.openInfoWindowHtml(this.getInfoPoint(), this._infoHtml, infoWindowOptions);
-        }
-        if (hasMax && this._maxOnly) {
-            this.map.getInfoWindow().maximize();
-            var iw = this.map.getInfoWindow();
-            var oMap = this.map;
-            GEvent.addListener(iw, "restoreclick", function() {
-                oMap.closeInfoWindow();
-            });
-        }
-    }
-    // load window html via ajax
-    else if (this._infoUrl != "") {
-        var item = this;
-        GDownloadUrl(this._infoUrl, function(result) {
-            item._infoHtml = result;
-            item.openInfoWindow();
-        });
+    // open window
+    if (this.getType() == "marker") {
+        this.placemark.openInfoWindowHtml(this._infoHtml);
+    } else {
+        this.map.openInfoWindowHtml(this.getInfoPoint(), this._infoHtml);
     }
 }
 
 /*
- * Close the info window if it appears to be associated with this item
- *
- * @param {GMap2} map   Reference to the map object
+ * Open info window function using ajax-loaded text in map window
  */
-TimeMapItem.prototype.closeInfoWindow = function() {
+TimeMapItem.openInfoWindowAjax = function() {
+    if (this._infoHtml != "") { // already loaded - change to static
+        this.openInfoWindow = TimeMapItem.openInfoWindowBasic;
+        this.openInfoWindow();
+    } else { // load content via AJAX
+        if (this._infoUrl != "") {
+            var item = this;
+            GDownloadUrl(this._infoUrl, function(result) {
+                    item._infoHtml = result;
+                    item.openInfoWindow();
+            });
+        } else { // fall back on basic function
+            this.openInfoWindow = TimeMapItem.openInfoWindowBasic;
+            this.openInfoWindow();
+        }
+    }
+}
+
+/*
+ * Standard close window function, using the map window
+ */
+TimeMapItem.closeInfoWindowBasic = function() {
     if (this.getType() == "marker") {
         this.placemark.closeInfoWindow();
     } else {

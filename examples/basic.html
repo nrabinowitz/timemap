@@ -8,7 +8,6 @@
       type="text/javascript"></script>
     <script type="text/javascript" src="http://simile.mit.edu/timeline/api/timeline-api.js"></script>
     <script src="../timemap.js" type="text/javascript"></script>
-    <script src="../metawebloader.js" type="text/javascript"></script>
     <script src="../timemapinit.js" type="text/javascript"></script>
 	<script type="text/javascript">
 
@@ -33,7 +32,8 @@ function onLoad() {
                            },
                           "title" : "Domenico Ghirlandaio",
                           "options" : {
-                            "description": "Visual artist"
+                            // set the full HTML for the info window
+                            "infoHtml": "<div class='custominfostyle'><b>Domenico Ghirlandaio</b> was a visual artist of some sort.</div>"
                           }
                         },
                         {
@@ -45,7 +45,10 @@ function onLoad() {
                            },
                           "title" : "Leonardo da Vinci",
                           "options" : {
-                            "description": "Renaissance man",
+                            // load HTML from another file via AJAX
+                            // Note that this may break in IE if you're running it with
+                            // a local file, due to cross-site scripting restrictions
+                            "infoUrl": "ajax_content.html",
                             "theme": TimeMapDataset.redTheme({eventIconPath: "../images/"})
                           }
                         },
@@ -58,7 +61,8 @@ function onLoad() {
                            },
                           "title" : "Michelangelo",
                           "options" : {
-                            "description": "Visual artist",
+                            // use the default title/description info window
+                            "description": "Renaissance Man",
                             "theme": TimeMapDataset.yellowTheme({eventIconPath: "../images/"})
                           }
                         }
@@ -84,7 +88,7 @@ function onLoad() {
   <body onload="onLoad();" onunload="GUnload();">
     <div id="help">
     <h1>Simplest Dataset Ever</h1>
-    In this example, we're just directly entering the data in the javascript.
+    In this example, we're just directly entering the data in the javascript, loading content into the info window in several different ways. (Note that Leonardo's window, which loads content via AJAX, may throw an error in IE if you're viewing this locally, due to cross-site scripting restrictions.)
     </div>
     <div id="timemap">
         <div id="timelinecontainer">
