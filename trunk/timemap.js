@@ -693,7 +693,7 @@ function TimeMapItem(placemark, event, map, options) {
     this.map =       map;
     
     // get vars from options
-    options = options || {};
+    this.options = options || {};
     this._type =        options['type'] || '';
     this._title =       options['title'] || '';
     this._description = options['description'] || '';
