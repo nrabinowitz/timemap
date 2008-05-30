@@ -73,9 +73,9 @@ function timemapInit(config) {
     var datasets = [];
     for (var x=0; x < config['datasets'].length; x++) {
         var ds = config['datasets'][x];
-        var dsOptions = {};
+        var dsOptions = ds['options'] || {};
         dsOptions['title'] = ds['title'] || '';
-        if (ds['theme']) dsOptions['theme'] = ds['theme'];
+        dsOptions['theme'] = ds['theme'] || undefined;
         if (ds['dateParser']) dsOptions['dateParser'] = ds['dateParser'];
         datasets[x] = tm.createDataset("ds" + x, dsOptions);
         if (x > 0) {
