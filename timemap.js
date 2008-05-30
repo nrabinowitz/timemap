@@ -4,7 +4,7 @@
  * (see LICENSE.txt or http://www.gnu.org/licenses)
  */
 
-/*----------------------------------------------------------------------------
+/**---------------------------------------------------------------------------
  * TimeMap
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
@@ -47,6 +47,8 @@
  *   {Boolean} showMapCtrl          Whether to show map navigation control
  *   {Boolean} hidePastFuture       Whether to hide map placemarks for events not visible on timeline
  *   {Boolean} centerMapOnItems     Whether to center and zoom the map based on loaded item positions
+ *   {Function} openInfoWindow      Function redefining how info window opens
+ *   {Function} closeInfoWindow     Function redefining how info window closes
  */
 function TimeMap(tElement, mElement, options) {
     // save elements
@@ -57,27 +59,24 @@ function TimeMap(tElement, mElement, options) {
     // initialize map bounds
     this.mapBounds = new GLatLngBounds();
     
-    // default settings, can be overridden by options
+    // set defaults for options
     // other options can be set directly on the map or timeline
-    options = options || {}; // make sure the options object isn't null
-    this.settings = {
-        syncBands:        options['syncBands'] || true,
-        mapCenter:        options['mapCenter'] || new GLatLng(0,0), 
-        mapZoom:          options['mapZoom'] || 0,
-        mapType:          options['mapType'] || G_PHYSICAL_MAP,
-        showMapTypeCtrl:  options['showMapTypeCtrl'] || true,
-        showMapCtrl:      options['showMapCtrl'] || true,
-        hidePastFuture:   options['hidePastFuture'] || true,
-        centerMapOnItems: options['centerMapOnItems'] || true
-    };
+    this.opts = options || {}; // make sure the options object isn't null
+    this.opts.syncBands =        options['syncBands'] || true;
+    this.opts.mapCenter =        options['mapCenter'] || new GLatLng(0,0); 
+    this.opts.mapZoom =          options['mapZoom'] || 0;
+    this.opts.mapType =          options['mapType'] || G_PHYSICAL_MAP;
+    this.opts.showMapTypeCtrl =  options['showMapTypeCtrl'] || true;
+    this.opts.showMapCtrl =      options['showMapCtrl'] || true;
+    this.opts.hidePastFuture =   options['hidePastFuture'] || true;
+    this.opts.centerMapOnItems = options['centerMapOnItems'] || true;
     
     // initialize map
-    var s = this.settings;
     if (GBrowserIsCompatible()) {
         this.map = new GMap2(this.mElement);
-        if (s.showMapCtrl)
+        if (this.opts.showMapCtrl)
             this.map.addControl(new GLargeMapControl());
-        if (s.showMapTypeCtrl)
+        if (this.opts.showMapTypeCtrl)
             this.map.addControl(new GMapTypeControl());
         this.map.addMapType(G_PHYSICAL_MAP);
         this.map.removeMapType(G_HYBRID_MAP);
@@ -85,26 +84,27 @@ function TimeMap(tElement, mElement, options) {
         this.map.enableScrollWheelZoom();
         this.map.enableContinuousZoom();
         // initialize map center and zoom
-        this.map.setCenter(s.mapCenter, s.mapZoom);
+        this.map.setCenter(this.opts.mapCenter, this.opts.mapZoom);
         // must be called after setCenter, for reasons unclear
-        this.map.setMapType(s.mapType);
+        this.map.setMapType(this.opts.mapType);
     }
     
-    // hijack popup window callback to show map info window
-    var oMap = this.map;
+    // hijack popup window callback to open info window
     Timeline.DurationEventPainter.prototype._showBubble = function(x, y, evt) {
-        GEvent.trigger(evt.placemark, 'click');
+        evt.item.openInfoWindow();
     }
 }
 
 /**
  * Create an empty dataset object and add it to the timemap
  *
- * @param {String} id               The id of the dataset
- * @param {Object} options          A container for optional arguments:
+ * @param {String} id           The id of the dataset
+ * @param {Object} options      A container for optional arguments for dataset constructor
+ * @return {TimeMapDataset}     The new dataset object    
  */
 TimeMap.prototype.createDataset = function(id, options) {
-    if(!("title" in options)) options.title = id;
+    options = options || {}; // make sure the options object isn't null
+    if(!("title" in options)) options["title"] = id;
     var dataset = new TimeMapDataset(this, options);
     this.datasets[id] = dataset;
     return dataset;
@@ -120,7 +120,7 @@ TimeMap.prototype.initTimeline = function(bands) {
     
     // synchronize & highlight timeline bands
     for (var x=1; x < bands.length; x++) {
-        if (this.settings.syncBands)
+        if (this.opts.syncBands)
             bands[x].syncWith = (x-1);
         bands[x].highlight = true;
     }
@@ -129,7 +129,7 @@ TimeMap.prototype.initTimeline = function(bands) {
     this.timeline = Timeline.create(this.tElement, bands);
     
     // set event listener to hide off-timeline items on the map
-    if (this.settings.hidePastFuture) {
+    if (this.opts.hidePastFuture) {
         var topband = this.timeline.getBand(0);
         var datasets = this.datasets;
         var oMap = this.map;
@@ -161,7 +161,7 @@ TimeMap.prototype.initTimeline = function(bands) {
     }
     
     // set event listener to hide off-map items on the timeline
-    if (this.settings.hideOffMap) {
+    if (this.opts.hideOffMap) {
         var datasets = this.datasets;
         var oMap = this.map;
         GEvent.addListener(oMap, "moveend", function() {
@@ -203,7 +203,7 @@ TimeMap.prototype.createLegend = function(legendId) {
     legendId = "#"+legendId;
     for (id in this.datasets) {
         var dataset = this.datasets[id];
-        var colorBox = '<div style="float:left;margin-right:5px;border:1px solid #000;width:12px;height:12px;background:' + dataset._theme.color + '">&nbsp;</div>';
+        var colorBox = '<div style="float:left;margin-right:5px;border:1px solid #000;width:12px;height:12px;background:' + dataset.opts.theme.color + '">&nbsp;</div>';
         var divHtml = '<div class="legenditem">' + colorBox+dataset.title + '</div>';
         $(legendId).append(divHtml);
     }
@@ -217,12 +217,13 @@ TimeMap.prototype.createLegend = function(legendId) {
  * Create a new TimeMap dataset to hold a set of items
  *
  * @constructor
- * @param {TimeMap} timemap             Reference to the timemap object
- * @param {Object} options              Object holding optional arguments:
- *      {String} title                      Title of the dataset (for the legend)
- *      {TimeMapDatasetTheme} theme         Theme settings
- *      {Function}  dateParser              Function to replace default date parser
- *
+ * @param {TimeMap} timemap         Reference to the timemap object
+ * @param {Object} options          Object holding optional arguments:
+ *   {String} title                     Title of the dataset (for the legend)
+ *   {TimeMapDatasetTheme} theme        Theme settings
+ *   {Function} dateParser              Function to replace default date parser
+ *   {Function} openInfoWindow          Function redefining how info window opens
+ *   {Function} closeInfoWindow         Function redefining how info window closes
  */
 function TimeMapDataset(timemap, options) {
     // hold reference to timemap
@@ -230,19 +231,21 @@ function TimeMapDataset(timemap, options) {
     // initialize timeline event source
     this.eventSource = new Timeline.DefaultEventSource();
     // initialize array of items
-    this._items = [];
-    // initialize vars
-    this.title = options["title"] || "";
-    this._theme = options["theme"] || new TimeMapDatasetTheme({});
+    this.items = [];
+    
+    // set defaults for options
+    this.opts = options || {}; // make sure the options object isn't null
+    this.opts.title =        options["title"] || "";
+    this.opts.theme =        options["theme"] || new TimeMapDatasetTheme({});
     // allow for other data parsers (e.g. Gregorgian)
-    this._dateParser = options["dateParser"] || Timeline.DateTime.parseIso8601DateTime;
+    this.opts.dateParser =   options["dateParser"] || Timeline.DateTime.parseIso8601DateTime;
 }
 
 /*
  * Get the items for this dataset
  */
 TimeMapDataset.prototype.getItems = function() {
-    return this._items;
+    return this.items;
 }
 
 
@@ -259,7 +262,7 @@ TimeMapDataset.prototype.loadItems = function(data, transform) {
     }
     var tm = this.timemap;
     // XXX - probably change to this.timemap.onLoadItems()
-    if  (tm.settings.centerMapOnItems) {
+    if  (tm.opts.centerMapOnItems) {
         // determine the zoom level from the bounds
         tm.map.setZoom(tm.map.getBoundsZoomLevel(tm.mapBounds));
         // determine the center from the bounds
@@ -297,16 +300,16 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     // transform functions can return a null value to skip a datum in the set
     if (data == null) return;
     
-    // use item theme if provided
-    var theme = data["options"]["theme"] || this._theme;
+    // use item theme if provided, defaulting to dataset theme
+    var theme = data.options["theme"] || this.opts.theme;
     
     var tm = this.timemap;
     
     // create timeline event
     var start = (data.start == undefined||data.start == "") ? null :
-        this._dateParser(data.start);
+        this.opts.dateParser(data.start);
     var end = (data.end == undefined||data.end == "") ? null : 
-        this._dateParser(data.end);
+        this.opts.dateParser(data.end);
     var instant = (data.end == undefined);
     var eventIcon = instant ? theme.eventIcon : null;
     var title = data.title;
@@ -328,7 +331,7 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
             parseFloat(data.point["lon"])
         );
         // add point to visible map bounds
-        if (tm.settings.centerMapOnItems) {
+        if (tm.opts.centerMapOnItems) {
             tm.mapBounds.extend(point);
         }
         markerIcon = ("icon" in data) ? data["icon"] : theme.icon;
@@ -346,7 +349,7 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
             );
             points.push(point);
             // add point to visible map bounds
-            if (tm.settings.centerMapOnItems) {
+            if (tm.opts.centerMapOnItems) {
                 tm.mapBounds.extend(point);
             }
         }
@@ -381,13 +384,13 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
         point = placemark.getBounds().getCenter();
     }
     
-    var options = ("options" in data) ? data.options : {};
+    var options = data.options || {};
     options["title"] = title;
     options["type"] = type;
     options["infoPoint"] = point;
     
-    // create cross-references
-    var item = new TimeMapItem(placemark, event, tm.map, options);
+    // create item and cross-references
+    var item = new TimeMapItem(placemark, event, this, options);
     if (event != null) {
         event.placemark = placemark;
         event.item = item;
@@ -395,10 +398,9 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     placemark.event = event;
     placemark.item = item;
     
-    this._items.push(item);
+    this.items.push(item);
     
     // add listener to make placemark open when event is clicked
-    // XXX: Will need to think about how to make this work w/Ajax
     var oMap = tm.map;
     GEvent.addListener(placemark, "click", function() {
         item.openInfoWindow();
@@ -430,9 +432,9 @@ TimeMapDataset.parseKML = function(kml) {
         }
         // get description
         nList = pm.getElementsByTagName("description");
-        data["options"] = {};
+        data.options = {};
         if (nList.length > 0) {
-            data["options"]["description"] = nList[0].firstChild.nodeValue;
+            data.options["description"] = nList[0].firstChild.nodeValue;
         }
         // look for instant timestamp
         nList = pm.getElementsByTagName("TimeStamp");
@@ -553,7 +555,7 @@ TimeMapDataset.parseParentNode = function(pm){
 function TimeMapDatasetTheme(options) {
     // work out various defaults - the default theme is Google's reddish color
     options = options || {};
-    this.icon =              options['icon'] || G_DEFAULT_ICON; //("icon" in options) ? options.icon : G_DEFAULT_ICON;
+    this.icon =              options['icon'] || G_DEFAULT_ICON;
     this.color =             options['color'] || "#FE766A";
     this.lineColor =         options['lineColor'] || this.color;
     this.polygonLineColor =  options['polygonLineColor'] || this.lineColor;
@@ -675,7 +677,7 @@ TimeMapDataset.yellowTheme = function(options) {
  * @constructor
  * @param {placemark} placemark     The map placemark (one of GMarker, GPolyline, or GPolygon)
  * @param {Event} event             The timeline event
- * @param {GMap2} map               Reference to the map object
+ * @param {TimeMapDataset} dataset  Reference to the parent dataset object
  * @param {Object} options          A container for optional arguments:
  *   {String} title                     Title of the item
  *   {String} description               Plain-text description of the item
@@ -686,32 +688,35 @@ TimeMapDataset.yellowTheme = function(options) {
  *   {Function} openInfoWindow          Function redefining how info window opens
  *   {Function} closeInfoWindow         Function redefining how info window closes
  */
-function TimeMapItem(placemark, event, map, options) {
+function TimeMapItem(placemark, event, dataset, options) {
     // initialize vars
     this.placemark = placemark;
     this.event =     event;
-    this.map =       map;
+    this.dataset =   dataset;
+    this.map =       dataset.timemap.map;
     
-    // get vars from options
-    this.options = options || {};
-    this._type =        options['type'] || '';
-    this._title =       options['title'] || '';
-    this._description = options['description'] || '';
-    this._infoPoint =   options['infoPoint'] || null;
-    this._infoHtml =    options['infoHtml'] || '';
-    this._infoUrl =     options['infoUrl'] || '';
+    // set defaults for options
+    this.opts = options || {};
+    this.opts.type =        options['type'] || '';
+    this.opts.title =       options['title'] || '';
+    this.opts.description = options['description'] || '';
+    this.opts.infoPoint =   options['infoPoint'] || null;
+    this.opts.infoHtml =    options['infoHtml'] || '';
+    this.opts.infoUrl =     options['infoUrl'] || '';
     
     // get functions
-    this.getType = function() { return this._type; };
-    this.getTitle = function() { return this._title; };
-    this.getInfoPoint = function() { return this._infoPoint; };
+    this.getType = function() { return this.opts.type; };
+    this.getTitle = function() { return this.opts.title; };
+    this.getInfoPoint = function() { return this.opts.infoPoint; };
     
-    // allow for custom open/close functions
-    if ('openInfoWindow' in options) {
-        this.openInfoWindow = options['openInfoWindow'];
-    } else {
+    // allow for custom open/close functions, set at item, dataset, or timemap level
+    this.openInfoWindow =   options['openInfoWindow'] ||
+                            dataset.opts['openInfoWindow'] ||
+                            dataset.timemap.opts['openInfoWindow'] ||
+                            false;
+    if (!this.openInfoWindow) {
         // load via AJAX if URL is provided
-        if (this._infoUrl != "")
+        if (this.opts.infoUrl != "")
             this.openInfoWindow = TimeMapItem.openInfoWindowAjax;
         // otherwise default to basic window
         else this.openInfoWindow = TimeMapItem.openInfoWindowBasic;    
@@ -724,16 +729,16 @@ function TimeMapItem(placemark, event, map, options) {
  */
 TimeMapItem.openInfoWindowBasic = function() {
     // create content for info window if none is provided
-    if (this._infoHtml == "" && this._infoUrl == "") {
-        this._infoHtml = '<div class="infotitle">' + this._title + '</div>';
-        if (this._description != "") 
-            this._infoHtml += '<div class="infodescription">' + this._description + '</div>';
+    if (this.opts.infoHtml == "" && this.opts.infoUrl == "") {
+        this.opts.infoHtml = '<div class="infotitle">' + this.opts.title + '</div>';
+        if (this.opts.description != "") 
+            this.opts.infoHtml += '<div class="infodescription">' + this.opts.description + '</div>';
     }
     // open window
     if (this.getType() == "marker") {
-        this.placemark.openInfoWindowHtml(this._infoHtml);
+        this.placemark.openInfoWindowHtml(this.opts.infoHtml);
     } else {
-        this.map.openInfoWindowHtml(this.getInfoPoint(), this._infoHtml);
+        this.map.openInfoWindowHtml(this.getInfoPoint(), this.opts.infoHtml);
     }
 }
 
@@ -741,14 +746,14 @@ TimeMapItem.openInfoWindowBasic = function() {
  * Open info window function using ajax-loaded text in map window
  */
 TimeMapItem.openInfoWindowAjax = function() {
-    if (this._infoHtml != "") { // already loaded - change to static
+    if (this.opts.infoHtml != "") { // already loaded - change to static
         this.openInfoWindow = TimeMapItem.openInfoWindowBasic;
         this.openInfoWindow();
     } else { // load content via AJAX
-        if (this._infoUrl != "") {
+        if (this.opts.infoUrl != "") {
             var item = this;
-            GDownloadUrl(this._infoUrl, function(result) {
-                    item._infoHtml = result;
+            GDownloadUrl(this.opts.infoUrl, function(result) {
+                    item.opts.infoHtml = result;
                     item.openInfoWindow();
             });
         } else { // fall back on basic function

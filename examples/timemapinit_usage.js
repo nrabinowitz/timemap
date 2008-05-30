@@ -23,7 +23,15 @@ timemapInit({
         // Whether to hide map placemarks for events not visible on timeline
         hidePastFuture: true,
         // Whether to center and zoom the map based on loaded item positions
-        centerMapOnItems: true
+        centerMapOnItems: true,
+        // Function redefining how info windows open for this timemap
+        openInfoWindow: function() { 
+            // your function here - "this" refers to the item
+        },
+        // Function redefining how info windows close for this timemap
+        closeInfoWindow: function() { 
+            // your function here - "this" refers to the item
+        }
     },
     datasets: [                 // Array of datasets to show
         // Sample types of dataset shown below:
@@ -33,6 +41,17 @@ timemapInit({
             // events and map placemarks, including color and icon.
             // Use a preset or use TimeMapDatasetTheme() to make your own
             theme: TimeMapDataset.greenTheme(),
+            options: {
+                // Function redefining how info windows open for this dataset
+                // This can also be set on a per-item basis
+                openInfoWindow: function() { 
+                    // your function here - "this" refers to the item
+                },
+                // Function redefining how info windows close for this dataset
+                closeInfoWindow: function() { 
+                    // your function here - "this" refers to the item
+                }
+            },
             data: {                 // Define the data for this dataset
                 type: "basic",      // Data defined right in the javascript
                 value: [            
@@ -150,6 +169,12 @@ timemapInit({
         Timeline.DateTime.WEEK, 
         Timeline.DateTime.MONTH 
     ],
-    // whether to scroll to the earliest or latest date on load
-    scrollTo: "latest" // or "earliest" - default
+    // Date the timeline should scroll to when all data is loaded
+    // Options: "earliest" (default), "latest", "now", or null (effectively same as "now")
+    scrollTo: "latest",
+    // Custom function to be called when all data is loaded
+    // Receives the TimeMap object as an argument
+    dataLoadedFunction: function(tm) {
+        alert("All datasets loaded!");
+    }
 });
