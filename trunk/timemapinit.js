@@ -109,8 +109,12 @@ function timemapInit(config) {
     loadMgr.ifLoadedFunction = function() {
         if (config['scrollTo']=="earliest")
             tm.timeline.getBand(0).setCenterVisibleDate(eventSource.getEarliestDate());
-        else tm.timeline.getBand(0).setCenterVisibleDate(eventSource.getLatestDate());
+        else if (config['scrollTo']!="now" && config['scrollTo']!=null)
+            tm.timeline.getBand(0).setCenterVisibleDate(eventSource.getLatestDate());
         tm.timeline.layout();
+        // custom function to be called when data is loaded
+        if (config['dataLoadedFunction'])
+            config['dataLoadedFunction'](tm);
     };
     loadMgr.ifLoaded = function() {
         this.count++;
