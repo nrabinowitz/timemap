@@ -77,7 +77,8 @@ function timemapInit(config) {
         dsOptions['title'] = ds['title'] || '';
         dsOptions['theme'] = ds['theme'] || undefined;
         if (ds['dateParser']) dsOptions['dateParser'] = ds['dateParser'];
-        datasets[x] = tm.createDataset("ds" + x, dsOptions);
+        var dsId = ds['id'] || "ds" + x;
+        datasets[x] = tm.createDataset(dsId, dsOptions);
         if (x > 0) {
             // set all to the same eventSource
             datasets[x].eventSource = datasets[0].eventSource;
