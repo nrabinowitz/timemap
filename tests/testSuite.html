@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>TimeMap Test Suite</title>
+    <link rel="stylesheet" type="text/css" href="../jsUnit/../css/jsUnitStyle.css">
+    <script language="JavaScript" type="text/javascript" src="../../jsunit/app/jsUnitCore.js"></script>
+    <script language="JavaScript" type="text/javascript">
+
+function loadSuite() {
+    var result = new top.jsUnitTestSuite();
+    result.addTestPage(translatePath("basicLoadTests.html"));
+    result.addTestPage(translatePath("kmlLoadTests.html"));
+    result.addTestPage(translatePath("jsonLoadTests.html"));
+    return result;
+}
+
+function suite() {
+    var newsuite = new top.jsUnitTestSuite();
+    newsuite.addTestSuite(loadSuite());
+    return newsuite;
+}
+  
+// from https://sourceforge.net/tracker/index.php?func=detail&aid=1124389&group_id=28041&atid=391976      
+function translatePath(path) {
+	var basePath = window.location.pathname;
+	basePath = basePath.substring(0,basePath.lastIndexOf("/"));
+	while(path.indexOf("../")==0) {
+		basePath = basePath.substring(0, basePath.lastIndexOf("/"));
+		path = path.substring(3);
+	}
+	if (path.indexOf("/")!=0) path = "/" + path;
+	return basePath + path;
+}
+
+    </script>
+</head>
+
+<body>
+<h1>TimeMap Test Suite</h1>
+
+<p>This page contains a suite of tests for testing TimeMap with jsUnit.</p>
+</body>
+</html>
