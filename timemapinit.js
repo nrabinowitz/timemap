@@ -108,14 +108,19 @@ function timemapInit(config) {
     loadMgr.count = 0;
     loadMgr.loadTarget = config['datasets'].length;
     loadMgr.ifLoadedFunction = function() {
-        if (config['scrollTo']=="earliest")
-            tm.timeline.getBand(0).setCenterVisibleDate(eventSource.getEarliestDate());
-        else if (config['scrollTo']!="now" && config['scrollTo']!=null)
-            tm.timeline.getBand(0).setCenterVisibleDate(eventSource.getLatestDate());
-        tm.timeline.layout();
-        // custom function to be called when data is loaded
+        // custom function including timeline scrolling and layout
         if (config['dataLoadedFunction'])
             config['dataLoadedFunction'](tm);
+        else {
+            if (config['scrollTo']=="earliest")
+                tm.timeline.getBand(0).setCenterVisibleDate(eventSource.getEarliestDate());
+            else if (config['scrollTo']!="now" && config['scrollTo']!=null)
+                tm.timeline.getBand(0).setCenterVisibleDate(eventSource.getLatestDate());
+            tm.timeline.layout();
+            // custom function to be called when data is loaded
+            if (config['dataDisplayedFunction'])
+                config['dataDisplayedFunction'](tm);
+        }
     };
     loadMgr.ifLoaded = function() {
         this.count++;
