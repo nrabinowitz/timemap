@@ -13,11 +13,12 @@
 
 function onLoad() {
 
-    var tm = timemapInit({
+    tm = timemapInit({
         mapId: "map",               // Id of map div element (required)
         timelineId: "timeline",     // Id of timeline div element (required) 
         datasets: [
             {
+                id: "artists",
                 title: "Artists",
                 theme: TimeMapDataset.orangeTheme({eventIconPath: "../images/"}),
                 data: {
@@ -89,6 +90,7 @@ function onLoad() {
     <div id="help">
     <h1>Simplest Dataset Ever</h1>
     In this example, we're just directly entering the data in the javascript, loading content into the info window in several different ways. (Note that Leonardo's window, which loads content via AJAX, may throw an error in IE if you're viewing this locally, due to cross-site scripting restrictions.)
+    <a href="#" onClick="tm.hideDataset('artists'); return false;">hide!</a> <a href="#" onClick="tm.showDataset('artists'); return false;">show!</a>
     </div>
     <div id="timemap">
         <div id="timelinecontainer">
