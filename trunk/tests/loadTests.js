@@ -1,3 +1,14 @@
+function exposeTestFunctionNames() {
+    return [
+        'testDatasetIsDefined',
+        'testItemLoaded',
+        'testItemLoadedInEventSource',
+        'testEarliestDate',
+        'testLatestDate',
+        'testItemAttributes'
+    ];
+}
+
 function testDatasetIsDefined() {
     assertNotUndefined("dataset is defined", tm.datasets["test"]);
 }

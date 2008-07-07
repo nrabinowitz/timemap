@@ -1,3 +1,14 @@
+function exposeTestFunctionNames() {
+    return [
+        'testVisible',
+        'testItemHide',
+        'testDatasetHideShow',
+        'testTimeMapDatasetHideShow',
+        'testHidePast',
+        'testHideFuture'
+    ];
+}
+
 function testVisible() {
     var items = tm.datasets["test"].getItems();
     var placemark = items[0].placemark;
