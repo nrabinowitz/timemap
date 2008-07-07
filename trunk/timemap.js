@@ -56,20 +56,22 @@ function TimeMap(tElement, mElement, options) {
     this.tElement = tElement;
     // initialize array of datasets
     this.datasets = {};
+    // initialize filters
+    this.filters = {};
     // initialize map bounds
     this.mapBounds = new GLatLngBounds();
     
     // set defaults for options
     // other options can be set directly on the map or timeline
     this.opts = options || {}; // make sure the options object isn't null
-    this.opts.syncBands =        options['syncBands'] || true;
     this.opts.mapCenter =        options['mapCenter'] || new GLatLng(0,0); 
     this.opts.mapZoom =          options['mapZoom'] || 0;
     this.opts.mapType =          options['mapType'] || G_PHYSICAL_MAP;
-    this.opts.showMapTypeCtrl =  options['showMapTypeCtrl'] || true;
-    this.opts.showMapCtrl =      options['showMapCtrl'] || true;
-    this.opts.hidePastFuture =   options['hidePastFuture'] || true;
-    this.opts.centerMapOnItems = options['centerMapOnItems'] || true;
+    this.opts.syncBands =        ('syncBands' in options) ? options['syncBands'] : true;
+    this.opts.showMapTypeCtrl =  ('showMapTypeCtrl' in options) ? options['showMapTypeCtrl'] : true;
+    this.opts.showMapCtrl =      ('showMapCtrl' in options) ? options['showMapCtrl'] : true;
+    this.opts.hidePastFuture =   ('hidePastFuture' in options) ? options['hidePastFuture'] : true;
+    this.opts.centerMapOnItems = ('centerMapOnItems' in options) ? options['centerMapOnItems'] : true;
     
     // initialize map
     if (GBrowserIsCompatible()) {
@@ -128,69 +130,153 @@ TimeMap.prototype.initTimeline = function(bands) {
     // initialize timeline
     this.timeline = Timeline.create(this.tElement, bands);
     
-    // set event listener to hide off-timeline items on the map
+    // set event listeners
+    var tm = this;
+    // update map on timeline scroll
+    this.timeline.getBand(0).addOnScrollListener(function() {
+        tm.filter("map");
+    });
+    // update timeline on map move (no default functionality yet)
+    GEvent.addListener(tm.map, "moveend", function() {
+        tm.filter("timeline");
+    });
+    
+    // filter chain for map placemarks
+    this.filters["map"] = {
+        chain:[],
+        on: function(item) {
+            item.placemark.show();
+        },
+        off: function(item) {
+            item.placemark.hide();
+            item.closeInfoWindow();
+        }
+    };
+    
+    // filter: hide when dataset is hidden
+    this.filters["map"].chain.push(function(item) {
+        return item.dataset.visible;
+    });
+    
+    // filter: hide off-timeline items
     if (this.opts.hidePastFuture) {
-        var topband = this.timeline.getBand(0);
-        var datasets = this.datasets;
-        var oMap = this.map;
-        topband.addOnScrollListener(function() {
+        this.filters["map"].chain.push(function(item) {
+            var topband = item.dataset.timemap.timeline.getBand(0);
             var maxVisibleDate = topband.getMaxVisibleDate().getTime();
             var minVisibleDate = topband.getMinVisibleDate().getTime();
-            for (id in datasets) {
-                var items = datasets[id].getItems();
-                for (var x=0; x < items.length; x++) {
-                    if (items[x].event != null) {
-                        var itemStart = items[x].event.getStart().getTime();
-                        var itemEnd = items[x].event.getEnd().getTime();
-                        // hide items in the future
-                        if (itemStart > maxVisibleDate) {
-                            items[x].placemark.hide();
-                            items[x].closeInfoWindow();
-                        } 
-                        // hide items in the past
-                        else if (itemEnd < minVisibleDate || 
-                            (items[x].event.isInstant() && itemStart < minVisibleDate)) {
-                            items[x].placemark.hide();
-                            items[x].closeInfoWindow();
-                        } 
-                        else items[x].placemark.show();
-                    }
+            if (item.event != null) {
+                var itemStart = item.event.getStart().getTime();
+                var itemEnd = item.event.getEnd().getTime();
+                // hide items in the future
+                if (itemStart > maxVisibleDate) {
+                    return false;
+                } 
+                // hide items in the past
+                else if (itemEnd < minVisibleDate || 
+                    (item.event.isInstant() && itemStart < minVisibleDate)) {
+                    return false;
                 }
             }
-        });
-    }
-    
-    // set event listener to hide off-map items on the timeline
-    if (this.opts.hideOffMap) {
-        var datasets = this.datasets;
-        var oMap = this.map;
-        GEvent.addListener(oMap, "moveend", function() {
-            var bounds = oMap.getBounds();
-            for (id in datasets) {
-                var items = datasets[id].getItems();
-                for (var x=0; x < items.length; x++) {
-                    var placemarkPoint = items[x].placemark.getLatLng();
-                    // hide events outside map bounds
-                    if (!bounds.containsLatLng(placemarkPoint) && items[x].event != null)
-                        items[x].event.hide();
-                    else items[x].event.show();
-                }
-            }
+            return true;
         });
     }
     
     // add callback for window resize here instead of the html file, to conform with XHTML 1.0
     resizeTimerID = null;
-    var oTImeline = this.timeline;
+    var oTimeline = this.timeline;
     window.onresize = function() {
         if (resizeTimerID == null) {
             resizeTimerID = window.setTimeout(function() {
                 resizeTimerID = null;
-                oTImeline.layout();
+                oTimeline.layout();
             }, 500);
         }
     };
 };
+
+/**
+ * Update items, hiding or showing according to filters
+ *
+ * @param {String} target   What to update, either "map" or "timeline"
+ */
+TimeMap.prototype.filter = function(target) {
+    var filters = this.filters[target];
+    // if no filters exist, forget it
+    if (!filters || !filters.chain || filters.chain.length == 0) return;
+    // run items through filter
+    for (id in this.datasets) {
+        var items = this.datasets[id].getItems();
+        for (var x=0; x < items.length; x++) {
+            F_LOOP: {
+                for (f in filters.chain) {
+                    if (!filters.chain[f](items[x])) {
+                        // false condition
+                        filters.off(items[x]);
+                        break F_LOOP;
+                    }
+                }
+                // true condition
+                filters.on(items[x]);
+            }
+        }
+    } 
+}
+
+/**
+ * Hides placemarks for a given dataset
+ * 
+ * @param {String} id   The id of the dataset to hide
+ */
+TimeMap.prototype.hideDataset = function (id){
+    if (id in this.datasets) {
+    	this.datasets[id].hide();
+    }
+}
+
+/**
+ * Hides all the datasets on the map
+ */
+TimeMap.prototype.hideDatasets = function(){
+	for (id in this.datasets){
+		this.datasets[id].visible = false;
+	}
+    this.filter("map");
+}
+
+/**
+ * Shows placemarks for a given dataset
+ * 
+ * @param {String} id   The id of the dataset to hide
+ */
+TimeMap.prototype.showDataset = function(id) {
+    if (id in this.datasets) {
+	    this.datasets[id].show();
+    }
+}
+
+/**
+ * Shows all the datasets on the map
+ */
+TimeMap.prototype.showDatasets = function() {
+	for (id in this.datasets){
+		this.datasets[id].visible = true;
+	}
+    this.filter("map");
+}
+ 
+/**
+ * Scrolls the timeline the number of years passed (negative numbers scroll it back)
+ * XXX: This should probably handle other intervals as well...
+ *
+ * @param {int} years    Number of years to scroll the timeline
+*/
+TimeMap.prototype.scrollTimeline = function (years) {
+ 	var topband = this.timeline.getBand(0);
+ 	var centerDate = topband.getCenterVisibleDate();
+ 	var centerYear = centerDate.getFullYear() + parseFloat(years);
+ 	centerDate.setFullYear(centerYear);
+ 	topband.setCenterVisibleDate(centerDate);
+}
 
 /**
  * Create a legend with the current datasets, using an existing DOM element.
@@ -232,6 +318,8 @@ function TimeMapDataset(timemap, options) {
     this.eventSource = new Timeline.DefaultEventSource();
     // initialize array of items
     this.items = [];
+    // for show/hide functions
+    this.visible = true;
     
     // set defaults for options
     this.opts = options || {}; // make sure the options object isn't null
@@ -248,6 +336,25 @@ TimeMapDataset.prototype.getItems = function() {
     return this.items;
 }
 
+/**
+ * Show dataset
+ */
+TimeMapDataset.prototype.show = function() {
+    if (!this.visible) {
+      this.visible = true;
+      this.timemap.filter("map");
+    }
+}
+
+/**
+ * Hide dataset
+ */
+TimeMapDataset.prototype.hide = function() {
+    if (this.visible) {
+      this.visible = false;
+      this.timemap.filter("map");
+    }
+}
 
 /*
  * Add items to map and timeline. 
@@ -401,13 +508,15 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     this.items.push(item);
     
     // add listener to make placemark open when event is clicked
-    var oMap = tm.map;
     GEvent.addListener(placemark, "click", function() {
         item.openInfoWindow();
     });
     
     // add placemark and event to map and timeline
     tm.map.addOverlay(placemark);
+    // hide placemarks until the next refresh
+    placemark.hide();
+    
     if (event != null)
         this.eventSource.add(event);
 };
