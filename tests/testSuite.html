@@ -10,10 +10,10 @@
 
 function loadSuite() {
     var result = new top.jsUnitTestSuite();
-    result.addTestPage(translatePath("basicLoadTests.html"));
-    result.addTestPage(translatePath("kmlLoadTests.html"));
-    result.addTestPage(translatePath("jsonLoadTests.html"));
-    result.addTestPage(translatePath("basicVisibilityTests.html"));
+    result.addTestPage("../timemap/tests/basicLoadTests.html");
+    result.addTestPage("../timemap/tests/kmlLoadTests.html");
+    result.addTestPage("../timemap/tests/jsonLoadTests.html");
+    result.addTestPage("../timemap/tests/basicVisibilityTests.html");
     return result;
 }
 
@@ -22,18 +22,8 @@ function suite() {
     newsuite.addTestSuite(loadSuite());
     return newsuite;
 }
-  
-// from https://sourceforge.net/tracker/index.php?func=detail&aid=1124389&group_id=28041&atid=391976      
-function translatePath(path) {
-	var basePath = window.location.pathname;
-	basePath = basePath.substring(0,basePath.lastIndexOf("/"));
-	while(path.indexOf("../")==0) {
-		basePath = basePath.substring(0, basePath.lastIndexOf("/"));
-		path = path.substring(3);
-	}
-	if (path.indexOf("/")!=0) path = "/" + path;
-	return basePath + path;
-}
+
+
 
     </script>
 </head>
