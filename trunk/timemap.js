@@ -404,24 +404,23 @@ TimeMapDataset.prototype.loadItems = function(data, transform) {
  * Add one item to map and timeline. 
  * Each item has both a timeline event and a map placemark.
  *
- * @param {Object} data             Data to be loaded, in the following format:
- *      {String} title                  Title of the item (visible on timeline)
- *      {DateTime} start         Start time of the event on the timeline
- *      {DateTime} end           End time of the event on the timeline (duration events only)
- *      {Object} point                  Data for a single-point placemark: 
- *          {Float} lat                   Latitude of map marker
- *          {Float} lon                   Longitude of map marker
- *      {Array of points} polyline      Data for a polyline placemark, in format above
- *      {Array of points} polygon       Data for a polygon placemark, in format above
- *      {Object} options                Optional arguments to be passed to the TimeMapItem:
- *          {String} description            Description to be shown in the info window
- *          {String} infoHtml               Full HTML for the info window, defaults to title + description
- *          {String} infoUrl                URL from which to retrieve full HTML for the info window
- *          {String} maxInfoHtml            Full HTML for the maximized info window
- *          {String} maxInfoUrl             URL from which to retrieve full HTML for the maximized info window
- *          {String} maxOnly                Whether to auto-maximize on open
- *          {TimeMapDatasetTheme} theme     Theme to apply to this item (overriding dataset theme)
- * @param {Function} transform      If data is not in the above format, transformation function to make it so
+ * @param {Object} data         Data to be loaded, in the following format:
+ *      {String} title              Title of the item (visible on timeline)
+ *      {DateTime} start            Start time of the event on the timeline
+ *      {DateTime} end              End time of the event on the timeline (duration events only)
+ *      {Object} point              Data for a single-point placemark: 
+ *          {Float} lat                 Latitude of map marker
+ *          {Float} lon                 Longitude of map marker
+ *      {Array of points} polyline  Data for a polyline placemark, in format above
+ *      {Array of points} polygon   Data for a polygon placemark, in format above
+ *      {Object} overlay            Data for a ground overlay:
+ *          {String} image              URL of image to overlay
+ *          {Float} north               Northern latitude of the overlay
+ *          {Float} south               Southern latitude of the overlay
+ *          {Float} east                Eastern longitude of the overlay
+ *          {Float} west                Western longitude of the overlay
+ *      {Object} options            Optional arguments to be passed to the TimeMapItem (@see TimeMapItem)
+ * @param {Function} transform  If data is not in the above format, transformation function to make it so
  */
 TimeMapDataset.prototype.loadItem = function(data, transform) {
     // apply transformation, if any
@@ -431,7 +430,7 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     if (data == null) return;
     
     // use item theme if provided, defaulting to dataset theme
-    var theme = data.options["theme"] || this.opts.theme;
+    var theme = (data.options && data.options["theme"]) || this.opts.theme;
     
     var tm = this.timemap;
     
@@ -467,7 +466,10 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
         markerIcon = ("icon" in data) ? data["icon"] : theme.icon;
         placemark = new GMarker(point, { icon: markerIcon });
         type = "marker";
-    } else if ("polyline" in data || "polygon" in data) {
+        point = placemark.getLatLng();
+    } 
+    // polyline and polygon placemarks
+    else if ("polyline" in data || "polygon" in data) {
         var points = [];
         if ("polyline" in data)
             var line = data.polyline;
@@ -489,6 +491,7 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
                                       theme.lineWeight,
                                       theme.lineOpacity);
             type = "polyline";
+            point = placemark.getVertex(Math.floor(placemark.getVertexCount()/2));
         } else {
             placemark = new GPolygon(points, 
                                      theme.polygonLineColor, 
@@ -497,22 +500,32 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
                                      theme.fillColor,
                                      theme.fillOpacity);
             type = "polygon";
+            point = placemark.getBounds().getCenter();
         }
+    } 
+    // ground overlay placemark
+    else if ("overlay" in data) {
+        var sw = new GLatLng(
+            parseFloat(data.overlay["south"]), 
+            parseFloat(data.overlay["west"])
+        );
+        var ne = new GLatLng(
+            parseFloat(data.overlay["north"]), 
+            parseFloat(data.overlay["east"])
+        );
+        // add to visible bounds
+        if (tm.opts.centerMapOnItems) {
+            tm.mapBounds.extend(sw);
+            tm.mapBounds.extend(ne);
+        }
+        // create overlay
+        var overlayBounds = new GLatLngBounds(sw, ne);
+        placemark = new GGroundOverlay(data.overlay["image"], overlayBounds);
+        point = overlayBounds.getCenter();
     }
+    
      // XXX: It would be nice to handle missing placemarks better
     if (placemark == null) return;
-    
-    // define the center point of this item
-    if (type == "marker") {
-        // just the marker point
-        point = placemark.getLatLng();
-    } else if (type == "polyline") {
-        // the middle vertex of the line
-        point = placemark.getVertex(Math.floor(placemark.getVertexCount()/2));
-    } else if (type == "polygon") {
-        // the middle of the polygon bounds
-        point = placemark.getBounds().getCenter();
-    }
     
     var options = data.options || {};
     options["title"] = title;
@@ -550,116 +563,126 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
  * @param {XML text} kml        KML to be parsed
  */
 TimeMapDataset.parseKML = function(kml) {
-    var items = [];
+    var items = [], data, kmlnode, placemarks, pm;
     kmlnode = GXml.parse(kml);
-    var placemarks = kmlnode.getElementsByTagName("Placemark");
-    var timeCheck = false;
-    for (var i=0; i<placemarks.length; i++) {
-        var pm = placemarks[i];
-        var nList, data = {};
-        // get title
-        nList = pm.getElementsByTagName("name");
+    
+    // convenience function: get tag value as a string
+    var getTagValue = function(n, tag) {
+        var nList = n.getElementsByTagName(tag);
         if (nList.length > 0) {
-            data["title"] = nList[0].firstChild.nodeValue;
+            return nList[0].firstChild.nodeValue;
+        } else {
+            return "";
         }
-        // get description
-        nList = pm.getElementsByTagName("description");
-        data.options = {};
-        if (nList.length > 0) {
-            data.options["description"] = nList[0].firstChild.nodeValue;
-        }
+    }
+    
+    // recursive time data search
+    var findNodeTime = function(n, data) {
+        var check = false;
         // look for instant timestamp
-        nList = pm.getElementsByTagName("TimeStamp");
+        nList = n.getElementsByTagName("TimeStamp");
         if (nList.length > 0) {
-            data["start"] = nList[0].getElementsByTagName("when")[0].firstChild.nodeValue;
-            timeCheck = true;
+            data["start"] = getTagValue(nList[0], "when");
+            check = true;
         }
         // otherwise look for span
-        if (!timeCheck) {
-            nList = pm.getElementsByTagName("TimeSpan");
+        else {
+            nList = n.getElementsByTagName("TimeSpan");
             if (nList.length > 0) {
-                data["start"] = nList[0].getElementsByTagName("begin")[0].firstChild.nodeValue;
-                data["end"] = nList[0].getElementsByTagName("end")[0].firstChild.nodeValue;
-                timeCheck = true;
+                data["start"] = getTagValue(nList[0], "begin");
+                data["end"] = getTagValue(nList[0], "end");
+                check = true;
             }
         }
-        if (!timeCheck) {
-          data.push(TimeMapDataset.parseParentNode(pm));
+        // try looking recursively at parent nodes
+        if (!check) {
+            var pn = n.parentNode;
+            if (pn.nodename == "Folder" || pn.nodename=="Document") {
+                TimeMapDataset.findNodeTime(pn, data);
+            }
+            pn = null;
         }
-        // look for marker
-        nList = pm.getElementsByTagName("Point");
-        if (nList.length > 0) {
-            data["point"] = {};
-            // get lat/lon
-            var coords = nList[0].getElementsByTagName("coordinates")[0].firstChild.nodeValue;
-            var latlon = coords.split(",");
-            data["point"] = {
-                "lat": trim(latlon[1]),
-                "lon": trim(latlon[0])
-            };
-        }
-        // look for polyline / polygon
-        else {
+    }
+    
+    // look for placemarks
+    placemarks = kmlnode.getElementsByTagName("Placemark");
+    for (var i=0; i<placemarks.length; i++) {
+        pm = placemarks[i];
+        data = { options: {} };
+        // get title & description
+        data["title"] = getTagValue(pm, "name");
+        data.options["description"] = getTagValue(pm, "description");
+        // get time information
+        findNodeTime(pm, data);
+        // find placemark
+        PLACEMARK: {
+            var coords, coordArr, latlon, geom;
+            // look for marker
+            nList = pm.getElementsByTagName("Point");
+            if (nList.length > 0) {
+                data["point"] = {};
+                // get lat/lon
+                coords = getTagValue(nList[0], "coordinates");
+                latlon = coords.split(",");
+                data["point"] = {
+                    "lat": trim(latlon[1]),
+                    "lon": trim(latlon[0])
+                };
+                break PLACEMARK;
+            }
+            // look for polylines and polygons
             nList = pm.getElementsByTagName("LineString");
             if (nList.length > 0) {
-                data["polyline"] = [];
-                var coords = nList[0].getElementsByTagName("coordinates")[0].firstChild.nodeValue;
-                var coordArr = trim(coords).split(/[\r\n\f]+/);
+                geom = "polyline";
+            } else {
+                nList = pm.getElementsByTagName("Polygon");
+                if (nList.length > 0) geom = "polygon";
+            }
+            if (nList.length > 0) {
+                data[geom] = [];
+                coords = getTagValue(nList[0], "coordinates");
+                coordArr = trim(coords).split(/[\r\n\f]+/);
                 for (var x=0; x<coordArr.length; x++) {
-                    var latlon = coordArr[x].split(",");
-                    data["polyline"].push({
+                    latlon = coordArr[x].split(",");
+                    data[geom].push({
                         "lat": trim(latlon[1]),
                         "lon": trim(latlon[0])
                     });
                 }
-            } else {
-                nList = pm.getElementsByTagName("Polygon");
-                if (nList.length > 0) {
-                    data["polyline"] = [];
-                    var coords = nList[0].getElementsByTagName("coordinates")[0].firstChild.nodeValue;
-                    var coordArr = trim(coords).split(/[\r\n\f]+/);
-                    for (var x=0; x<coordArr.length; x++) {
-                        var latlon = coordArr[x].split(",");
-                        data["polyline"].push({
-                            "lat": trim(latlon[1]),
-                            "lon": trim(latlon[0])
-                        });
-                    }
-                }
+                break PLACEMARK;
             }
         }
         items.push(data);
     }
+    
+    // look for ground overlays
+    placemarks = kmlnode.getElementsByTagName("GroundOverlay");
+    for (var i=0; i<placemarks.length; i++) {
+        pm = placemarks[i];
+        data = { options: {}, overlay: {} };
+        // get title & description
+        data["title"] = getTagValue(pm, "name");
+        data.options["description"] = getTagValue(pm, "description");
+        // get time information
+        findNodeTime(pm, data);
+        // get image
+        nList = pm.getElementsByTagName("Icon");
+        data.overlay["image"] = getTagValue(nList[0], "href");
+        // get coordinates
+        nList = pm.getElementsByTagName("LatLonBox");
+        data.overlay["north"] = getTagValue(nList[0], "north");
+        data.overlay["south"] = getTagValue(nList[0], "south");
+        data.overlay["east"] = getTagValue(nList[0], "east");
+        data.overlay["west"] = getTagValue(nList[0], "west");
+        items.push(data);
+    }
+    
+    // clean up
     kmlnode = null;
+    placemarks = null;
+    pm = null;
     nList = null;
     return items;
-}
-
-
-TimeMapDataset.parseParentNode = function(pm){
-  check = false;
-  var data = {};
-  pn = pm.parentNode;
-  if (pn.nodename == "Folder" || pn.nodename=="Document"){
-    for (ele in pn.childNodes) {
-      if (ele.nodename == "TimeStamp") {
-        data["start"] = ele.getElementsByTagName("when")[0].firstChild.nodeValue;
-        check = true;
-      }
-      else if (ele.nodename = "TimeStamp"){
-        beginNodes = ele.getElementsByTagName("begin");
-        if (beginNodes.length > 0) data["start"] = beginNodes[0].firstChild.nodeValue;
-        if (endNodes.length > 0) data["end"] = endNodes[0].firstChild.nodeValue;
-        check = true;
-      }
-    }
-  }
-  else check = true;
-  if (!check) {
-    data = TimeMapDataset.parseParentNode(pn);
-  }
-         
-  return data;
 }
 
 /*----------------------------------------------------------------------------
