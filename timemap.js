@@ -46,6 +46,7 @@
  *   {Boolean} showMapTypeCtrl      Whether to display the map type control
  *   {Boolean} showMapCtrl          Whether to show map navigation control
  *   {Boolean} hidePastFuture       Whether to hide map placemarks for events not visible on timeline
+ *   {Boolean} showMomentOnly       Whether to hide all but the current moment (bad for instant events)
  *   {Boolean} centerMapOnItems     Whether to center and zoom the map based on loaded item positions
  *   {Function} openInfoWindow      Function redefining how info window opens
  *   {Function} closeInfoWindow     Function redefining how info window closes
@@ -71,6 +72,7 @@ function TimeMap(tElement, mElement, options) {
     this.opts.showMapTypeCtrl =  ('showMapTypeCtrl' in options) ? options['showMapTypeCtrl'] : true;
     this.opts.showMapCtrl =      ('showMapCtrl' in options) ? options['showMapCtrl'] : true;
     this.opts.hidePastFuture =   ('hidePastFuture' in options) ? options['hidePastFuture'] : true;
+    this.opts.showMomentOnly =   ('showMomentOnly' in options) ? options['showMomentOnly'] : false;
     this.opts.centerMapOnItems = ('centerMapOnItems' in options) ? options['centerMapOnItems'] : true;
     
     // initialize map
@@ -174,6 +176,27 @@ TimeMap.prototype.initTimeline = function(bands) {
                 // hide items in the past
                 else if (itemEnd < minVisibleDate || 
                     (item.event.isInstant() && itemStart < minVisibleDate)) {
+                    return false;
+                }
+            }
+            return true;
+        });
+    }
+    // filter: hide all but the present moment - overridden by hidePastFuture
+    else if (this.opts.showMomentOnly) {
+        this.filters["map"].chain.push(function(item) {
+            var topband = item.dataset.timemap.timeline.getBand(0);
+            var momentDate = topband.getCenterVisibleDate().getTime();
+            if (item.event != null) {
+                var itemStart = item.event.getStart().getTime();
+                var itemEnd = item.event.getEnd().getTime();
+                // hide items in the future
+                if (itemStart > momentDate) {
+                    return false;
+                } 
+                // hide items in the past
+                else if (itemEnd < momentDate || 
+                    (item.event.isInstant() && itemStart < momentDate)) {
                     return false;
                 }
             }
