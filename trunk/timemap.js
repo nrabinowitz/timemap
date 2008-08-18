@@ -231,8 +231,8 @@ TimeMap.prototype.filter = function(target) {
         var items = this.datasets[id].getItems();
         for (var x=0; x < items.length; x++) {
             F_LOOP: {
-                for (f in filters.chain) {
-                    if (!filters.chain[f](items[x])) {
+                for (var i = filters.chain.length - 1; i >= 0; i--){
+                    if (!filters.chain[i](items[x])) {
                         // false condition
                         filters.off(items[x]);
                         break F_LOOP;
