@@ -1,7 +1,9 @@
-#summary Basic usage for the TimeMap library.
+#summary Custom initialization for the TimeMap library.
 #labels Featured
 
-The easiest way to get the script working may be to copy code from the [http://www.nickrabinowitz.com/projects/timemap/artists.html artist mashup]. But here's a quick primer that might also help:
+This page outlines how to write a custom initialization script for the TimeMap library. You may need this if you want to use a complex timeline setup or some other non-standard initialization. Otherwise, you'll probably want to use the provided `timemapInit()` function, whose various options are explained in the [http://code.google.com/p/timemap/source/browse/trunk/examples/timemapinit_usage.js timemapinit_usage.js file].
+
+But here's a quick primer that might also help:
 
   * Make an HTML page with a `<div>` tag you want to hold the map, and another to hold the timeline. Give them unique ids (e.g. "map" and "timeline") and size them with CSS. I've found that the CSS can be a little easier if you put the map and timeline `div` tags inside container `div` tags that can be sized separately.
 
