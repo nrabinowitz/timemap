@@ -1,7 +1,7 @@
 #summary Basic usage for the TimeMap library.
 #labels Featured
 
-This page outlines the basic usage of the TimeMap library. I've tried to make it as both as simple and as flexible as possible, though it's stilled geared towards developers who know Javascript fairly well. Make sure to check out the [http://code.google.com/p/timemap/source/browse/#svn/trunk/examples examples] - you may well get further faster by starting with the example code than by starting from scratch.
+This page outlines the basic usage of the TimeMap library. I've tried to make the API both as simple and as flexible as possible, though it's still geared towards developers who know Javascript fairly well. Make sure to check out the [http://code.google.com/p/timemap/source/browse/#svn/trunk/examples examples] - you may well get further faster by starting with the example code than by starting from scratch.
 
 *How to make a TimeMap*
 
