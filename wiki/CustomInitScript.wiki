@@ -1,0 +1,121 @@
+#summary Custom initialization for the TimeMap library.
+
+This page outlines how to write a custom initialization script for the TimeMap library. You may need this if you want to use a complex timeline setup or some other non-standard initialization - one good reason to do this is to have different datasets appear on different timeline bands. Otherwise, you'll probably want to use the provided `timemapInit()` function, whose various options are explained in the [http://code.google.com/p/timemap/source/browse/trunk/examples/timemapinit_usage.js timemapinit_usage.js file].
+
+The simplest way to write a custom script might be to copy the `timemapinit.js` file and hack around until you get it to do what you want. But here's a quick primer that might also help:
+
+  * Start by making an HTML page like the one described in BasicUsage. Make sure to include the Google Maps script, the SIMILE Timeline script, and (at least) `timemap.js` or `timemap.pack.js`.
+
+  * Now use an `onLoad()` script like the one below to set up your map and timeline. 
+
+{{{
+function onLoad() {
+
+    // Make a new TimeMap object, passing the ids of the map and timeline DOM elements.
+    // This will initialize the map.
+    var tm = new TimeMap(
+        document.getElementById("timeline"), 
+        document.getElementById("map"),
+        {} // Any additional TimeMap options go here
+    );
+
+    // Make a new dataset with the id "sample1" and green markers.
+    // You can load multiple datasets with different visual themes.
+    var sample1 = tm.createDataset("sample1", {
+        title:  "Sample One",
+        theme:  TimeMapDataset.greenTheme()
+    });
+
+    // Make a new dataset with the id "sample2" and purple markers.
+    var sample2 = tm.createDataset("sample2", {
+        title:  "Sample Two",
+        theme:  TimeMapDataset.purpleTheme()
+    });
+
+    // Create band information for the timeline as you would for any SIMILE timeline,
+    // but using the eventSource from the dataset object.
+    // See http://simile.mit.edu/timeline/docs/ for more info.
+    // In this case we're making two equally-sized bands with two different datasets.
+    var bands = [
+        Timeline.createBandInfo({
+            eventSource:    sample1.eventSource,
+            width:          "50%",
+            intervalPixels: 100,
+            intervalUnit:   Timeline.DateTime.DAY
+        }),
+        Timeline.createBandInfo({
+            eventSource:    sample2.eventSource,
+            width:          "50%",
+            intervalPixels: 100,
+            intervalUnit:   Timeline.DateTime.DAY
+        })
+    ];
+
+    // Initialize the timeline with the band info
+    tm.initTimeline(bands);
+
+    /*
+     * LOAD YOUR DATA HERE
+     */
+
+} // end onLoad()
+}}}
+
+  * Where it says `LOAD YOUR DATA HERE` in the script above, you have two basic options: you can load data in JSON format, or you can load KML, which the script can parse into JSON.
+
+  To load JSON, use something like the following code:
+
+{{{
+    // Data should be an array of objects - see the code comments for format details
+    // This assumes that you have an array called "items" with your data in it
+    sample.loadItems(items);
+
+    // scroll to a given date - this is often necessary to make the timeline events appear
+    var latestDate = sample.eventSource.getLatestDate();
+    tm.timeline.getBand(0).setCenterVisibleDate(latestDate);
+    // this line may be necessary if your events don't appear on the timeline
+    tm.timeline.layout();
+}}}
+
+  To load KML data, use a download-and-callback function, like this:
+
+{{{
+    // Load a KML file with TimeStamp and TimeSpan elements
+    GDownloadUrl("sample.kml", function(result) {
+        var data = TimeMapDataset.parseKML(result);
+        sample.loadItems(data);
+        tm.timeline.getBand(0).setCenterVisibleDate(sample.eventSource.getLatestDate());
+        // this line may be necessary if your events don't appear on the timeline
+        tm.timeline.layout();
+    });
+}}}
+
+==Troubleshooting==
+
+  * As noted in the code above, you may need to make the timeline scroll to a given date to make the events appear. Scrolling forces it to refresh, but the way I've written the code above it will throw an error if there are no events (or if the events haven't loaded yet). If you run into problems, try replacing the `setCenterVisibleDate` line with this:
+
+{{{
+tm.timeline.layout();
+}}}
+
+  For example, this may be necessary if you want to scroll to the latest date, and the latest date is now - this is the default, so the timeline may not scroll anywhere in this case. 
+
+  * If you're loading multiple files by JSON, you may need to make sure that the _last_ callback function makes the timeline call layout() (either explicitly or by making the timeline scroll to a date). Otherwise the events may lay out funny (overlapping) on the timeline.
+
+  * Be aware that trailing commas and missing semicolons in JSON declarations can throw an error in IE. So this:
+
+{{{
+var test = {
+  title: "Test title",
+  description: "A description!", // <--- problem comma
+} // <--- missing semicolon
+}}}
+
+  needs to be this:
+
+{{{
+var test = {
+  title: "Test title",
+  description: "A description!"
+};
+}}}
