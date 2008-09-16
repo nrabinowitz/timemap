@@ -1,15 +1,15 @@
-#summary Custom initialization for the TimeMap library.
+#summary Basic usage for the TimeMap library.
 #labels Featured
 
-This page outlines how to write a custom initialization script for the TimeMap library. You may need this if you want to use a complex timeline setup or some other non-standard initialization. Otherwise, you'll probably want to use the provided `timemapInit()` function, whose various options are explained in the [http://code.google.com/p/timemap/source/browse/trunk/examples/timemapinit_usage.js timemapinit_usage.js file].
+This page outlines the basic usage of the TimeMap library. I've tried to make it as both as simple and as flexible as possible, though it's stilled geared towards developers who know Javascript fairly well. Make sure to check out the [http://code.google.com/p/timemap/source/browse/#svn/trunk/examples examples] - you may well get further faster by starting with the example code than by starting from scratch.
 
-But here's a quick primer that might also help:
+*How to make a TimeMap*
 
-  * Make an HTML page with a `<div>` tag you want to hold the map, and another to hold the timeline. Give them unique ids (e.g. "map" and "timeline") and size them with CSS. I've found that the CSS can be a little easier if you put the map and timeline `div` tags inside container `div` tags that can be sized separately.
+  * [http://code.google.com/p/timemap/downloads/list Download the TimeMap library] and unzip it somewhere on your server or local machine.
 
-  * [http://code.google.com/p/timemap/downloads/list Download the timemap.js script]. You may also want the images, which are just round dots color-coded to match the Google map markers in various colors. Put `timemap.js` somewhere on your server.
+  * Make an HTML page with a `<div>` tag to hold the map and another to hold the timeline. Give them unique ids (e.g. "map" and "timeline") and size them with CSS. I've found that the CSS can be a little easier if you put the map and timeline `<div>` tags inside container `<div>` tags that can be sized separately.
 
-  * In the `<head>` of your HTML page, include the Google maps script, the SIMILE script, and the TimeMap script (you'll need to get an [http://code.google.com/apis/maps/signup.html API key] from Google, of course).
+  * In the `<head>` of your HTML page, include the Google maps script (you'll need to get an [http://code.google.com/apis/maps/signup.html API key] from Google, of course), the SIMILE Timeline script, and the TimeMap script. In most cases, you'll probably want to use the file `timemap_full.pack.js` - this includes all the other scripts in the library, packed with the YUI compressor. If you're concerned about download size, you could use the `timemap.pack.js` file and include other scripts as necessary.
 
   The page should look something like this (though of course you can put other things in here besides just the map and timeline if you want):
 
@@ -21,7 +21,7 @@ But here's a quick primer that might also help:
     <title>Map Timeline Mashup</title>
     <script src="http://maps.google.com/maps?file=api&v=2&key=[API-KEY]" type="text/javascript"></script>
     <script src="http://simile.mit.edu/timeline/api/timeline-api.js" type="text/javascript"></script>
-    <script src="timemap-1.0.js" type="text/javascript"></script>
+    <script src="timemap_full.pack.js" type="text/javascript"></script>
     <link href="your-css-file.css" type="text/css" rel="stylesheet"/>
   </head>
   <body onLoad="onLoad()" onunload="GUnload();">
@@ -35,104 +35,46 @@ But here's a quick primer that might also help:
 </html>
 }}}
 
-  * Now use an `onLoad()` script like the one below to set up your map and timeline. 
+  * You may have noticed the `onLoad()` function called in the page as shown above. You'll need to write that function, either in the `<head>` of your HTML page or in a separate Javascript file. Fortunately, the only thing that function needs to do is call `timemapInit()` with the settings and data for your TimeMap. At bare minimum, you need to pass the ids of the map and timeline `<div>`s, and whatever data you'd like to load. A very simple `onLoad()` function, with one dataset containing one item, might look like this:
 
 {{{
 function onLoad() {
-
-    // Make a new TimeMap object, passing the ids of the map and timeline DOM elements.
-    // This will initialize the map.
-    var tm = new TimeMap(
-        document.getElementById("timeline"), 
-        document.getElementById("map"),
-        {}
-    );
-
-    // Make a new dataset with the id "sample" and green markers.
-    // You can load multiple datasets with different visual themes.
-    var sample = tm.createDataset("sample", {
-        title:  "Sample",
-        theme:  TimeMapDataset.greenTheme()
-    });
-
-    // Create band information for the timeline as you would for any SIMILE timeline,
-    // but using the eventSource from the dataset object.
-    // See http://simile.mit.edu/timeline/docs/ for more info.
-    var bands = [
-        Timeline.createBandInfo({
-            eventSource:    sample.eventSource,
-            width:          "100%",
-            intervalPixels: 100,
-            intervalUnit:   Timeline.DateTime.DAY
-        })
-    ];
-
-    // Initialize the timeline with the band info
-    tm.initTimeline(bands);
-
-    /*
-     * LOAD YOUR DATA HERE
-     */
-
-} // end onLoad()
+  tm = timemapInit({
+    mapId: "map",               // Id of map div element (required)
+    timelineId: "timeline",     // Id of timeline div element (required) 
+    datasets: [
+      {
+        data: {
+          type: "basic",  // Other options include "json" and "kml"
+          value: [        // Put in an array of objects
+            {
+              // The start date for the event
+              "start" : "2008-09-02",
+              // The end date for the event - omit for instant events    
+              "end" : "2008-09-30",
+              // The placemark could be a point, polyline, polygon, or overlay
+              "point" : {                   
+                "lat" : 37.872312,
+                "lon" : -122.258863
+              },
+              // by default, the title and description are shown in the info window
+              "title" : "An event at South Hall",
+              "options" : {
+                "description" : "UC Berkeley School of Information"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  });
+}
 }}}
 
-  * Where it says `LOAD YOUR DATA HERE` in the script above, you have two basic options: you can load data in JSON format, or you can load KML, which the script can parse into JSON.
-
-  To load JSON, use something like the following code:
-
-{{{
-    // Data should be an array of objects - see the code comments for format details
-    sample.loadItems(items);
-
-    // scroll to a given date - this is often necessary to make the timeline events appear
-    var latestDate = sample.eventSource.getLatestDate();
-    tm.timeline.getBand(0).setCenterVisibleDate(latestDate);
-    // this line may be necessary if your events don't appear on the timeline
-    tm.timeline.layout();
-}}}
-
-  To load KML data, use a dowload-and-callback function, like this:
-
-{{{
-    // Load a KML file with TimeStamp and TimeSpan elements
-    GDownloadUrl("sample.kml", function(result) {
-        var data = TimeMapDataset.parseKML(result);
-        sample.loadItems(data);
-        tm.timeline.getBand(0).setCenterVisibleDate(sample.eventSource.getLatestDate());
-        // this line may be necessary if your events don't appear on the timeline
-        tm.timeline.layout();
-    });
-}}}
+And that's it! There are a ton of different possible options for the `timemapInit()` function - you can find a reference in the [http://code.google.com/p/timemap/source/browse/trunk/examples/timemapinit_usage.js examples/timemapinit_usage.js file] and the various example files. If you find you can't do what you want with `timemapInit()`, you can [CustomInitScript write your own initialization script] - but you can probably do a lot of what you want without going that far.
 
 ==Troubleshooting==
 
-  * One problem I've found that can be hard to diagnose is actually the size of the divs, as set by CSS - if they are sized so that they have 0 height, for example, the javascript may throw an error. Try giving them absolute pixel sizes first, and see if you can get that working.
+  * One problem I've found that can be hard to diagnose is actually the size of the divs, as set by CSS - if they are sized so that they have 0 height, for example, the javascript may throw an error. Try giving them absolute pixel sizes and a visible background first, and see if you can get that working.
 
-  * As noted in the code above, you may need to make the timeline scroll to a given date to make the events appear. Scrolling forces it to refresh, but the way I've written the code above it will throw an error if there are no events (or if the events haven't loaded yet). If you run into problems, try replacing the `setCenterVisibleDate` line with this:
-
-{{{
-tm.timeline.layout();
-}}}
-
-  For example, this may be necessary if you want to scroll to the latest date, and the latest date is now - this is the default, so the timeline may not scroll anywhere in this case. 
-
-  * If you're loading multiple files by JSON, you may need to make sure that the _last_ callback function makes the timeline call layout() (either explicitly or by making the timeline scroll to a date). Otherwise the events may lay out funny (overlapping) on the timeline.
-
-  * Be aware that trailing commas and missing semicolons in JSON declarations can throw an error in IE. So this:
-
-{{{
-var test = {
-  title: "Test title",
-  description: "A description!", // <--- problem comma
-} // <--- missing semicolon
-}}}
-
-  needs to be this:
-
-{{{
-var test = {
-  title: "Test title",
-  description: "A description!"
-};
-}}}
+  * Loading remote JSON or KML files should be pretty simple, but if you can't get it to work, try loading static inline data first, as shown above - this will ensure that it's the remote data that's causing problems, not the rest of the code. Also note that KML must live on the same site as the page with your TimeMap in order to load - if you want to load external KML, you may need to set up some kind of proxy on your server.
