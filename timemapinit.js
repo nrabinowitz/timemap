@@ -65,8 +65,8 @@ function timemapInit(config) {
     // create the TimeMap object
     var tm = new TimeMap(
   		document.getElementById(config['timelineId']), 
-		document.getElementById(config['mapId']),
-		config['options']
+		  document.getElementById(config['mapId']),
+		  config['options']
     );
     
     // create the dataset objects
