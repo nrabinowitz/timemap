@@ -147,10 +147,10 @@ TimeMap.prototype.initTimeline = function(bands) {
     this.filters["map"] = {
         chain:[],
         on: function(item) {
-            item.placemark.show();
+            item.showPlacemark();
         },
         off: function(item) {
-            item.placemark.hide();
+            item.hidePlacemark();
             item.closeInfoWindow();
         }
     };
@@ -524,37 +524,32 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
         point = overlayBounds.getCenter();
     }
     
-     // XXX: It would be nice to handle missing placemarks better
-    if (placemark == null) return;
-    
     var options = data.options || {};
     options["title"] = title;
-    options["type"] = type;
+    options["type"] = type || "none";
     options["infoPoint"] = options["infoPoint"] || point;
     
     // create item and cross-references
     var item = new TimeMapItem(placemark, event, this, options);
+    // add event if it exists
     if (event != null) {
-        event.placemark = placemark;
         event.item = item;
-    }
-    placemark.event = event;
-    placemark.item = item;
-    
-    this.items.push(item);
-    
-    // add listener to make placemark open when event is clicked
-    GEvent.addListener(placemark, "click", function() {
-        item.openInfoWindow();
-    });
-    
-    // add placemark and event to map and timeline
-    tm.map.addOverlay(placemark);
-    // hide placemarks until the next refresh
-    placemark.hide();
-    
-    if (event != null)
         this.eventSource.add(event);
+    }
+    // add placemark if it exists
+    if (placemark != null) {
+        placemark.item = item;
+        // add listener to make placemark open when event is clicked
+        GEvent.addListener(placemark, "click", function() {
+            item.openInfoWindow();
+        });
+        // add placemark and event to map and timeline
+        tm.map.addOverlay(placemark);
+        // hide placemarks until the next refresh
+        placemark.hide();
+    }
+    // add the item to the dataset
+    this.items.push(item);
 };
 
 /*
@@ -862,7 +857,18 @@ function TimeMapItem(placemark, event, dataset, options) {
     // get functions
     this.getType = function() { return this.opts.type; };
     this.getTitle = function() { return this.opts.title; };
-    this.getInfoPoint = function() { return this.opts.infoPoint; };
+    this.getInfoPoint = function() { 
+        // default to map center if placemark not set
+        return this.opts.infoPoint || this.map.getCenter(); 
+    };
+    
+    // show/hide functions - no action if placemark is null
+    this.showPlacemark = function() {
+        if (this.placemark) this.placemark.show();
+    }
+    this.hidePlacemark = function() {
+        if (this.placemark) this.placemark.hide();
+    }
     
     // allow for custom open/close functions, set at item, dataset, or timemap level
     this.openInfoWindow =   options['openInfoWindow'] ||
@@ -879,7 +885,7 @@ function TimeMapItem(placemark, event, dataset, options) {
     this.closeInfoWindow = options['closeInfoWindow'] || TimeMapItem.closeInfoWindowBasic;
 }
 
-/*
+/**
  * Standard open info window function, using static text in map window
  */
 TimeMapItem.openInfoWindowBasic = function() {
@@ -897,7 +903,7 @@ TimeMapItem.openInfoWindowBasic = function() {
     }
 }
 
-/*
+/**
  * Open info window function using ajax-loaded text in map window
  */
 TimeMapItem.openInfoWindowAjax = function() {
@@ -918,7 +924,7 @@ TimeMapItem.openInfoWindowAjax = function() {
     }
 }
 
-/*
+/**
  * Standard close window function, using the map window
  */
 TimeMapItem.closeInfoWindowBasic = function() {
@@ -932,6 +938,7 @@ TimeMapItem.closeInfoWindowBasic = function() {
                 this.map.closeInfoWindow();
     }
 }
+ 
 
 // convenience trim function
 function trim(str) {
