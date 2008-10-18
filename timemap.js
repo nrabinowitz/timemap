@@ -302,6 +302,16 @@ TimeMap.prototype.scrollTimeline = function (years) {
 }
 
 /**
+ * Refresh the timeline, maintaining the current date
+*/
+TimeMap.prototype.refreshTimeline = function (years) {
+ 	var topband = this.timeline.getBand(0);
+ 	var centerDate = topband.getCenterVisibleDate();
+ 	this.timeline.layout();
+ 	topband.setCenterVisibleDate(centerDate);
+}
+
+/**
  * Create a legend with the current datasets, using an existing DOM element.
  * This relies on the color property being set for each dataset
  * XXX: still depends on jQuery...
@@ -350,13 +360,10 @@ function TimeMapDataset(timemap, options) {
     this.opts.theme =        options["theme"] || new TimeMapDatasetTheme({});
     // allow for other data parsers (e.g. Gregorgian)
     this.opts.dateParser =   options["dateParser"] || Timeline.DateTime.parseIso8601DateTime;
-}
-
-/*
- * Get the items for this dataset
- */
-TimeMapDataset.prototype.getItems = function() {
-    return this.items;
+    
+    // get functions
+    this.getItems = function() { return this.items; }
+    this.getTitle = function() { return this.opts.title; }
 }
 
 /**
@@ -379,7 +386,7 @@ TimeMapDataset.prototype.hide = function() {
     }
 }
 
-/*
+/**
  * Add items to map and timeline. 
  * Each item has both a timeline event and a map placemark.
  *
@@ -440,7 +447,7 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     var end = (data.end == undefined||data.end == "") ? null : 
         this.opts.dateParser(data.end);
     var instant = (data.end == undefined);
-    var eventIcon = instant ? theme.eventIcon : null;
+    var eventIcon = theme.eventIcon;
     var title = data.title;
     // allow event-less placemarks - these will be always present
     if (start != null)
@@ -521,6 +528,7 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
         // create overlay
         var overlayBounds = new GLatLngBounds(sw, ne);
         placemark = new GGroundOverlay(data.overlay["image"], overlayBounds);
+        type = "overlay";
         point = overlayBounds.getCenter();
     }
     
