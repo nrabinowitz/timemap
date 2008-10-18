@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------
+/**----------------------------------------------------------------------------
  * TimeMap Intialization Script
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
@@ -65,8 +65,8 @@ function timemapInit(config) {
     // create the TimeMap object
     var tm = new TimeMap(
   		document.getElementById(config['timelineId']), 
-		  document.getElementById(config['mapId']),
-		  config['options']
+		document.getElementById(config['mapId']),
+		config['options']
     );
     
     // create the dataset objects
@@ -112,10 +112,15 @@ function timemapInit(config) {
         if (config['dataLoadedFunction'])
             config['dataLoadedFunction'](tm);
         else {
-            if (config['scrollTo']=="earliest")
-                tm.timeline.getBand(0).setCenterVisibleDate(eventSource.getEarliestDate());
-            else if (config['scrollTo']!="now" && config['scrollTo']!=null)
-                tm.timeline.getBand(0).setCenterVisibleDate(eventSource.getLatestDate());
+            var d = new Date();
+            // make sure there are events to scroll to
+            if (eventSource.getCount() > 0) {
+                if (config['scrollTo']=="earliest")
+                    d = eventSource.getEarliestDate();
+                else if (config['scrollTo']!="now" && config['scrollTo']!=null)
+                    d = eventSource.getLatestDate();
+                tm.timeline.getBand(0).setCenterVisibleDate(d);
+            }
             tm.timeline.layout();
             // custom function to be called when data is loaded
             if (config['dataDisplayedFunction'])
