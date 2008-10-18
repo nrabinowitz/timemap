@@ -19,7 +19,8 @@
 function exposeTestFunctionNames() {
     return [
         'testItemsLoaded',
-        'testItemsLoadedInEventSource'
+        'testAllPlacemarksExist',
+        'testPolyVertices'
     ];
 }
 
@@ -28,9 +29,22 @@ function testItemsLoaded() {
     assertEquals("three items in item array", ds.getItems().length, 3);
 }
 
-function testItemsLoadedInEventSource() {
+function testAllPlacemarksExist() {
     var ds = tm.datasets["test"];
-    assertEquals("two items in eventSource", ds.eventSource.getCount(), 2);
+    var items = ds.getItems();
+    for (var x=0; x < items.length; x++) {
+        assertTrue("placemark evaluates to true", Boolean(items[x].placemark));
+        assertNotNull("placemark is not null", items[x].placemark);
+        assertNotUndefined("placemark is not undefined", items[x].placemark);
+    }
+}
+
+function testPolyVertices() {
+    var ds = tm.datasets["test"];
+    var polyline = ds.getItems()[1].placemark;
+    assertEquals("polyline has 3 vertices", polyline.getVertexCount(), 3);
+    var polygon = ds.getItems()[2].placemark;
+    assertEquals("polyline has 6 vertices", polygon.getVertexCount(), 6);
 }
 
 var tm = null;
@@ -46,32 +60,68 @@ function setUpPage() {
                 data: {
                     type: "basic",
                     value: [
-                        {
+                        { // overlay
                           "start" : "1980-01-02",
                           "end" : "1990-01-02",
-                          "point" : {
-                              "lat" : 23.456,
-                              "lon" : 12.345
+                          "overlay" : {
+                              "image" : "tile.png",
+                              "north" : 38.285990,
+                              "south" : 29.231120,
+                              "east"  : 74.523837,
+                              "west"  : 60.533227
                            },
-                          "title" : "Test Event 1",
+                          "title" : "Test Overlay",
                           "options" : {
                             "description": "Test Description"
                           }
                         },
-                        { // missing event
-                          "point" : {
-                              "lat" : 23.456,
-                              "lon" : 12.3453
-                           },
-                          "title" : "Test Event 2",
+                        { // polyline
+                          "start" : "1980-01-02",
+                          "end" : "1990-01-02",
+                          "polyline" : [
+                            {
+                              "lat" : 43.829872,
+                              "lon" : 11.154900
+                            },
+                            {
+                              "lat" : 43.730968,
+                              "lon" : 11.190605
+                            },
+                            {
+                              "lat" : 43.730473,
+                              "lon" : 11.257896
+                            }
+                           ],
+                          "title" : "Test Polyline",
                           "options" : {
                             "description": "Test Description"
                           }
                         },
-                        { // missing placemark
+                        { // polygon
                           "start" : "1980-01-02",
                           "end" : "1990-01-02",
-                          "title" : "Test Event 3",
+                          "polygon" : [
+                            {
+                              "lat" : 43.787254,
+                              "lon" : 11.226311
+                            },{
+                              "lat" : 43.801628,
+                              "lon" : 11.283646
+                            },{
+                              "lat" : 43.770649,
+                              "lon" : 11.302528
+                            },{
+                              "lat" : 43.743370,
+                              "lon" : 11.276779
+                            },{
+                              "lat" : 43.755276,
+                              "lon" : 11.230087
+                            },{
+                              "lat" : 43.787254,
+                              "lon" : 11.226311
+                            }
+                           ],
+                          "title" : "Test Polygon",
                           "options" : {
                             "description": "Test Description"
                           }
