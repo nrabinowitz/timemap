@@ -536,7 +536,13 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     options["title"] = title;
     options["type"] = type || "none";
     options["theme"] = theme;
-    options["infoPoint"] = options["infoPoint"] || point;
+    // check for custom infoPoint and convert to GLatLng
+    if (options["infoPoint"]) {
+        options["infoPoint"] = new GLatLng(
+            parseFloat(options.infoPoint['lat']), 
+            parseFloat(options.infoPoint['lon'])
+        );
+    } else options["infoPoint"] = point;
     
     // create item and cross-references
     var item = new TimeMapItem(placemark, event, this, options);
