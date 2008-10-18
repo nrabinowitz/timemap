@@ -535,6 +535,7 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     var options = data.options || {};
     options["title"] = title;
     options["type"] = type || "none";
+    options["theme"] = theme;
     options["infoPoint"] = options["infoPoint"] || point;
     
     // create item and cross-references
