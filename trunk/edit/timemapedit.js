@@ -147,13 +147,30 @@ TimeMapItem.prototype.updateEditPane = function() {
     if (!this.editdiv) return;
     else $(this.editdiv).empty();
     var item = this;
-    // add placemark - XXX: support polys!
-    $(this.editdiv).append(
-        $('<div class="itemicon"><img src="' + this.placemark.getIcon().image + '"></div>')
-            .click(function() {
-                item.dataset.timemap.map.setCenter(item.getInfoPoint());
-            })
-    );
+    // add existing placemark
+    if (this.placemark) {
+        // add placemark icon
+        switch (this.opts.type) {
+            case "marker":
+                var iconImg = '<img src="' + this.placemark.getIcon().image + '">';
+                break;
+            case "polygon":
+                var iconImg = '<div style="width:15px; height:15px; border:1px solid #CCCCCC; background:' 
+                    + this.opts.theme.color + '">';
+                break;
+            case "polyline":
+                var iconImg = '<div style="width:32px;height:32px;background:' 
+                    + this.opts.theme.color + '">' 
+                    + '<img src="http://maps.google.com/intl/en_us/mapfiles/ms/line.png"></div>';
+            // XXX: handle overlays?
+        }
+        $(this.editdiv).append(
+            $('<div class="itemicon">' + iconImg + '</div>')
+                .click(function() {
+                    item.dataset.timemap.map.setCenter(item.getInfoPoint());
+                })
+        );
+    } 
     // add title
     $(this.editdiv).append(
         $('<div class="itemtitle">' + this.getTitle() + '</div>')
@@ -164,12 +181,90 @@ TimeMapItem.prototype.updateEditPane = function() {
                 return(value);
             })
     );
+    // new placemark tools
+    if (!this.placemark) {
+        // common function: select button
+        var selectButton = function(b) {
+            $(".pmbutton").removeClass("selected");
+            if (b) $(b).addClass("selected");
+            if (item.listener) GEvent.removeListener(item.listener);
+        };
+        // common function: poly drawing
+        var startDrawing = function(poly) {
+            item.dataset.timemap.map.addOverlay(poly);
+            poly.enableDrawing();
+            poly.enableEditing({onEvent: "mouseover"});
+            poly.disableEditing({onEvent: "mouseout"});
+            GEvent.addListener(poly, "endline", function() {
+                poly.item = item;
+                item.placemark = poly;
+                item.opts.infoPoint = poly.getBounds().getCenter();
+                GEvent.addListener(poly, "click", function() {
+                    item.openInfoWindow();
+                });
+                item.updateEditPane();
+            });
+        };
+        $(this.editdiv).append(
+            $('<div class="itemlabel">Add:</div>')
+        ).append(
+            $('<div class="itempmtools" />').append(
+                // new marker button
+                $('<div id="markerbutton" class="pmbutton" />').click(function() {
+                    selectButton(this);
+                    item.listener = GEvent.addListener(item.dataset.timemap.map, "click", function(overlay, latlng) {
+                        if (latlng) {
+                            GEvent.removeListener(item.listener);
+                            item.placemark = new GMarker(latlng, {icon: item.opts.theme.icon});
+                            item.opts.type = "marker";
+                            item.enablePlacemarkEdits();
+                            item.updateEditPane();
+                        }
+                    });
+
+                })
+            ).append(
+                // new polyline button
+                $('<div id="polylinebutton" class="pmbutton" />').click(function() {
+                    selectButton(this);
+                    item.listener = GEvent.addListener(item.dataset.timemap.map, "click", function(overlay, latlng) {
+                        if (latlng) {
+                            GEvent.removeListener(item.listener);
+                            item.opts.type = "polyline";
+                            startDrawing(new GPolyline([latlng], 
+                                item.opts.theme.lineColor, 
+                                item.opts.theme.lineWeight,
+                                item.opts.theme.lineOpacity)
+                            );
+                        }
+                    });
+                })
+            ).append(
+                // new polygon button
+                $('<div id="polygonbutton" class="pmbutton" />').click(function() {
+                    selectButton(this);
+                    item.listener = GEvent.addListener(item.dataset.timemap.map, "click", function(overlay, latlng) {
+                        if (latlng) {
+                            GEvent.removeListener(item.listener);
+                            item.opts.type = "polygon";
+                            startDrawing(new GPolygon([latlng], 
+                                item.opts.theme.polygonLineColor, 
+                                item.opts.theme.polygonLineWeight,
+                                item.opts.theme.polygonLineOpacity,
+                                item.opts.theme.fillColor,
+                                item.opts.theme.fillOpacity)
+                            );
+                        }
+                    });
+                })
+            )
+        );
+    }
     // add start time
     var startDate = item.dataset.timemap.formatDate(this.event.getStart());
     $(this.editdiv).append(
         $('<div class="itemlabel">Start:</div>')
-    );
-    $(this.editdiv).append(
+    ).append(
         $('<div class="itemdate">' + startDate + '</div>')
             .editable(function(value, settings) {
                 var s = item.dataset.opts.dateParser(value);
@@ -193,8 +288,7 @@ TimeMapItem.prototype.updateEditPane = function() {
     var endDate = this.event.isInstant() ? "" : item.dataset.timemap.formatDate(this.event.getEnd());
     $(this.editdiv).append(
         $('<div class="itemlabel">End:</div>')
-    );
-    $(this.editdiv).append(
+    ).append(
         $('<div class="itemdate">' + endDate + '</div>')
             .editable(function(value, settings) {
                 var e = item.dataset.opts.dateParser(value);
@@ -286,7 +380,7 @@ TimeMapItem.prototype.disablePlacemarkEdits = function() {
             break;
         case "polyline":
         case "polygon":
-            this.placemark.disableEditing();
+            this.placemark.disableEditing({onEvent: "mouseover"});
             break;
     }
 }
@@ -298,17 +392,19 @@ TimeMapItem.prototype.disablePlacemarkEdits = function() {
  * @return (String) Formatted string
  */
 TimeMap.prototype.formatDate = function(d) {
-    // adjust granularity based on band intervals
-    var str = d.getFullYear() + '-' + (d.getMonth() + 1 ) + '-' + d.getDate();
-    var interval = this.timeline.getBand(0).getEther()._interval;
-    // show time if top interval less than a week
-    if (interval < Timeline.DateTime.WEEK) {
-        str = str + ' ' + ((d.getHours() < 10) ? "0" : "") + d.getHours() + ':' 
-            + ((d.getMinutes() < 10) ? "0" : "") + d.getMinutes();
-        // show seconds if the interval is less than a day
-        if (interval < Timeline.DateTime.DAY) {
-            str = str + ((d.getSeconds() < 10) ? "0" : "") + d.getSeconds();
+    if (d) {
+        // adjust granularity based on band intervals
+        var str = d.getFullYear() + '-' + (d.getMonth() + 1 ) + '-' + d.getDate();
+        var interval = this.timeline.getBand(0).getEther()._interval;
+        // show time if top interval less than a week
+        if (interval < Timeline.DateTime.WEEK) {
+            str = str + ' ' + ((d.getHours() < 10) ? "0" : "") + d.getHours() + ':' 
+                + ((d.getMinutes() < 10) ? "0" : "") + d.getMinutes();
+            // show seconds if the interval is less than a day
+            if (interval < Timeline.DateTime.DAY) {
+                str = str + ((d.getSeconds() < 10) ? "0" : "") + d.getSeconds();
+            }
         }
-    }
-    return str;
+        return str;
+    } else return "";
 }

@@ -71,39 +71,34 @@ http://gmaps-samples.googlecode.com/svn/trunk/poly/mymapstoolbar.html
     width: 45px;
     float: left;
 }
+#editpane .dataset .item .itempmtools {
+    height: 31px;
+}
 
-#hand_b {
+.pmbutton {
   width:31px;
   height:31px;
-  background-image: url(http://google.com/mapfiles/ms/t/Bsu.png);
+  float: left;
+  margin-right: 5px;
+  cursor: pointer;
 }
-#hand_b.selected {
-  background-image: url(http://google.com/mapfiles/ms/t/Bsd.png);
-}
- 
-#placemark_b {
-  width:31px;
-  height:31px;
+#markerbutton {
   background-image: url(http://google.com/mapfiles/ms/t/Bmu.png);
 }
-#placemark_b.selected {
+#markerbutton.selected {
   background-image: url(http://google.com/mapfiles/ms/t/Bmd.png);
 }
  
-#line_b {
-  width:31px;
-  height:31px;
+#polylinebutton {
   background-image: url(http://google.com/mapfiles/ms/t/Blu.png);
 }
-#line_b.selected {
+#polylinebutton.selected {
   background-image: url(http://google.com/mapfiles/ms/t/Bld.png);
 }
  
-#shape_b {
-  width:31px;
-  height:31px;
+#polygonbutton {
   background-image: url(http://google.com/mapfiles/ms/t/Bpu.png);
 }
-#shape_b.selected {
+#polygonbutton.selected {
   background-image: url(http://google.com/mapfiles/ms/t/Bpd.png);
 }
