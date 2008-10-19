@@ -144,25 +144,24 @@ TimeMap.prototype.initTimeline = function(bands) {
     });
     
     // filter chain for map placemarks
-    this.filters["map"] = {
-        chain:[],
-        on: function(item) {
+    this.addFilterChain("map", 
+        function(item) {
             item.showPlacemark();
         },
-        off: function(item) {
+        function(item) {
             item.hidePlacemark();
             item.closeInfoWindow();
         }
-    };
+    );
     
     // filter: hide when dataset is hidden
-    this.filters["map"].chain.push(function(item) {
+    this.addFilter("map", function(item) {
         return item.dataset.visible;
     });
     
     // filter: hide off-timeline items
     if (this.opts.hidePastFuture) {
-        this.filters["map"].chain.push(function(item) {
+        this.addFilter("map", function(item) {
             var topband = item.dataset.timemap.timeline.getBand(0);
             var maxVisibleDate = topband.getMaxVisibleDate().getTime();
             var minVisibleDate = topband.getMinVisibleDate().getTime();
@@ -184,7 +183,7 @@ TimeMap.prototype.initTimeline = function(bands) {
     }
     // filter: hide all but the present moment - overridden by hidePastFuture
     else if (this.opts.showMomentOnly) {
-        this.filters["map"].chain.push(function(item) {
+        this.addFilter("map", function(item) {
             var topband = item.dataset.timemap.timeline.getBand(0);
             var momentDate = topband.getCenterVisibleDate().getTime();
             if (item.event != null) {
@@ -220,10 +219,10 @@ TimeMap.prototype.initTimeline = function(bands) {
 /**
  * Update items, hiding or showing according to filters
  *
- * @param {String} target   What to update, either "map" or "timeline"
+ * @param {String} fid      Filter chain to update on
  */
-TimeMap.prototype.filter = function(target) {
-    var filters = this.filters[target];
+TimeMap.prototype.filter = function(fid) {
+    var filters = this.filters[fid];
     // if no filters exist, forget it
     if (!filters || !filters.chain || filters.chain.length == 0) return;
     // run items through filter
@@ -243,6 +242,52 @@ TimeMap.prototype.filter = function(target) {
             }
         }
     } 
+}
+
+/**
+ * Add a new filter chain
+ *
+ * @param {String} fid      Id of the filter chain
+ * @param {Function} fon    Function to run on an item if filter is true
+ * @param {Function} foff   Function to run on an item if filter is false
+ */
+TimeMap.prototype.addFilterChain = function(fid, fon, foff) {
+    this.filters[fid] = {
+        chain:[],
+        on: fon,
+        off: foff
+    };
+}
+
+/**
+ * Remove a filter chain
+ *
+ * @param {String} fid      Id of the filter chain
+ */
+TimeMap.prototype.removeFilterChain = function(fid, on, off) {
+    this.filters[fid] = null;
+}
+
+/**
+ * Add a function to a filter chain
+ *
+ * @param {String} fid      Id of the filter chain
+ * @param {Function} f      Function to add
+ */
+TimeMap.prototype.addFilter = function(fid, f) {
+    if (this.filters[fid] && this.filters[fid].chain) 
+        this.filters[fid].chain.push(f);
+}
+
+/**
+ * Remove a function from a filter chain
+ *
+ * @param {String} fid      Id of the filter chain
+ * XXX: Support index here
+ */
+TimeMap.prototype.removeFilter = function(fid) {
+    if (this.filters[fid] && this.filters[fid].chain) 
+        this.filters[fid].chain.pop();
 }
 
 /**
@@ -877,12 +922,21 @@ function TimeMapItem(placemark, event, dataset, options) {
         return this.opts.infoPoint || this.map.getCenter(); 
     };
     
+    // items initialize hidden
+    this.visible = false;
+    
     // show/hide functions - no action if placemark is null
     this.showPlacemark = function() {
-        if (this.placemark) this.placemark.show();
+        if (this.placemark) {
+            this.placemark.show();
+            this.visible = true;
+        }
     }
     this.hidePlacemark = function() {
-        if (this.placemark) this.placemark.hide();
+        if (this.placemark) {
+            this.placemark.hide();
+            this.visible = false;
+        }
     }
     
     // allow for custom open/close functions, set at item, dataset, or timemap level
