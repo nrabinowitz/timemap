@@ -64,7 +64,7 @@ function TimeMap(tElement, mElement, options) {
     
     // set defaults for options
     // other options can be set directly on the map or timeline
-    this.opts = options || {}; // make sure the options object isn't null
+    this.opts = options || {};   // make sure the options object isn't null
     this.opts.mapCenter =        options['mapCenter'] || new GLatLng(0,0); 
     this.opts.mapZoom =          options['mapZoom'] || 0;
     this.opts.mapType =          options['mapType'] || G_PHYSICAL_MAP;
@@ -346,33 +346,6 @@ TimeMap.prototype.scrollTimeline = function (years) {
  	topband.setCenterVisibleDate(centerDate);
 }
 
-/**
- * Refresh the timeline, maintaining the current date
-*/
-TimeMap.prototype.refreshTimeline = function (years) {
- 	var topband = this.timeline.getBand(0);
- 	var centerDate = topband.getCenterVisibleDate();
- 	this.timeline.layout();
- 	topband.setCenterVisibleDate(centerDate);
-}
-
-/**
- * Create a legend with the current datasets, using an existing DOM element.
- * This relies on the color property being set for each dataset
- * XXX: still depends on jQuery...
- *
- * @param {String} legendId        The id of the legend element.
- */
-TimeMap.prototype.createLegend = function(legendId) {
-    legendId = "#"+legendId;
-    for (id in this.datasets) {
-        var dataset = this.datasets[id];
-        var colorBox = '<div style="float:left;margin-right:5px;border:1px solid #000;width:12px;height:12px;background:' + dataset.opts.theme.color + '">&nbsp;</div>';
-        var divHtml = '<div class="legenditem">' + colorBox+dataset.title + '</div>';
-        $(legendId).append(divHtml);
-    }
-}
-
 /*----------------------------------------------------------------------------
  * TimeMapDataset Class - holds references to items and visual themes
  *---------------------------------------------------------------------------*/
@@ -610,6 +583,8 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     }
     // add the item to the dataset
     this.items.push(item);
+    // return the item object
+    return item;
 };
 
 /*

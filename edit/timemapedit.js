@@ -4,7 +4,9 @@
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
  * Functions in this file offer tools for editing a timemap dataset in
  * a browser-based GUI. Call tm.enterEditMode() and tm.closeEditMode() 
- * to turn the tools on and off.
+ * to turn the tools on and off; set configuration options in 
+ * tm.opts.editOpts (set as {options{editOpts{...}} in timemapInit()).
+ * 
  * 
  * Depends on:
  * jQuery: jquery.com
@@ -17,8 +19,20 @@
   * Add editing tools to the timemap.
   *
   * @param (String) editPaneId      ID of DOM element to be the edit pane.
+  * @param (Object) options         Options for edit mode - may also be set in tm.opts.editMode
+  *     (String) saveTarget             URL for ajax save submissions (XXX:unsupported)
+  *     (String) saveMode               Either "explicit" (default - you push a button) or "implicit"
+  *                                     (save with every change) (XXX:unsupported)
   */
-TimeMap.prototype.enterEditMode = function(editPaneId) {
+TimeMap.prototype.enterEditMode = function(editPaneId, options) {
+    // set default options if none have been specified
+    if (!this.opts.editOpts) {
+        var opts = options || {};
+        opts.saveTarget = opts.saveTarget || "";
+        opts.saveMode =   opts.saveMode || "explicit";
+        this.opts.editOpts = opts;
+    }
+    // create edit pane
     if (!this.editPane) {
         // default id
         if (!editPaneId) editPaneId = 'editpane';
@@ -97,7 +111,7 @@ TimeMap.prototype.addEditDataset = function(ds, el) {
     // make the dataset div
     var dsdiv = $('<div class="dataset" />').get(0);
     // save reference
-    ds.editdiv = dsdiv;
+    ds.editpane = dsdiv;
     ds.updateEditPane();
     $(el).append(dsdiv);
 }
@@ -106,11 +120,19 @@ TimeMap.prototype.addEditDataset = function(ds, el) {
  * Update the edit pane version of a timemap dataset.
  */
 TimeMapDataset.prototype.updateEditPane = function() {
-    if (!this.editdiv) return;
-    else $(this.editdiv).empty();
+    if (!this.editpane) return;
+    else $(this.editpane).empty();
     var ds = this;
+    // add new item button
+    $(this.editpane).append(
+        $('<div class="dsadditem">add new item</div>')
+            .click(function() {
+                var item = ds.loadItem({title:"Untitled Item"});
+                ds.addEditItem(item, ds.editpane);
+            })
+    );
     // add title
-    $(this.editdiv).append(
+    $(this.editpane).append(
         $('<div class="dstitle">' + this.getTitle() + '</div>')
             .editable(function(value, settings) { 
                 ds.opts.title = value;
@@ -120,7 +142,7 @@ TimeMapDataset.prototype.updateEditPane = function() {
     // items
     var items = this.getItems();
     for (var x=0; x < items.length; x++) {
-        this.addEditItem(items[x], this.editdiv);
+        this.addEditItem(items[x], this.editpane);
     }
 }
 
@@ -134,7 +156,7 @@ TimeMapDataset.prototype.addEditItem = function(item, el) {
     // make the item div
     var itemdiv = $('<div class="item" />').get(0);
     // save reference
-    item.editdiv = itemdiv;
+    item.editpane = itemdiv;
     // update div
     item.updateEditPane();
     $(el).append(itemdiv);
@@ -144,8 +166,8 @@ TimeMapDataset.prototype.addEditItem = function(item, el) {
  * Update the edit pane version of a timemap item.
  */
 TimeMapItem.prototype.updateEditPane = function() {
-    if (!this.editdiv) return;
-    else $(this.editdiv).empty();
+    if (!this.editpane) return;
+    else $(this.editpane).empty();
     var item = this;
     // add existing placemark
     if (this.placemark) {
@@ -164,7 +186,7 @@ TimeMapItem.prototype.updateEditPane = function() {
                     + '<img src="http://maps.google.com/intl/en_us/mapfiles/ms/line.png"></div>';
             // XXX: handle overlays?
         }
-        $(this.editdiv).append(
+        $(this.editpane).append(
             $('<div class="itemicon">' + iconImg + '</div>')
                 .click(function() {
                     item.dataset.timemap.map.setCenter(item.getInfoPoint());
@@ -172,11 +194,11 @@ TimeMapItem.prototype.updateEditPane = function() {
         );
     } 
     // add title
-    $(this.editdiv).append(
+    $(this.editpane).append(
         $('<div class="itemtitle">' + this.getTitle() + '</div>')
             .editable(function(value, settings) { 
                 item.opts.title = value;
-                item.event._text = value;
+                if (item.event) item.event._text = value;
                 item.dataset.timemap.refreshTimeline();
                 return(value);
             })
@@ -205,7 +227,7 @@ TimeMapItem.prototype.updateEditPane = function() {
                 item.updateEditPane();
             });
         };
-        $(this.editdiv).append(
+        $(this.editpane).append(
             $('<div class="itemlabel">Add:</div>')
         ).append(
             $('<div class="itempmtools" />').append(
@@ -261,15 +283,21 @@ TimeMapItem.prototype.updateEditPane = function() {
         );
     }
     // add start time
-    var startDate = item.dataset.timemap.formatDate(this.event.getStart());
-    $(this.editdiv).append(
+    var startDate = this.event ?
+        item.dataset.timemap.formatDate(this.event.getStart()) : "";
+    $(this.editpane).append(
         $('<div class="itemlabel">Start:</div>')
     ).append(
         $('<div class="itemdate">' + startDate + '</div>')
             .editable(function(value, settings) {
                 var s = item.dataset.opts.dateParser(value);
                 // check for invalid dates
-                if (s == null) return item.dataset.timemap.formatDate(item.event.getStart());
+                if (s == null) {
+                    return item.event ? 
+                        item.dataset.timemap.formatDate(item.event.getStart()) : "";
+                }
+                // create the event if it doesn't exist
+                if (!item.event) item.createEvent(s);
                 if (!item.event.isInstant()) {
                     var dur = item.event.getEnd() - item.event.getStart();
                 }
@@ -282,11 +310,12 @@ TimeMapItem.prototype.updateEditPane = function() {
                 }
                 item.dataset.timemap.refreshTimeline();
                 return(value);
-            })
+            }, { placeholder: '<span class="missingelement">(add start date)</span>' })
     );
     // add end time
-    var endDate = this.event.isInstant() ? "" : item.dataset.timemap.formatDate(this.event.getEnd());
-    $(this.editdiv).append(
+    var endDate = this.event && !this.event.isInstant() ? 
+        item.dataset.timemap.formatDate(this.event.getEnd()) : "";
+    $(this.editpane).append(
         $('<div class="itemlabel">End:</div>')
     ).append(
         $('<div class="itemdate">' + endDate + '</div>')
@@ -294,8 +323,11 @@ TimeMapItem.prototype.updateEditPane = function() {
                 var e = item.dataset.opts.dateParser(value);
                 // check for invalid dates
                 if (e == null) {
-                    return item.event.isInstant() ? "" : item.dataset.timemap.formatDate(item.event.getEnd());
+                    return item.event && !item.event.isInstant() ?
+                        item.dataset.timemap.formatDate(item.event.getEnd()) : "";
                 }
+                // create the event if it doesn't exist
+                if (!item.event) item.createEvent(e);
                 // set new start date
                 item.event._end = item.event._earliestEnd = e;
                 if (e < item.event.getStart()) {
@@ -310,7 +342,7 @@ TimeMapItem.prototype.updateEditPane = function() {
             }, { placeholder: '<span class="missingelement">(add end date)</span>' })
     );
     // add description
-    $(this.editdiv).append(
+    $(this.editpane).append(
         $('<div class="itemdesc">' + this.opts.description + '</div>')
             .editable(function(value, settings) {
                 item.opts.infoHtml = false;
@@ -319,6 +351,7 @@ TimeMapItem.prototype.updateEditPane = function() {
             }, { 
                 type: 'textarea',
                 rows: 5,
+                onblur: 'ignore',
                 cancel: 'Cancel',
                 submit: 'OK',
                 placeholder: '<span class="missingelement">(add description)</span>'
@@ -383,6 +416,37 @@ TimeMapItem.prototype.disablePlacemarkEdits = function() {
             this.placemark.disableEditing({onEvent: "mouseover"});
             break;
     }
+}
+
+/**
+ * Create a new event for the item.
+ * XXX: Should this be in the main library?
+ * 
+ * @param (Date) s      Start date for the event
+ * @param (Date) e      (Optional) End date for the event
+ */
+TimeMapItem.prototype.createEvent = function(s, e) {
+    var instant = (e == undefined);
+    var eventIcon = this.opts.theme.eventIcon;
+    var title = this.getTitle();
+    // create event
+    var event = new Timeline.DefaultEventSource.Event(s, e, null, null, instant, title, 
+        null, null, null, this.opts.theme.eventIcon, this.opts.theme.eventColor, null);
+    // add references
+    event.item = this;
+    this.event = event;
+    this.dataset.eventSource.add(event);
+}
+
+/**
+ * Refresh the timeline, maintaining the current date
+*/
+TimeMap.prototype.refreshTimeline = function (years) {
+ 	var topband = this.timeline.getBand(0);
+ 	var centerDate = topband.getCenterVisibleDate();
+    topband.getEventPainter().getLayout()._laidout = false;
+ 	this.timeline.layout();
+ 	topband.setCenterVisibleDate(centerDate);
 }
 
 /**
