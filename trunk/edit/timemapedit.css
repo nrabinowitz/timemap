@@ -1,18 +1,17 @@
 /*
-Styles for editing tools, largely taken from 
-http://gmaps-samples.googlecode.com/svn/trunk/poly/mymapstoolbar.html
+Styles for editing tools
 */
 
 #editpane {
     position: absolute;
     top: 0px;
     left: 0px;
-    width: 300px;
-    height: 500px;
-    overflow: auto;
+    width: 350px;
+    height: 550px;
     padding: 5px;
     margin: 5px;
     background: #FFFFFF;
+    overflow: hidden;
     z-index: 1002;
     border: 1px solid #CCCCCC;
 }
@@ -22,14 +21,16 @@ http://gmaps-samples.googlecode.com/svn/trunk/poly/mymapstoolbar.html
     background-image: url(http://maps.google.com/intl/en_us/mapfiles/iw_close.gif);
     width: 12px;
     height: 12px;
+    font-size: 10px;
     cursor: pointer;
 }
 #editresize {
     position: absolute; 
-    right: 2px; 
+    right: 5px; 
     bottom: 2px;
     width: 12px;
     height: 12px;
+    font-size: 10px;
     background: #CCCCCC;
     cursor: pointer;
 }
@@ -44,16 +45,32 @@ http://gmaps-samples.googlecode.com/svn/trunk/poly/mymapstoolbar.html
     margin: 0px;
     font-weight: normal;
     font-size: 1.2em;
+    cursor: pointer;
 }
+#dspane {
+    height: 90%;
+    overflow: auto;
+}
+
 #editpane .dataset {
     margin: 5px 5px 10px 5px;
 }
 #editpane .dataset .dstitle {
     font-weight: bold;
     border-bottom: 1px solid #CCCCCC;
+    cursor: pointer;
 }
+#editpane .dataset .dsadditem {
+    color: #0000CC;
+    cursor: pointer;
+    float: right;
+    font-size: 0.8em;
+    line-height: 1.2em;
+}
+
 #editpane .dataset .item {
     margin-top: .5em;
+    padding-bottom: 1em;
     font-size: 0.8em;
 }
 #editpane .dataset .item .itemicon {
@@ -62,18 +79,30 @@ http://gmaps-samples.googlecode.com/svn/trunk/poly/mymapstoolbar.html
 }
 #editpane .dataset .item .itemtitle {
     font-weight: bold;
+    cursor: pointer;
 }
 #editpane .dataset .item .itemdate {
     color: #0000CC;
+    cursor: pointer;
 }
 #editpane .dataset .item .itemlabel {
     color: #999999;
     width: 45px;
     float: left;
 }
+#editpane .dataset .item .itemdesc {
+    cursor: pointer;
+}
 #editpane .dataset .item .itempmtools {
     height: 31px;
 }
+#editpane .dataset .item  .missingelement {
+    color: #CCCCCC;
+    font-style: italic;
+    font-size: 0.8em;
+    line-height: 1.6em;
+}
+
 
 .pmbutton {
   width:31px;
