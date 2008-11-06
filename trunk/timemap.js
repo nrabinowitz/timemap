@@ -474,81 +474,116 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
                                                       eventIcon, theme.eventColor, null);
     else var event = null;
     
-    // create map placemark
-    var placemark = null;
-    var type = "";
-    var point = null;
-    // point placemark
-    if ("point" in data) {
-        point = new GLatLng(
-            parseFloat(data.point["lat"]), 
-            parseFloat(data.point["lon"])
-        );
-        // add point to visible map bounds
-        if (tm.opts.centerMapOnItems) {
-            tm.mapBounds.extend(point);
-        }
-        markerIcon = ("icon" in data) ? data["icon"] : theme.icon;
-        placemark = new GMarker(point, { icon: markerIcon });
-        type = "marker";
-        point = placemark.getLatLng();
-    } 
-    // polyline and polygon placemarks
-    else if ("polyline" in data || "polygon" in data) {
-        var points = [];
-        if ("polyline" in data)
-            var line = data.polyline;
-        else var line = data.polygon;
-        for (var x=0; x<line.length; x++) {
+    // internal function: create map placemark
+    // takes a data object (could be full data, could be just placemark)
+    // returns an object with {placemark, type, point}
+    var createPlacemark = function(pdata) {
+        var placemark = null, type = "", point = null;
+        // point placemark
+        if ("point" in pdata) {
             point = new GLatLng(
-                parseFloat(line[x]["lat"]), 
-                parseFloat(line[x]["lon"])
+                parseFloat(pdata.point["lat"]), 
+                parseFloat(pdata.point["lon"])
             );
-            points.push(point);
             // add point to visible map bounds
             if (tm.opts.centerMapOnItems) {
                 tm.mapBounds.extend(point);
             }
+            markerIcon = ("icon" in pdata) ? pdata["icon"] : theme.icon;
+            placemark = new GMarker(point, { icon: markerIcon });
+            type = "marker";
+            point = placemark.getLatLng();
         }
-        if ("polyline" in data) {
-            placemark = new GPolyline(points, 
-                                      theme.lineColor, 
-                                      theme.lineWeight,
-                                      theme.lineOpacity);
-            type = "polyline";
-            point = placemark.getVertex(Math.floor(placemark.getVertexCount()/2));
-        } else {
-            placemark = new GPolygon(points, 
-                                     theme.polygonLineColor, 
-                                     theme.polygonLineWeight,
-                                     theme.polygonLineOpacity,
-                                     theme.fillColor,
-                                     theme.fillOpacity);
-            type = "polygon";
-            point = placemark.getBounds().getCenter();
+        // polyline and polygon placemarks
+        else if ("polyline" in pdata || "polygon" in pdata) {
+            var points = [];
+            if ("polyline" in pdata)
+                var line = pdata.polyline;
+            else var line = pdata.polygon;
+            for (var x=0; x<line.length; x++) {
+                point = new GLatLng(
+                    parseFloat(line[x]["lat"]), 
+                    parseFloat(line[x]["lon"])
+                );
+                points.push(point);
+                // add point to visible map bounds
+                if (tm.opts.centerMapOnItems) {
+                    tm.mapBounds.extend(point);
+                }
+            }
+            if ("polyline" in pdata) {
+                placemark = new GPolyline(points, 
+                                          theme.lineColor, 
+                                          theme.lineWeight,
+                                          theme.lineOpacity);
+                type = "polyline";
+                point = placemark.getVertex(Math.floor(placemark.getVertexCount()/2));
+            } else {
+                placemark = new GPolygon(points, 
+                                         theme.polygonLineColor, 
+                                         theme.polygonLineWeight,
+                                         theme.polygonLineOpacity,
+                                         theme.fillColor,
+                                         theme.fillOpacity);
+                type = "polygon";
+                point = placemark.getBounds().getCenter();
+            }
+        } 
+        // ground overlay placemark
+        else if ("overlay" in pdata) {
+            var sw = new GLatLng(
+                parseFloat(pdata.overlay["south"]), 
+                parseFloat(pdata.overlay["west"])
+            );
+            var ne = new GLatLng(
+                parseFloat(pdata.overlay["north"]), 
+                parseFloat(pdata.overlay["east"])
+            );
+            // add to visible bounds
+            if (tm.opts.centerMapOnItems) {
+                tm.mapBounds.extend(sw);
+                tm.mapBounds.extend(ne);
+            }
+            // create overlay
+            var overlayBounds = new GLatLngBounds(sw, ne);
+            placemark = new GGroundOverlay(pdata.overlay["image"], overlayBounds);
+            type = "overlay";
+            point = overlayBounds.getCenter();
         }
-    } 
-    // ground overlay placemark
-    else if ("overlay" in data) {
-        var sw = new GLatLng(
-            parseFloat(data.overlay["south"]), 
-            parseFloat(data.overlay["west"])
-        );
-        var ne = new GLatLng(
-            parseFloat(data.overlay["north"]), 
-            parseFloat(data.overlay["east"])
-        );
-        // add to visible bounds
-        if (tm.opts.centerMapOnItems) {
-            tm.mapBounds.extend(sw);
-            tm.mapBounds.extend(ne);
-        }
-        // create overlay
-        var overlayBounds = new GLatLngBounds(sw, ne);
-        placemark = new GGroundOverlay(data.overlay["image"], overlayBounds);
-        type = "overlay";
-        point = overlayBounds.getCenter();
+        return {
+            "placemark": placemark,
+            "type": type,
+            "point": point
+        };
     }
+    
+    // create placemark or placemarks
+    var placemark = [], pdataArr = [], pdata=null, type = "", point = null;
+    // array of placemark objects
+    if ("placemarks" in data) pdataArr = data["placemarks"];
+    else {
+        // we have one or more single placemarks
+        var types = ["point", "polyline", "polygon", "overlay"];
+        for (var i=0; i<types.length; i++) {
+            if (types[i] in data) {
+                pdata = {};
+                pdata[types[i]] = data[types[i]];
+                pdataArr.push(pdata);
+            }
+        }
+    }
+    if (pdataArr) {
+        for (var i=0; i<pdataArr.length; i++) {
+            // create the placemark
+            var p = createPlacemark(pdataArr[i]);
+            // take the first point and type as a default
+            if (!point) point = p.point;
+            if (!type) type = p.type;
+            placemark.push(p.placemark);
+        }
+    }
+    // override type for arrays
+    if (placemark.length > 1) type = "array";
     
     var options = data.options || {};
     options["title"] = title;
@@ -569,17 +604,19 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
         event.item = item;
         this.eventSource.add(event);
     }
-    // add placemark if it exists
-    if (placemark != null) {
-        placemark.item = item;
-        // add listener to make placemark open when event is clicked
-        GEvent.addListener(placemark, "click", function() {
-            item.openInfoWindow();
-        });
-        // add placemark and event to map and timeline
-        tm.map.addOverlay(placemark);
-        // hide placemarks until the next refresh
-        placemark.hide();
+    // add placemark(s) if any exist
+    if (placemark.length > 0) {
+        for (var i=0; i<placemark.length; i++) {
+            placemark[i].item = item;
+            // add listener to make placemark open when event is clicked
+            GEvent.addListener(placemark[i], "click", function() {
+                item.openInfoWindow();
+            });
+            // add placemark and event to map and timeline
+            tm.map.addOverlay(placemark[i]);
+            // hide placemarks until the next refresh
+            placemark[i].hide();
+        }
     }
     // add the item to the dataset
     this.items.push(item);
@@ -860,7 +897,7 @@ TimeMapDataset.yellowTheme = function(options) {
  * Create a new TimeMap item with a map placemark and a timeline event
  *
  * @constructor
- * @param {placemark} placemark     The map placemark (one of GMarker, GPolyline, or GPolygon)
+ * @param {placemark} placemark     Placemark or array of placemarks (GMarker, GPolyline, etc)
  * @param {Event} event             The timeline event
  * @param {TimeMapDataset} dataset  Reference to the parent dataset object
  * @param {Object} options          A container for optional arguments:
@@ -875,10 +912,14 @@ TimeMapDataset.yellowTheme = function(options) {
  */
 function TimeMapItem(placemark, event, dataset, options) {
     // initialize vars
-    this.placemark = placemark;
     this.event =     event;
     this.dataset =   dataset;
     this.map =       dataset.timemap.map;
+    
+    // initialize placemark(s) with some type juggling
+    if (placemark && isArray(placemark) && placemark.length == 0) placemark = null;
+    if (placemark && placemark.length == 1) placemark = placemark[0];
+    this.placemark = placemark;
     
     // set defaults for options
     this.opts = options || {};
@@ -903,13 +944,19 @@ function TimeMapItem(placemark, event, dataset, options) {
     // show/hide functions - no action if placemark is null
     this.showPlacemark = function() {
         if (this.placemark) {
-            this.placemark.show();
+            if (this.getType() == "array") {
+                for (var i=0; i<this.placemark.length; i++)
+                    this.placemark[i].show();
+            } else this.placemark.show();
             this.visible = true;
         }
     }
     this.hidePlacemark = function() {
         if (this.placemark) {
-            this.placemark.hide();
+            if (this.getType() == "array") {
+                for (var i=0; i<this.placemark.length; i++)
+                    this.placemark[i].hide();
+            } else this.placemark.hide();
             this.visible = false;
         }
     }
@@ -987,4 +1034,10 @@ TimeMapItem.closeInfoWindowBasic = function() {
 // convenience trim function
 function trim(str) {
     return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+}
+
+// convenience array tester
+function isArray(o) {   
+    return o && !(o.propertyIsEnumerable('length')) && 
+        typeof o === 'object' && typeof o.length === 'number';
 }
