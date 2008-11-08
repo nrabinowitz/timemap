@@ -29,6 +29,7 @@
  *   {GLatLng} mapCenter            Point for map center
  *   {Number} mapZoom               Intial map zoom level
  *   {GMapType} mapType             The maptype for the map
+ *   {Array} mapTypes               The set of maptypes available for the map
  *   {Boolean} showMapTypeCtrl      Whether to display the map type control
  *   {Boolean} showMapCtrl          Whether to show map navigation control
  *   {Boolean} hidePastFuture       Whether to hide map placemarks for events not visible on timeline
@@ -54,6 +55,7 @@ function TimeMap(tElement, mElement, options) {
     this.opts.mapCenter =        options['mapCenter'] || new GLatLng(0,0); 
     this.opts.mapZoom =          options['mapZoom'] || 0;
     this.opts.mapType =          options['mapType'] || G_PHYSICAL_MAP;
+    this.opts.mapTypes =         options['mapTypes'] || [G_NORMAL_MAP, G_SATELLITE_MAP, G_PHYSICAL_MAP];
     this.opts.syncBands =        ('syncBands' in options) ? options['syncBands'] : true;
     this.opts.showMapTypeCtrl =  ('showMapTypeCtrl' in options) ? options['showMapTypeCtrl'] : true;
     this.opts.showMapCtrl =      ('showMapCtrl' in options) ? options['showMapCtrl'] : true;
@@ -68,8 +70,16 @@ function TimeMap(tElement, mElement, options) {
             this.map.addControl(new GLargeMapControl());
         if (this.opts.showMapTypeCtrl)
             this.map.addControl(new GMapTypeControl());
-        this.map.addMapType(G_PHYSICAL_MAP);
-        this.map.removeMapType(G_HYBRID_MAP);
+        // drop all existing types
+        for (var i=G_DEFAULT_MAP_TYPES.length-1; i>0; i--) {
+            this.map.removeMapType(G_DEFAULT_MAP_TYPES[i]);
+        }
+        // you can't remove the last maptype, so add a new one first
+        this.map.addMapType(this.opts.mapTypes[0]);
+        this.map.removeMapType(G_DEFAULT_MAP_TYPES[0]);
+        // add the rest of the new types
+        for (var i=1; i<this.opts.mapTypes.length; i++)
+            this.map.addMapType(this.opts.mapTypes[i]);
         this.map.enableDoubleClickZoom();
         this.map.enableScrollWheelZoom();
         this.map.enableContinuousZoom();
