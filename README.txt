@@ -5,21 +5,10 @@ The TimeMap library is intended to sync a SIMILE Timeline with a Google Map.
 Dependencies: Google Maps API v2, SIMILE Timeline v1.2
 Thanks to Jörn Clausen (http://www.oe-files.de) for initial concept and code.
 
------------------------------------------------------------------------------
-TimeMap is copyright 2008 Nick Rabinowitz.
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details. 
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see http://www.gnu.org/licenses/.
------------------------------------------------------------------------------
+/*! 
+ * TimeMap Copyright 2008 Nick Rabinowitz.
+ * Licensed under the MIT License (see LICENSE.txt)
+ */
 
 Files in the project, in order of importance:
 
@@ -38,6 +27,7 @@ Documentation
 - README.txt       This file
 
 Other stuff
+- edit/            Semi-experimental editing UI - depends on jQuery
 - examples/        Example HTML code
 - images/          Simple icons for timeline events
 - tests/           jsUnit tests
