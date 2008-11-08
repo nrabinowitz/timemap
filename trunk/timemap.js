@@ -1,7 +1,6 @@
 /*! 
  * TimeMap Copyright 2008 Nick Rabinowitz.
- * Licensed under the GNU General Public License
- * (see LICENSE.txt or http://www.gnu.org/licenses)
+ * Licensed under the MIT License (see LICENSE.txt)
  */
 
 /**---------------------------------------------------------------------------
