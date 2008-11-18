@@ -14,10 +14,11 @@
  * 
  * 
  * Depends on:
+ * json2: lib/json2.pack.js
  * jQuery: jquery.com
  * jqModal: http://dev.iceburg.net/jquery/jqModal/
  * jeditable: http://www.appelsiini.net/projects/jeditable
- * Sorry for all the bloat, bu jQuery makes UI development much easier.
+ * Sorry for all the bloat, but jQuery makes UI development much easier.
  *---------------------------------------------------------------------------*/
  
  /**
@@ -43,14 +44,14 @@ TimeMap.prototype.enterEditMode = function(editPaneId, options) {
         if (!editPaneId) editPaneId = 'editpane';
         // look for existing div
         editPane = $('#' + editPaneId).get(0);
+        var tmo = this;
         if (!editPane) {
             // make it from string
             editPane = $('<div id="' + editPaneId + '" class="jqmWindow"></div>').get(0);
-            var o = this;
             $(editPane).append(
                 $('<div class="edittitle jqDrag" />').append(
                     $('<div id="editclose" />').click(function() {
-                        o.closeEditMode();
+                        tmo.closeEditMode();
                     })
                 ).append($('<h3>Edit Datasets</h3>'))
             ).append($('<div id="editresize" class="jqResize" />'));
@@ -59,6 +60,17 @@ TimeMap.prototype.enterEditMode = function(editPaneId, options) {
         // make a holder for datasets
         var dsPane = $('<div id="dspane" />').get(0);
         $(editPane).append(dsPane);
+        // make a save button
+        var saveButton = $('<div id="editsave"/>').append(
+            $('<input type="button" value="Save Changes" />').click(function() {
+                if (tmo.opts.editOpts.saveTarget) {
+                    // send the datasets to the server, serialized
+                    $.post(tmo.opts.editOpts.saveTarget, 
+                           {'datasets':JSON.stringify( tmo.datasets)});
+                }
+            })
+        );
+        $(editPane).append(saveButton);
         // save for later
         this.editPane = editPane;
         this.dsPane = dsPane;
@@ -445,13 +457,69 @@ TimeMapItem.prototype.createEvent = function(s, e) {
 
 /**
  * Refresh the timeline, maintaining the current date
-*/
-TimeMap.prototype.refreshTimeline = function (years) {
- 	var topband = this.timeline.getBand(0);
- 	var centerDate = topband.getCenterVisibleDate();
+ */
+TimeMap.prototype.refreshTimeline = function () {
+    var topband = this.timeline.getBand(0);
+    var centerDate = topband.getCenterVisibleDate();
     topband.getEventPainter().getLayout()._laidout = false;
- 	this.timeline.layout();
- 	topband.setCenterVisibleDate(centerDate);
+    this.timeline.layout();
+    topband.setCenterVisibleDate(centerDate);
+}
+
+/**
+ * Clean up dataset into a nice object for serialization
+ * This is called automatically by the JSON.stringify() function
+ */
+TimeMapDataset.prototype.toJSON = function() {
+    // any additional info (e.g. a database key) should be set in opts.saveOpts
+    var data = {
+        'title': this.getTitle(),
+        'saveOpts': this.opts.saveOpts,
+        'items': this.getItems()
+    };
+    return data;
+}
+
+/**
+ * Clean up item into a nice object for serialization
+ * This is called automatically by the JSON.stringify() function
+ */
+TimeMapItem.prototype.toJSON = function() {
+    // any additional info (e.g. a database key) should be set in opts.saveOpts
+    var data = {
+        'title': this.getTitle(),
+        'saveOpts': this.opts.saveOpts
+    };
+    // add event info
+    if (this.event) {
+        data['start'] = this.event.getStart();
+        if (!this.event.isInstant()) {
+            data['end'] = this.event.getEnd();
+        }
+    }
+    // add placemark info (only single placemarks supported at the moment)
+    if (this.placemark) {
+        var makePoint = function(latLng) {
+            return {
+                'lat': latLng.lat(),
+                'lon': latLng.lng()
+            }
+        }
+        switch (this.getType()) {
+            case "marker":
+                data['point'] = makePoint(this.placemark.getLatLng());
+                break;
+            case "polyline":
+            case "polygon":
+                line = [];
+                for (var x=0; x<this.placemark.getVertexCount(); x++) {
+                    line.push(makePoint(this.placemark.getVertex(x)));
+                }
+                data[this.getType()] = line;
+                break;
+        }
+    }
+    return data;
 }
 
 /**
