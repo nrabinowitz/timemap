@@ -41,7 +41,7 @@ Metaweb.read = function(q, f) {
     envelope = {qname: {query: q}}
 
     // Serialize and encode the query object
-    var querytext = encodeURIComponent(JSON.serialize(envelope));
+    var querytext = encodeURIComponent(JSON.stringify(envelope));
 
     // Build the URL using encoded query text and the callback name
     var url = Metaweb.HOST + Metaweb.QUERY_SERVICE +  
