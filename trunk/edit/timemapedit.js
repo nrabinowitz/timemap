@@ -469,6 +469,7 @@ TimeMap.prototype.refreshTimeline = function () {
 /**
  * Clean up dataset into a nice object for serialization
  * This is called automatically by the JSON.stringify() function
+ * XXX: Does this need to be loadable into timemap_init?
  */
 TimeMapDataset.prototype.toJSON = function() {
     // any additional info (e.g. a database key) should be set in opts.saveOpts
@@ -488,7 +489,10 @@ TimeMapItem.prototype.toJSON = function() {
     // any additional info (e.g. a database key) should be set in opts.saveOpts
     var data = {
         'title': this.getTitle(),
-        'saveOpts': this.opts.saveOpts
+        'saveOpts': this.opts.saveOpts,
+        'options': {
+          'description': this.opts.description
+        }
     };
     // add event info
     if (this.event) {
