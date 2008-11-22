@@ -15,6 +15,7 @@
  * 
  * Depends on:
  * json2: lib/json2.pack.js
+ * timemapexport.js
  * jQuery: jquery.com
  * jqModal: http://dev.iceburg.net/jquery/jqModal/
  * jeditable: http://www.appelsiini.net/projects/jeditable
@@ -464,71 +465,6 @@ TimeMap.prototype.refreshTimeline = function () {
     topband.getEventPainter().getLayout()._laidout = false;
     this.timeline.layout();
     topband.setCenterVisibleDate(centerDate);
-}
-
-/**
- * Clean up dataset into a nice object for serialization
- * This is called automatically by the JSON.stringify() function
- * XXX: Does this need to be loadable into timemap_init?
- */
-TimeMapDataset.prototype.toJSON = function() {
-    // any additional info (e.g. a database key) should be set in opts.saveOpts
-    var data = {
-        'title': this.getTitle(),
-        'options': {
-            'saveOpts': this.opts.saveOpts
-        },
-        'data': {
-            'type':'basic',
-            'value': this.getItems()
-        }
-    };
-    return data;
-}
-
-/**
- * Clean up item into a nice object for serialization
- * This is called automatically by the JSON.stringify() function
- */
-TimeMapItem.prototype.toJSON = function() {
-    // any additional info (e.g. a database key) should be set in opts.saveOpts
-    var data = {
-        'title': this.getTitle(),
-        'options': {
-            'saveOpts': this.opts.saveOpts,
-            'description': this.opts.description
-        }
-    };
-    // add event info
-    if (this.event) {
-        data['start'] = this.event.getStart();
-        if (!this.event.isInstant()) {
-            data['end'] = this.event.getEnd();
-        }
-    }
-    // add placemark info (only single placemarks supported at the moment)
-    if (this.placemark) {
-        var makePoint = function(latLng) {
-            return {
-                'lat': latLng.lat(),
-                'lon': latLng.lng()
-            }
-        }
-        switch (this.getType()) {
-            case "marker":
-                data['point'] = makePoint(this.placemark.getLatLng());
-                break;
-            case "polyline":
-            case "polygon":
-                line = [];
-                for (var x=0; x<this.placemark.getVertexCount(); x++) {
-                    line.push(makePoint(this.placemark.getVertex(x)));
-                }
-                data[this.getType()] = line;
-                break;
-        }
-    }
-    return data;
 }
 
 /**
