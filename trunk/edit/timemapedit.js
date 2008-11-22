@@ -475,8 +475,13 @@ TimeMapDataset.prototype.toJSON = function() {
     // any additional info (e.g. a database key) should be set in opts.saveOpts
     var data = {
         'title': this.getTitle(),
-        'saveOpts': this.opts.saveOpts,
-        'items': this.getItems()
+        'options': {
+            'saveOpts': this.opts.saveOpts
+        },
+        'data': {
+            'type':'basic',
+            'value': this.getItems()
+        }
     };
     return data;
 }
@@ -489,9 +494,9 @@ TimeMapItem.prototype.toJSON = function() {
     // any additional info (e.g. a database key) should be set in opts.saveOpts
     var data = {
         'title': this.getTitle(),
-        'saveOpts': this.opts.saveOpts,
         'options': {
-          'description': this.opts.description
+            'saveOpts': this.opts.saveOpts,
+            'description': this.opts.description
         }
     };
     // add event info
