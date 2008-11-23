@@ -61,17 +61,14 @@ TimeMap.prototype.enterEditMode = function(editPaneId, options) {
         // make a holder for datasets
         var dsPane = $('<div id="dspane" />').get(0);
         $(editPane).append(dsPane);
-        // make a save button
+        /* XXX: make a save button
         var saveButton = $('<div id="editsave"/>').append(
             $('<input type="button" value="Save Changes" />').click(function() {
-                if (tmo.opts.editOpts.saveTarget) {
-                    // send the datasets to the server, serialized
-                    $.post(tmo.opts.editOpts.saveTarget, 
-                           {'datasets':JSON.stringify( tmo.datasets)});
-                }
+              tmo.saveChanges()
             })
         );
         $(editPane).append(saveButton);
+        */
         // save for later
         this.editPane = editPane;
         this.dsPane = dsPane;
@@ -104,6 +101,19 @@ TimeMap.prototype.closeEditMode = function() {
         for (var x=0; x < items.length; x++) {
             items[x].disablePlacemarkEdits();
         }
+    }
+}
+
+/**
+ * Save all the datasets the specified target
+ */
+TimeMap.prototype.saveChanges = function() {
+    if (this.opts.editOpts.saveTarget) {
+        // send the datasets to the server, serialized
+        // XXX: Save options as well
+        // XXX: Add a hook and default for a callback function
+        $.post(this.opts.editOpts.saveTarget, 
+               {'datasets':JSON.stringify( this.datasets)});
     }
 }
 
@@ -203,11 +213,16 @@ TimeMapItem.prototype.updateEditPane = function() {
                     + this.opts.theme.color + '">' 
                     + '<img src="http://maps.google.com/intl/en_us/mapfiles/ms/line.png"></div>';
             // XXX: handle overlays?
+            // XXX: handle arrays?
         }
         $(this.editpane).append(
             $('<div class="itemicon">' + iconImg + '</div>')
                 .click(function() {
                     item.dataset.timemap.map.setCenter(item.getInfoPoint());
+                    if (item.event) {
+                        var topband = item.dataset.timemap.timeline.getBand(0);
+                        topband.setCenterVisibleDate(item.event.getStart());
+                    }
                 })
         );
     } 

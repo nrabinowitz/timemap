@@ -11,7 +11,7 @@
  * Depends on:
  * json2: lib/json2.pack.js
  *---------------------------------------------------------------------------*/
- 
+
 /**
  * Clean up dataset into a nice object for serialization
  * This is called automatically by the JSON.stringify() function
@@ -21,7 +21,6 @@
  * in full and no longer connected to their original file.
  */
 TimeMapDataset.prototype.toJSON = function() {
-    // any additional info (e.g. a database key) should be set in opts.saveOpts
     var data = {
         'title': this.getTitle(),
         'data': {
@@ -29,8 +28,24 @@ TimeMapDataset.prototype.toJSON = function() {
             'value': this.getItems()
         }
     };
+    data = this.addExportData(data);
     return data;
 }
+
+/**
+ * Specify additional data for export. Replace this function to change settings.
+ *
+ * @param data      Initial map of export data
+ * @return          Expanded map of export data
+ */
+TimeMapDataset.prototype.addExportData = function(data) {
+    data['options'] = data['options'] || {};
+    // set any additional server info (e.g. a database key) in opts.saveOpts
+    data['options']['saveOpts'] = this.opts['saveOpts'];
+    return data;
+}
+
+// XXX: export items to KML with placemark.getKmlAsync?
 
 /**
  * Clean up item into a nice object for serialization
@@ -41,7 +56,6 @@ TimeMapItem.prototype.toJSON = function() {
     var data = {
         'title': this.getTitle(),
         'options': {
-            'saveOpts': this.opts.saveOpts,
             'description': this.opts.description
         }
     };
@@ -52,27 +66,63 @@ TimeMapItem.prototype.toJSON = function() {
             data['end'] = this.event.getEnd();
         }
     }
-    // add placemark info (only single placemarks supported at the moment)
+    // add placemark info
     if (this.placemark) {
-        var makePoint = function(latLng) {
-            return {
-                'lat': latLng.lat(),
-                'lon': latLng.lng()
-            }
-        }
-        switch (this.getType()) {
-            case "marker":
-                data['point'] = makePoint(this.placemark.getLatLng());
-                break;
-            case "polyline":
-            case "polygon":
-                line = [];
-                for (var x=0; x<this.placemark.getVertexCount(); x++) {
-                    line.push(makePoint(this.placemark.getVertex(x)));
+        // internal function - takes type, placemark, data
+        var makePlacemarkJSON = function(type, pm, pdata) {
+            // make timemap-style point objects
+            var makePoint = function(latLng) {
+                return {
+                    'lat': latLng.lat(),
+                    'lon': latLng.lng()
                 }
-                data[this.getType()] = line;
-                break;
+            }
+            // identify the placemark type. not 100% happy with this.
+            var idType = function(pm) {
+                if ('getIcon' in pm) return 'marker';
+                if ('getVertex' in pm) {
+                    return 'setFillStyle' in pm ? 'polygon' : 'polyline';
+                }
+                return false;
+            }
+            type = type || idType(pm);
+            switch (type) {
+                case "marker":
+                    pdata['point'] = makePoint(pm.getLatLng());
+                    break;
+                case "polyline":
+                case "polygon":
+                    line = [];
+                    for (var x=0; x<pm.getVertexCount(); x++) {
+                        line.push(makePoint(pm.getVertex(x)));
+                    }
+                    pdata[type] = line;
+                    break;
+            }
+            return pdata;
+        }
+        if (this.getType() == 'array') {
+            data['placemarks'] = [];
+            for (var i=0; i<this.placemark.length; i++) {
+                data['placemarks'].push(makePlacemarkJSON(false, this.placemark, {}));
+            }
+        } else {
+            data = makePlacemarkJSON(this.getType(), this.placemark, data);
         }
     }
+    data = this.addExportData(data);
+    return data;
+}
+
+/**
+ * Specify additional data for export. Replace this function to change settings.
+ *
+ * @param data      Initial map of export data
+ * @return          Expanded map of export data
+ */
+TimeMapItem.prototype.addExportData = function(data) {
+    data['options'] = data['options'] || {};
+    // set any additional server info (e.g. a database key) in opts.saveOpts
+    data['options']['saveOpts'] = this.opts['saveOpts'];
     return data;
 }
