@@ -52,15 +52,15 @@ Styles for editing tools
     overflow: auto;
 }
 
-#editpane .dataset {
+#dspane .dataset {
     margin: 5px 5px 10px 5px;
 }
-#editpane .dataset .dstitle {
+#dspane .dataset .dstitle {
     font-weight: bold;
     border-bottom: 1px solid #CCCCCC;
     cursor: pointer;
 }
-#editpane .dataset .dsadditem {
+#dspane .dataset .dsadditem {
     color: #0000CC;
     cursor: pointer;
     float: right;
@@ -68,35 +68,35 @@ Styles for editing tools
     line-height: 1.2em;
 }
 
-#editpane .dataset .item {
+#dspane .dataset .item {
     margin-top: .5em;
     padding-bottom: 1em;
     font-size: 0.8em;
 }
-#editpane .dataset .item .itemicon {
+#dspane .dataset .item .itemicon {
     float: right;
     cursor: pointer;
 }
-#editpane .dataset .item .itemtitle {
+#dspane .dataset .item .itemtitle {
     font-weight: bold;
     cursor: pointer;
 }
-#editpane .dataset .item .itemdate {
+#dspane .dataset .item .itemdate {
     color: #0000CC;
     cursor: pointer;
 }
-#editpane .dataset .item .itemlabel {
+#dspane .dataset .item .itemlabel {
     color: #999999;
     width: 45px;
     float: left;
 }
-#editpane .dataset .item .itemdesc {
+#dspane .dataset .item .itemdesc {
     cursor: pointer;
 }
-#editpane .dataset .item .itempmtools {
+#dspane .dataset .item .itempmtools {
     height: 31px;
 }
-#editpane .dataset .item  .missingelement {
+#dspane .dataset .item  .missingelement {
     color: #CCCCCC;
     font-style: italic;
     font-size: 0.8em;
