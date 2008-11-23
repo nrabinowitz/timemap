@@ -82,10 +82,7 @@ TimeMap.prototype.enterEditMode = function(editPaneId, options) {
     this.updateEditDatasets();
     // turn on placemark editing
     for (id in this.datasets) {
-        var items = this.datasets[id].getItems();
-        for (var x=0; x < items.length; x++) {
-            items[x].enablePlacemarkEdits();
-        }
+        this.datasets[id].enterEditMode();
     }
 }
 
@@ -97,23 +94,23 @@ TimeMap.prototype.closeEditMode = function() {
     $(this.editPane).jqmHide();
     // turn off placemark editing
     for (id in this.datasets) {
-        var items = this.datasets[id].getItems();
-        for (var x=0; x < items.length; x++) {
-            items[x].disablePlacemarkEdits();
-        }
+        this.datasets[id].closeEditMode();
     }
 }
 
 /**
- * Save all the datasets the specified target
+ * Save all the datasets to the specified target
+ *
+ * @param (Function) f    Optional callback function
  */
-TimeMap.prototype.saveChanges = function() {
-    if (this.opts.editOpts.saveTarget) {
-        // send the datasets to the server, serialized
+TimeMap.prototype.saveAllChanges = function(f) {
+    var target = this.opts.editOpts.saveTarget;
+    f = f || function(d){};
+    if (target) {
         // XXX: Save options as well
-        // XXX: Add a hook and default for a callback function
-        $.post(this.opts.editOpts.saveTarget, 
-               {'datasets':JSON.stringify( this.datasets)});
+        var data = {'datasets':JSON.stringify( this.datasets)}
+        // send the datasets to the server, serialized
+        $.post(target, data, f);
     }
 }
 
@@ -125,23 +122,56 @@ TimeMap.prototype.updateEditDatasets = function() {
     $(this.dsPane).empty();
     // add all datasets
     for (id in this.datasets) {
-        this.addEditDataset(this.datasets[id], this.dsPane);
+        ds.enterEditMode();
+        $(this.dsPane).append(ds.editpane);
     }
 }
 
 /**
- * Add a timemap dataset to the edit pane.
- * 
- * @param (Object) ds       Dataset to add
- * @param (DOM Element) el  Element to add the item to
+ * Turn on editing for a single dataset.
  */
-TimeMap.prototype.addEditDataset = function(ds, el) {
-    // make the dataset div
-    var dsdiv = $('<div class="dataset" />').get(0);
-    // save reference
-    ds.editpane = dsdiv;
-    ds.updateEditPane();
-    $(el).append(dsdiv);
+TimeMapDataset.prototype.enterEditMode = function() {
+    if (!this.editpane) {
+        // make the dataset div
+        var dsdiv = $('<div class="dataset" />').get(0);
+        // save reference
+        this.editpane = dsdiv;
+    }
+    this.updateEditPane();
+    var items = this.getItems();
+    for (var x=0; x < items.length; x++) {
+        items[x].enablePlacemarkEdits();
+    }
+}
+
+/**
+ * Turn off editing for a single dataset.
+ */
+TimeMapDataset.prototype.closeEditMode = function() {
+    $(this.editpane).empty();
+    var items = this.getItems();
+    for (var x=0; x < items.length; x++) {
+        items[x].disablePlacemarkEdits();
+    }
+}
+
+/**
+ * Save the dataset to the specified target
+ *
+ * @param (Function) f    Optional callback function
+ */
+TimeMapDataset.prototype.saveAllChanges = function(f) {
+    try {
+        var target = this.timemap.opts.editOpts.saveTarget;
+    } catch(e) {
+      return;
+    }
+    f = f || function(d){};
+    if (target) {
+        var data = {'datasets':JSON.stringify({'ds':this})}
+        // send the datasets to the server, serialized
+        $.post(target, data, f);
+    }
 }
 
 /**
