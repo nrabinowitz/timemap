@@ -371,7 +371,7 @@ function TimeMapDataset(timemap, options) {
     // set defaults for options
     this.opts = options || {}; // make sure the options object isn't null
     this.opts.title =        options["title"] || "";
-    this.opts.theme =        options["theme"] || new TimeMapDatasetTheme({});
+    this.opts.theme =        options["theme"] || this.timemap.opts["theme"] || new TimeMapDatasetTheme({});
     // allow for other data parsers (e.g. Gregorgian)
     this.opts.dateParser =   options["dateParser"] || Timeline.DateTime.parseIso8601DateTime;
     
