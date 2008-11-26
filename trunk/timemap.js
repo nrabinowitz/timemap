@@ -111,6 +111,26 @@ TimeMap.prototype.createDataset = function(id, options) {
 }
 
 /**
+ * Delete all items, clearing them from map and timeline
+ */
+TimeMap.prototype.clear = function() {
+    for (id in this.datasets) {
+        this.datasets[id].clear();
+    }
+    this.datasets = [];
+}
+
+/**
+ * Delete one dataset, clearing it from map and timeline
+ *
+ * @param id    Id of dataset to delete
+ */
+TimeMap.prototype.deleteDataset = function(id) {
+    this.datasets[id].clear();
+    delete this.datasets[id];
+}
+
+/**
  * Initialize the timeline - this must happen separately to allow full control of 
  * timeline properties.
  *
@@ -199,7 +219,7 @@ TimeMap.prototype.initTimeline = function(bands) {
         });
     }
     
-    // add callback for window resize here instead of the html file, to conform with XHTML 1.0
+    // add callback for window resize
     resizeTimerID = null;
     var oTimeline = this.timeline;
     window.onresize = function() {
@@ -353,8 +373,8 @@ TimeMap.prototype.scrollTimeline = function (years) {
  * @param {TimeMap} timemap         Reference to the timemap object
  * @param {Object} options          Object holding optional arguments:
  *   {String} title                     Title of the dataset (for the legend)
- *   {TimeMapDatasetTheme} theme        Theme settings
- *   {Function} dateParser              Function to replace default date parser
+ *   {String or theme object} theme     Theme settings.
+ *   {String or Function} dateParser    Function to replace default date parser.
  *   {Function} openInfoWindow          Function redefining how info window opens
  *   {Function} closeInfoWindow         Function redefining how info window closes
  */
@@ -370,14 +390,55 @@ function TimeMapDataset(timemap, options) {
     
     // set defaults for options
     this.opts = options || {}; // make sure the options object isn't null
-    this.opts.title =        options["title"] || "";
-    this.opts.theme =        options["theme"] || this.timemap.opts["theme"] || new TimeMapDatasetTheme({});
-    // allow for other data parsers (e.g. Gregorgian)
-    this.opts.dateParser =   options["dateParser"] || Timeline.DateTime.parseIso8601DateTime;
+    this.opts.title = options["title"] || "";
+    // get theme by key or object
+    if (typeof(options["theme"]) == "string") 
+        options["theme"] = TimeMapDataset.themes[options["theme"]];
+    this.opts.theme = options["theme"] || this.timemap.opts["theme"] || new TimeMapDatasetTheme({});
+    // allow for other data parsers (e.g. Gregorgian) by key or function
+    if (typeof(options["dateParser"]) == "string") 
+        options["dateParser"] = TimeMapDataset.dateParsers[options["dateParser"]];
+    this.opts.dateParser = options["dateParser"] || Timeline.DateTime.parseIso8601DateTime;
     
     // get functions
     this.getItems = function() { return this.items; }
     this.getTitle = function() { return this.opts.title; }
+}
+
+/**
+ * Map of supported date parsers. Add custom date parsers here if you
+ * want to refer to them by key rather than as a function name.
+ */
+TimeMapDataset.dateParsers = {
+    'iso8601': Timeline.DateTime.parseIso8601DateTime,
+    'gregorian': Timeline.DateTime.parseGregorianDateTime
+}
+
+/**
+ * Delete all items, clearing them from map and timeline
+ */
+TimeMapDataset.prototype.clear = function() {
+    for (var x=0; x < this.items.length; x++) {
+        this.items[x].clear();
+    }
+    this.items = [];
+    this.timemap.timeline.layout();
+}
+
+/**
+ * Delete one item, clearing it from map and timeline
+ * 
+ * @param item      Item to delete
+ */
+TimeMapDataset.prototype.deleteItem = function(item) {
+    for (var x=0; x < this.items.length; x++) {
+        if (this.items[x] == item) {
+            item.clear();
+            this.items.splice(x, 1);
+            break;
+        }
+    }
+    this.timemap.timeline.layout();
 }
 
 /**
@@ -882,7 +943,20 @@ TimeMapDataset.yellowTheme = function(options) {
     options['eventIconImage'] = "yellow-circle.png";
     return new TimeMapDatasetTheme(options);
 }
- 
+
+/**
+ * Map of themes. Add custom themes to this map if you want
+ * to load them by key rather than as an object.
+ */
+TimeMapDataset.themes = {
+    'red': TimeMapDataset.redTheme(),
+    'blue': TimeMapDataset.blueTheme(),
+    'green': TimeMapDataset.greenTheme(),
+    'ltblue': TimeMapDataset.ltblueTheme(),
+    'orange': TimeMapDataset.orangeTheme(),
+    'yellow': TimeMapDataset.yellowTheme(),
+    'purple': TimeMapDataset.purpleTheme()
+};
 
 
 /*----------------------------------------------------------------------------
@@ -970,6 +1044,30 @@ function TimeMapItem(placemark, event, dataset, options) {
         else this.openInfoWindow = TimeMapItem.openInfoWindowBasic;    
     }
     this.closeInfoWindow = options['closeInfoWindow'] || TimeMapItem.closeInfoWindowBasic;
+}
+
+/**
+ * Delete placemark from map and event from timeline
+ */
+TimeMapItem.prototype.clear = function() {
+    if (this.event) {
+        // this is just ridiculous
+        this.dataset.timemap.timeline.getBand(0)
+            .getEventSource()._events._events.remove(this.event);
+    }
+    if (this.placemark) {
+        this.hidePlacemark();
+        f = function(p) {
+            try {
+                this.map.removeOverlay(p);
+            } catch(e) {}
+        }
+        if (this.getType() == "array") {
+            for (var i=0; i<this.placemark.length; i++)
+                f(this.placemark[i]);
+        } else f(this.placemark);
+    }
+    this.event = this.placemark = null;
 }
 
 /**
