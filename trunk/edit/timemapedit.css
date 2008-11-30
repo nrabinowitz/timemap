@@ -59,13 +59,35 @@ Styles for editing tools
     font-weight: bold;
     border-bottom: 1px solid #CCCCCC;
     cursor: pointer;
+    margin-left: 23px;
+    padding-top: 2px;
 }
-#dspane .dataset .dsadditem {
-    color: #0000CC;
-    cursor: pointer;
-    float: right;
-    font-size: 0.8em;
-    line-height: 1.2em;
+
+div.datasettheme {
+  width: 15px; 
+  height: 15px;
+  margin: 3px;
+  background: #CCCCCC;
+  float: left;
+}
+
+.editlink {
+  font-weight: normal;
+  font-style: normal;
+  color: #0000CC;
+  cursor: pointer;
+  font-size: 12px;
+  padding-right: 1em;
+  text-decoration: underline;
+}
+
+div.thememenu {
+  width: 42px;
+  height: 63px;
+  border: 1px solid #CCCCCC;
+  background: #FFFFFF;
+  display: none;
+  position: absolute;
 }
 
 #dspane .dataset .item {
@@ -79,10 +101,6 @@ Styles for editing tools
 }
 #dspane .dataset .item .itemtitle {
     font-weight: bold;
-    cursor: pointer;
-}
-#dspane .dataset .item .itemdate {
-    color: #0000CC;
     cursor: pointer;
 }
 #dspane .dataset .item .itemlabel {
