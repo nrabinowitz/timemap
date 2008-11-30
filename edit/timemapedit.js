@@ -81,9 +81,9 @@ TimeMap.prototype.enterEditMode = function(editPaneId, options) {
     $(this.editPane).jqmShow();
     this.updateEditDatasets();
     // turn on placemark editing
-    for (id in this.datasets) {
-        this.datasets[id].enterEditMode();
-    }
+    this.each(function(ds) {
+        ds.enterEditMode();
+    });
 }
 
 /**
@@ -93,9 +93,9 @@ TimeMap.prototype.closeEditMode = function() {
     // close edit pane
     $(this.editPane).jqmHide();
     // turn off placemark editing
-    for (id in this.datasets) {
-        this.datasets[id].closeEditMode();
-    }
+    this.each(function(ds) {
+        ds.closeEditMode();
+    });
 }
 
 /**
@@ -120,11 +120,12 @@ TimeMap.prototype.saveAllChanges = function(f) {
 TimeMap.prototype.updateEditDatasets = function() {
     // clear
     $(this.dsPane).empty();
+    var tmo = this;
     // add all datasets
-    for (id in this.datasets) {
+    this.each(function(ds) {
         ds.enterEditMode();
-        $(this.dsPane).append(ds.editpane);
-    }
+        $(tmo.dsPane).append(ds.editpane);
+    });
 }
 
 /**
@@ -138,10 +139,9 @@ TimeMapDataset.prototype.enterEditMode = function() {
         this.editpane = dsdiv;
     }
     this.updateEditPane();
-    var items = this.getItems();
-    for (var x=0; x < items.length; x++) {
-        items[x].enablePlacemarkEdits();
-    }
+    this.each(function(item) {
+        item.enablePlacemarkEdits();
+    });
 }
 
 /**
@@ -149,10 +149,9 @@ TimeMapDataset.prototype.enterEditMode = function() {
  */
 TimeMapDataset.prototype.closeEditMode = function() {
     $(this.editpane).empty();
-    var items = this.getItems();
-    for (var x=0; x < items.length; x++) {
-        items[x].disablePlacemarkEdits();
-    }
+    this.each(function(item) {
+        item.disablePlacemarkEdits();
+    });
 }
 
 /**
@@ -181,14 +180,48 @@ TimeMapDataset.prototype.updateEditPane = function() {
     if (!this.editpane) return;
     else $(this.editpane).empty();
     var ds = this;
-    // add new item button
-    $(this.editpane).append(
-        $('<div class="dsadditem">add new item</div>')
-            .click(function() {
-                var item = ds.loadItem({title:"Untitled Item"});
-                ds.addEditItem(item, ds.editpane);
-            })
-    );
+    // set up theme icon and menu
+    var themeicon = $('<div class="datasettheme icon"></div>');
+    // init menu
+    var thememenu = $('<div class="thememenu"></div>')
+        .jqm({
+            'toTop': true,
+            'trigger': false
+        });
+    // init icon
+    themeicon.css('background', this.opts.theme.color)
+        .css('cursor', 'pointer')
+        .click(function() {
+        thememenu.jqmShow()
+            .css('top', themeicon.offset().top - 4)
+            .css('left', themeicon.offset().left - 4);
+        });
+    // set up theme menu
+    var themes = ['red', 'blue', 'green', 'orange', 'yellow', 'purple'];
+    for (var x=0; x<themes.length; x++) {
+        var theme = TimeMapDataset.themes[themes[x]];
+        // correct the icon path
+        theme.eventIconPath = ds.opts.theme.eventIconPath;
+        theme.eventIcon = theme.eventIconPath + theme.eventIconImage;
+        (function(theme) {
+        // make a color button for each theme
+        thememenu.append(
+            $('<div class="datasettheme"></div>')
+                .css('background', theme.color)
+                .css('cursor', 'pointer')
+                .click(function() { 
+                    // change the dataset theme
+                    themeicon.css('background', theme.color);
+                    ds.changeTheme(theme);
+                    thememenu.jqmHide();
+                })
+        );
+      })(theme);
+    }
+    // add theme menu and icon
+    $(this.editpane)
+        .append(thememenu)
+        .append(themeicon);
     // add title
     $(this.editpane).append(
         $('<div class="dstitle">' + this.getTitle() + '</div>')
@@ -197,11 +230,35 @@ TimeMapDataset.prototype.updateEditPane = function() {
                 return(value);
             })
     );
+    // save and close button
+    $(this.editpane).append(
+        $('<span class="editlink saveds">save &amp; close</span>')
+            .click(function() {
+                ds.saveAllChanges();
+                ds.closeEditMode();
+                $(ds.editpane).remove();
+            })
+    );
+    // close button
+    $(this.editpane).append(
+        $('<span class="editlink closeds">close</span>')
+        .click(function() {
+            ds.closeEditMode();
+            $(ds.editpane).remove();
+        })
+    );
+    // add new item button
+    $(this.editpane).append(
+        $('<span class="editlink dsadditem">new item</span>')
+            .click(function() {
+                var item = ds.loadItem({title:"Untitled Item"});
+                ds.addEditItem(item, ds.editpane);
+            })
+    );
     // items
-    var items = this.getItems();
-    for (var x=0; x < items.length; x++) {
-        this.addEditItem(items[x], this.editpane);
-    }
+    this.each(function(item) {
+        ds.addEditItem(item, ds.editpane);
+    });
 }
 
 /**
@@ -221,6 +278,20 @@ TimeMapDataset.prototype.addEditItem = function(item, el) {
 }
 
 /**
+ * Change the theme for every item in a dataset
+ *
+ * @param (TimeMapDatasetTheme) theme       New theme settings
+ */
+ TimeMapDataset.prototype.changeTheme = function(newTheme) {
+    this.opts.theme = newTheme;
+    this.each(function(item) {
+        item.changeTheme(newTheme);
+    });
+    this.timemap.timeline.layout();
+    this.updateEditPane();
+ }
+
+/**
  * Update the edit pane version of a timemap item.
  */
 TimeMapItem.prototype.updateEditPane = function() {
@@ -232,7 +303,7 @@ TimeMapItem.prototype.updateEditPane = function() {
         // add placemark icon
         switch (this.opts.type) {
             case "marker":
-                var iconImg = '<img src="' + this.placemark.getIcon().image + '">';
+                var iconImg = '<img src="' + this.opts.theme.icon.image + '">';
                 break;
             case "polygon":
                 var iconImg = '<div style="width:15px; height:15px; border:1px solid #CCCCCC; background:' 
@@ -264,6 +335,15 @@ TimeMapItem.prototype.updateEditPane = function() {
                 if (item.event) item.event._text = value;
                 item.dataset.timemap.refreshTimeline();
                 return(value);
+            })
+    );
+    // delete button
+    $(this.editpane).append(
+        $('<span class="editlink deleteitem">delete</span>')
+            .click(function() {
+              var ds = item.dataset;
+              ds.deleteItem(item);
+              ds.updateEditPane();
             })
     );
     // new placemark tools
@@ -431,7 +511,7 @@ TimeMapItem.prototype.enablePlacemarkEdits = function() {
         case "marker":
             // have to reinitialize the marker :(
             var np = new GMarker(this.placemark.getLatLng(), { 
-                icon: this.placemark.getIcon(),
+                icon: this.opts.theme.icon,
                 draggable: true
             });
             np.item = item;
@@ -462,7 +542,7 @@ TimeMapItem.prototype.disablePlacemarkEdits = function() {
         case "marker":
             // have to reinitialize the marker :(
             var np = new GMarker(this.placemark.getLatLng(), { 
-                icon: this.placemark.getIcon()
+                icon: this.opts.theme.icon
             });
             np.item = item;
             // add listener to make placemark open when event is clicked
@@ -499,6 +579,67 @@ TimeMapItem.prototype.createEvent = function(s, e) {
     event.item = this;
     this.event = event;
     this.dataset.eventSource.add(event);
+}
+ 
+ /**
+ * Change the theme for an item
+ *
+ * @param theme   New theme settings
+ */
+ TimeMapItem.prototype.changeTheme = function(newTheme) {
+    this.opts.theme = newTheme;
+    // change placemark
+    if (this.placemark) {
+        // internal function - takes type, placemark
+        var changePlacemark = function(pm, type, theme) {
+            type = type || TimeMapItem.getPlacemarkType(pm);
+            switch (type) {
+                case "marker":
+                    pm.setImage(theme.icon.image);
+                    break;
+                case "polygon":
+                    pm.setFillStyle({
+                        'color': newTheme.fillColor,
+                        'opacity': newTheme.fillOpacity
+                    });
+                    // no break to get stroke style too
+                case "polyline":
+                    pm.setStrokeStyle({
+                        'color': newTheme.lineColor,
+                        'weight': newTheme.lineWeight,
+                        'opacity': newTheme.lineOpacity
+                    });
+                    break;
+            }
+        }
+        if (this.getType() == 'array') {
+            for (var i=0; i<this.placemark.length; i++) {
+                changePlacemark(this.placemark[i], false, newTheme);
+            }
+        } else {
+            changePlacemark(this.placemark, this.getType(), newTheme);
+        }
+    }
+    // change event
+    if (this.event) {
+        this.event._color = newTheme.eventColor;
+        this.event._icon = newTheme.eventIcon;
+    }
+ }
+
+
+/** 
+ * Identify the placemark type. not 100% happy with this.
+ *
+ * @param {Object} pm       Placemark to identify
+ * @return {String}         Type of placemark, or false if none found
+ */
+TimeMapItem.getPlacemarkType = function(pm) {
+    if ('getIcon' in pm) return 'marker';
+    if ('getVertex' in pm) {
+        return 'setFillStyle' in pm ? 'polygon' : 'polyline';
+    }
+    return false;
 }
 
 /**

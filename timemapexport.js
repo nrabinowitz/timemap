@@ -77,15 +77,7 @@ TimeMapItem.prototype.toJSON = function() {
                     'lon': latLng.lng()
                 }
             }
-            // identify the placemark type. not 100% happy with this.
-            var idType = function(pm) {
-                if ('getIcon' in pm) return 'marker';
-                if ('getVertex' in pm) {
-                    return 'setFillStyle' in pm ? 'polygon' : 'polyline';
-                }
-                return false;
-            }
-            type = type || idType(pm);
+            type = type || TimeMapItem.getPlacemarkType(pm);
             switch (type) {
                 case "marker":
                     pdata['point'] = makePoint(pm.getLatLng());
@@ -104,7 +96,7 @@ TimeMapItem.prototype.toJSON = function() {
         if (this.getType() == 'array') {
             data['placemarks'] = [];
             for (var i=0; i<this.placemark.length; i++) {
-                data['placemarks'].push(makePlacemarkJSON(false, this.placemark, {}));
+                data['placemarks'].push(makePlacemarkJSON(false, this.placemark[i], {}));
             }
         } else {
             data = makePlacemarkJSON(this.getType(), this.placemark, data);

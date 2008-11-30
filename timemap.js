@@ -111,12 +111,24 @@ TimeMap.prototype.createDataset = function(id, options) {
 }
 
 /**
- * Delete all items, clearing them from map and timeline
+ * Run a function on each dataset in the timemap. This is the preferred
+ * iteration method, as it allows for future iterator options.
+ *
+ * @param {Function} f    The function to run
+ */
+TimeMap.prototype.each = function(f) {
+    for (id in this.datasets) {
+        f(this.datasets[id]);
+    }
+}
+
+/**
+ * Delete all datasets, clearing them from map and timeline
  */
 TimeMap.prototype.clear = function() {
-    for (id in this.datasets) {
-        this.datasets[id].clear();
-    }
+    this.each(function(ds) {
+        ds.clear();
+    });
     this.datasets = [];
 }
 
@@ -242,22 +254,21 @@ TimeMap.prototype.filter = function(fid) {
     // if no filters exist, forget it
     if (!filters || !filters.chain || filters.chain.length == 0) return;
     // run items through filter
-    for (id in this.datasets) {
-        var items = this.datasets[id].getItems();
-        for (var x=0; x < items.length; x++) {
+    this.each(function(ds) {
+        ds.each(function(item) {
             F_LOOP: {
                 for (var i = filters.chain.length - 1; i >= 0; i--){
-                    if (!filters.chain[i](items[x])) {
+                    if (!filters.chain[i](item)) {
                         // false condition
-                        filters.off(items[x]);
+                        filters.off(item);
                         break F_LOOP;
                     }
                 }
                 // true condition
-                filters.on(items[x]);
+                filters.on(item);
             }
-        }
-    } 
+        });
+    });
 }
 
 /**
@@ -321,9 +332,9 @@ TimeMap.prototype.hideDataset = function (id){
  * Hides all the datasets on the map
  */
 TimeMap.prototype.hideDatasets = function(){
-	for (id in this.datasets){
-		this.datasets[id].visible = false;
-	}
+	this.each(function(ds) {
+		ds.visible = false;
+	});
     this.filter("map");
 }
 
@@ -342,9 +353,9 @@ TimeMap.prototype.showDataset = function(id) {
  * Shows all the datasets on the map
  */
 TimeMap.prototype.showDatasets = function() {
-	for (id in this.datasets){
-		this.datasets[id].visible = true;
-	}
+	this.each(function(ds) {
+		ds.visible = true;
+	});
     this.filter("map");
 }
  
@@ -391,10 +402,16 @@ function TimeMapDataset(timemap, options) {
     // set defaults for options
     this.opts = options || {}; // make sure the options object isn't null
     this.opts.title = options["title"] || "";
+    
     // get theme by key or object
     if (typeof(options["theme"]) == "string") 
         options["theme"] = TimeMapDataset.themes[options["theme"]];
     this.opts.theme = options["theme"] || this.timemap.opts["theme"] || new TimeMapDatasetTheme({});
+    // allow icon path override in options or timemap options
+    this.opts.theme.eventIconPath = options["eventIconPath"] || 
+        this.timemap.opts.eventIconPath || this.opts.theme.eventIconPath;
+    this.opts.theme.eventIcon = options["eventIconPath"] + this.opts.theme.eventIconImage;
+    
     // allow for other data parsers (e.g. Gregorgian) by key or function
     if (typeof(options["dateParser"]) == "string") 
         options["dateParser"] = TimeMapDataset.dateParsers[options["dateParser"]];
@@ -415,12 +432,24 @@ TimeMapDataset.dateParsers = {
 }
 
 /**
+ * Run a function on each item in the dataset. This is the preferred
+ * iteration method, as it allows for future iterator options.
+ *
+ * @param {Function} f    The function to run
+ */
+TimeMapDataset.prototype.each = function(f) {
+    for (var x=0; x < this.items.length; x++) {
+        f(this.items[x]);
+    }
+}
+
+/**
  * Delete all items, clearing them from map and timeline
  */
 TimeMapDataset.prototype.clear = function() {
-    for (var x=0; x < this.items.length; x++) {
-        this.items[x].clear();
-    }
+    this.each(function(item) {
+        item.clear();
+    });
     this.items = [];
     this.timemap.timeline.layout();
 }
@@ -512,7 +541,12 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     if (data == null) return;
     
     // use item theme if provided, defaulting to dataset theme
-    var theme = (data.options && data.options["theme"]) || this.opts.theme;
+    var options = data.options || {};
+    if (typeof(options["theme"]) == "string") 
+        options["theme"] = TimeMapDataset.themes[options["theme"]];
+    var theme = options["theme"] || this.opts.theme;
+    theme.eventIconPath = options["eventIconPath"] || this.opts.theme.eventIconPath;
+    theme.eventIcon = theme.eventIconPath + theme.eventIconImage;
     
     var tm = this.timemap;
     
@@ -642,7 +676,6 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     // override type for arrays
     if (placemark.length > 1) type = "array";
     
-    var options = data.options || {};
     options["title"] = title;
     options["type"] = type || "none";
     options["theme"] = theme;
@@ -834,7 +867,19 @@ TimeMapDataset.parseKML = function(kml) {
 function TimeMapDatasetTheme(options) {
     // work out various defaults - the default theme is Google's reddish color
     options = options || {};
-    this.icon =              options['icon'] || G_DEFAULT_ICON;
+    
+    if (!options['icon']) {
+        // make new red icon
+        var markerIcon = new GIcon(G_DEFAULT_ICON);
+        this.iconImage = options['iconImage'] 
+            || "http://www.google.com/intl/en_us/mapfiles/ms/icons/red-dot.png";
+        markerIcon.image = this.iconImage;
+        markerIcon.iconSize = new GSize(32, 32);
+        markerIcon.shadow = "http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png"
+        markerIcon.shadowSize = new GSize(59, 32);
+    }
+    
+    this.icon =              options['icon'] || markerIcon;
     this.color =             options['color'] || "#FE766A";
     this.lineColor =         options['lineColor'] || this.color;
     this.polygonLineColor =  options['polygonLineColor'] || this.lineColor;
@@ -856,29 +901,15 @@ TimeMapDataset.redTheme = function(options) {
 
 TimeMapDataset.blueTheme = function(options) {
     options = options || {};
-    // marker icon
-    var markerIcon = new GIcon(G_DEFAULT_ICON);
-    markerIcon.image = "http://www.google.com/intl/en_us/mapfiles/ms/icons/blue-dot.png";
-    markerIcon.iconSize = new GSize(32, 32);
-    markerIcon.shadow = "http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png"
-    markerIcon.shadowSize = new GSize(59, 32);
-
-    options['icon'] =           markerIcon;
-    options['color'] =          "#5A7ACF";
+    options['iconImage'] = "http://www.google.com/intl/en_us/mapfiles/ms/icons/blue-dot.png";
+    options['color'] = "#5A7ACF";
     options['eventIconImage'] = "blue-circle.png";
     return new TimeMapDatasetTheme(options);
 }
 
 TimeMapDataset.greenTheme = function(options) {
     options = options || {};
-    // marker icon
-    var markerIcon = new GIcon(G_DEFAULT_ICON);
-    markerIcon.image = "http://www.google.com/intl/en_us/mapfiles/ms/icons/green-dot.png";
-    markerIcon.iconSize = new GSize(32, 32);
-    markerIcon.shadow = "http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png"
-    markerIcon.shadowSize = new GSize(59, 32);
-
-    options['icon'] =           markerIcon;
+    options['iconImage'] = "http://www.google.com/intl/en_us/mapfiles/ms/icons/green-dot.png";
     options['color'] =          "#19CF54";
     options['eventIconImage'] = "green-circle.png";
     return new TimeMapDatasetTheme(options);
@@ -886,14 +917,7 @@ TimeMapDataset.greenTheme = function(options) {
 
 TimeMapDataset.ltblueTheme = function(options) {
     options = options || {};
-    // marker icon
-    var markerIcon = new GIcon(G_DEFAULT_ICON);
-    markerIcon.image = "http://www.google.com/intl/en_us/mapfiles/ms/icons/ltblue-dot.png";
-    markerIcon.iconSize = new GSize(32, 32);
-    markerIcon.shadow = "http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png"
-    markerIcon.shadowSize = new GSize(59, 32);
-
-    options['icon'] =           markerIcon;
+    options['iconImage'] = "http://www.google.com/intl/en_us/mapfiles/ms/icons/ltblue-dot.png";
     options['color'] =          "#5ACFCF";
     options['eventIconImage'] = "ltblue-circle.png";
     return new TimeMapDatasetTheme(options);
@@ -901,14 +925,7 @@ TimeMapDataset.ltblueTheme = function(options) {
 
 TimeMapDataset.purpleTheme = function(options) {
     options = options || {};
-    // marker icon
-    var markerIcon = new GIcon(G_DEFAULT_ICON);
-    markerIcon.image = "http://www.google.com/intl/en_us/mapfiles/ms/icons/purple-dot.png";
-    markerIcon.iconSize = new GSize(32, 32);
-    markerIcon.shadow = "http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png"
-    markerIcon.shadowSize = new GSize(59, 32);
-
-    options['icon'] =           markerIcon;
+    options['iconImage'] = "http://www.google.com/intl/en_us/mapfiles/ms/icons/purple-dot.png";
     options['color'] =          "#8E67FD";
     options['eventIconImage'] = "purple-circle.png";
     return new TimeMapDatasetTheme(options);
@@ -916,14 +933,7 @@ TimeMapDataset.purpleTheme = function(options) {
 
 TimeMapDataset.orangeTheme = function(options) {
     options = options || {};
-    // marker icon
-    var markerIcon = new GIcon(G_DEFAULT_ICON);
-    markerIcon.image = "http://www.google.com/intl/en_us/mapfiles/ms/icons/orange-dot.png";
-    markerIcon.iconSize = new GSize(32, 32);
-    markerIcon.shadow = "http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png"
-    markerIcon.shadowSize = new GSize(59, 32);
-
-    options['icon'] =           markerIcon;
+    options['iconImage'] = "http://www.google.com/intl/en_us/mapfiles/ms/icons/orange-dot.png";
     options['color'] =          "#FF9900";
     options['eventIconImage'] = "orange-circle.png";
     return new TimeMapDatasetTheme(options);
@@ -931,14 +941,7 @@ TimeMapDataset.orangeTheme = function(options) {
 
 TimeMapDataset.yellowTheme = function(options) {
     options = options || {};
-    // marker icon
-    var markerIcon = new GIcon(G_DEFAULT_ICON);
-    markerIcon.image = "http://www.google.com/intl/en_us/mapfiles/ms/icons/yellow-dot.png";
-    markerIcon.iconSize = new GSize(32, 32);
-    markerIcon.shadow = "http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png"
-    markerIcon.shadowSize = new GSize(59, 32);
-
-    options['icon'] =           markerIcon;
+    options['iconImage'] = "http://www.google.com/intl/en_us/mapfiles/ms/icons/yellow-dot.png";
     options['color'] =          "#ECE64A";
     options['eventIconImage'] = "yellow-circle.png";
     return new TimeMapDatasetTheme(options);
