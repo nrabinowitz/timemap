@@ -107,6 +107,16 @@ TimeMap.prototype.createDataset = function(id, options) {
     if(!("title" in options)) options["title"] = id;
     var dataset = new TimeMapDataset(this, options);
     this.datasets[id] = dataset;
+    // add event listener
+    if  (this.opts.centerMapOnItems) {
+        var tm = this;
+        GEvent.addListener(dataset, 'itemsloaded', function() {
+            // determine the zoom level from the bounds
+            tm.map.setZoom(tm.map.getBoundsZoomLevel(tm.mapBounds));
+            // determine the center from the bounds
+            tm.map.setCenter(tm.mapBounds.getCenter());
+        });
+    }
     return dataset;
 }
 
@@ -501,14 +511,7 @@ TimeMapDataset.prototype.loadItems = function(data, transform) {
     for (var x=0; x < data.length; x++) {
         this.loadItem(data[x], transform);
     }
-    var tm = this.timemap;
-    // XXX - probably change to this.timemap.onLoadItems()
-    if  (tm.opts.centerMapOnItems) {
-        // determine the zoom level from the bounds
-        tm.map.setZoom(tm.map.getBoundsZoomLevel(tm.mapBounds));
-        // determine the center from the bounds
-        tm.map.setCenter(tm.mapBounds.getCenter());
-    }
+    GEvent.trigger(this, 'itemsloaded');
 };
 
 /*
