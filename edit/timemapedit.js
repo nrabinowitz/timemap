@@ -84,6 +84,7 @@ TimeMap.prototype.enterEditMode = function(editPaneId, options) {
     this.each(function(ds) {
         ds.enterEditMode();
     });
+    GEvent.trigger(this, 'entereditmode');
 }
 
 /**
@@ -96,6 +97,7 @@ TimeMap.prototype.closeEditMode = function() {
     this.each(function(ds) {
         ds.closeEditMode();
     });
+    GEvent.trigger(this, 'closeeditmode');
 }
 
 /**
@@ -142,6 +144,7 @@ TimeMapDataset.prototype.enterEditMode = function() {
     this.each(function(item) {
         item.enablePlacemarkEdits();
     });
+    GEvent.trigger(this, 'entereditmode');
 }
 
 /**
@@ -152,6 +155,7 @@ TimeMapDataset.prototype.closeEditMode = function() {
     this.each(function(item) {
         item.disablePlacemarkEdits();
     });
+    GEvent.trigger(this, 'closeeditmode');
 }
 
 /**
@@ -306,15 +310,18 @@ TimeMapItem.prototype.updateEditPane = function() {
                 var iconImg = '<img src="' + this.opts.theme.icon.image + '">';
                 break;
             case "polygon":
-                var iconImg = '<div style="width:15px; height:15px; border:1px solid #CCCCCC; background:' 
+                var iconImg = '<div class="polygonicon" style="background:' 
                     + this.opts.theme.color + '">';
                 break;
             case "polyline":
-                var iconImg = '<div style="width:32px;height:32px;background:' 
+                var iconImg = '<div class="polylineicon" style="background:' 
                     + this.opts.theme.color + '">' 
                     + '<img src="http://maps.google.com/intl/en_us/mapfiles/ms/line.png"></div>';
+                break;
             // XXX: handle overlays?
             // XXX: handle arrays?
+            default:
+                var iconImg = '&nbsp;';
         }
         $(this.editpane).append(
             $('<div class="itemicon">' + iconImg + '</div>')

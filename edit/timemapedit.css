@@ -90,37 +90,47 @@ div.thememenu {
   position: absolute;
 }
 
-#dspane .dataset .item {
-    margin-top: .5em;
-    padding-bottom: 1em;
+.dataset .item {
+    margin-top: 1em;
+    padding: .5em 0em;
     font-size: 0.8em;
 }
-#dspane .dataset .item .itemicon {
+.dataset .item .itemicon {
     float: right;
     cursor: pointer;
 }
-#dspane .dataset .item .itemtitle {
+.dataset .item .itemtitle {
     font-weight: bold;
     cursor: pointer;
 }
-#dspane .dataset .item .itemlabel {
+.dataset .item .itemlabel {
     color: #999999;
     width: 45px;
     float: left;
 }
-#dspane .dataset .item .itemdesc {
+.dataset .item .itemdesc {
     cursor: pointer;
 }
-#dspane .dataset .item .itempmtools {
+.dataset .item .itempmtools {
     height: 31px;
 }
-#dspane .dataset .item  .missingelement {
+.dataset .item  .missingelement {
     color: #CCCCCC;
     font-style: italic;
     font-size: 0.8em;
     line-height: 1.6em;
 }
 
+.polygonicon {
+    width:15px; 
+    height:15px; 
+    border:1px solid #CCCCCC;
+    margin-right: 7px;
+}
+.polylineicon {
+    width:32px;
+    height:32px;
+}
 
 .pmbutton {
   width:31px;
