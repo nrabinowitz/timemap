@@ -188,7 +188,6 @@ TimeMap.prototype.initTimeline = function(bands) {
         },
         function(item) {
             item.hidePlacemark();
-            item.closeInfoWindow();
         }
     );
     
@@ -1035,6 +1034,7 @@ function TimeMapItem(placemark, event, dataset, options) {
             } else this.placemark.hide();
             this.visible = false;
         }
+        this.closeInfoWindow();
     }
     
     // allow for custom open/close functions, set at item, dataset, or timemap level
