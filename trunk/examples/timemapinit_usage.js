@@ -1,10 +1,10 @@
 /**
-* Shown below is the full data format accepted by timemapInit(). See the other 
+* Shown below is the full data format accepted by TimeMap.init(). See the other 
 * example files for specific use cases.
 */
 
 
-timemapInit({
+TimeMap.init({
     mapId: "map",               // Id of map div element (required)
     timelineId: "timeline",     // Id of timeline div element (required)
     options: {                  // Various initialization options. Defaults shown:
