@@ -10,11 +10,12 @@
  * Functions in this file offer tools for editing a timemap dataset in
  * a browser-based GUI. Call tm.enterEditMode() and tm.closeEditMode() 
  * to turn the tools on and off; set configuration options in 
- * tm.opts.editOpts (set as {options{editOpts{...}} in timemapInit()).
+ * tm.opts.editOpts (set as {options{editOpts{...}} in TimeMap.init()).
  * 
  * 
  * Depends on:
  * json2: lib/json2.pack.js
+ * manipulation.js
  * timemapexport.js
  * jQuery: jquery.com
  * jqModal: http://dev.iceburg.net/jquery/jqModal/
@@ -217,6 +218,7 @@ TimeMapDataset.prototype.updateEditPane = function() {
                     // change the dataset theme
                     themeicon.css('background', theme.color);
                     ds.changeTheme(theme);
+                    ds.updateEditPane();
                     thememenu.jqmHide();
                 })
         );
@@ -280,20 +282,6 @@ TimeMapDataset.prototype.addEditItem = function(item, el) {
     item.updateEditPane();
     $(el).append(itemdiv);
 }
-
-/**
- * Change the theme for every item in a dataset
- *
- * @param (TimeMapDatasetTheme) theme       New theme settings
- */
- TimeMapDataset.prototype.changeTheme = function(newTheme) {
-    this.opts.theme = newTheme;
-    this.each(function(item) {
-        item.changeTheme(newTheme);
-    });
-    this.timemap.timeline.layout();
-    this.updateEditPane();
- }
 
 /**
  * Update the edit pane version of a timemap item.
@@ -566,98 +554,6 @@ TimeMapItem.prototype.disablePlacemarkEdits = function() {
             this.placemark.disableEditing({onEvent: "mouseover"});
             break;
     }
-}
-
-/**
- * Create a new event for the item.
- * XXX: Should this be in the main library?
- * 
- * @param (Date) s      Start date for the event
- * @param (Date) e      (Optional) End date for the event
- */
-TimeMapItem.prototype.createEvent = function(s, e) {
-    var instant = (e == undefined);
-    var eventIcon = this.opts.theme.eventIcon;
-    var title = this.getTitle();
-    // create event
-    var event = new Timeline.DefaultEventSource.Event(s, e, null, null, instant, title, 
-        null, null, null, this.opts.theme.eventIcon, this.opts.theme.eventColor, null);
-    // add references
-    event.item = this;
-    this.event = event;
-    this.dataset.eventSource.add(event);
-}
- 
- /**
- * Change the theme for an item
- *
- * @param theme   New theme settings
- */
- TimeMapItem.prototype.changeTheme = function(newTheme) {
-    this.opts.theme = newTheme;
-    // change placemark
-    if (this.placemark) {
-        // internal function - takes type, placemark
-        var changePlacemark = function(pm, type, theme) {
-            type = type || TimeMapItem.getPlacemarkType(pm);
-            switch (type) {
-                case "marker":
-                    pm.setImage(theme.icon.image);
-                    break;
-                case "polygon":
-                    pm.setFillStyle({
-                        'color': newTheme.fillColor,
-                        'opacity': newTheme.fillOpacity
-                    });
-                    // no break to get stroke style too
-                case "polyline":
-                    pm.setStrokeStyle({
-                        'color': newTheme.lineColor,
-                        'weight': newTheme.lineWeight,
-                        'opacity': newTheme.lineOpacity
-                    });
-                    break;
-            }
-        }
-        if (this.getType() == 'array') {
-            for (var i=0; i<this.placemark.length; i++) {
-                changePlacemark(this.placemark[i], false, newTheme);
-            }
-        } else {
-            changePlacemark(this.placemark, this.getType(), newTheme);
-        }
-    }
-    // change event
-    if (this.event) {
-        this.event._color = newTheme.eventColor;
-        this.event._icon = newTheme.eventIcon;
-    }
- }
-
-
-/** 
- * Identify the placemark type. not 100% happy with this.
- *
- * @param {Object} pm       Placemark to identify
- * @return {String}         Type of placemark, or false if none found
- */
-TimeMapItem.getPlacemarkType = function(pm) {
-    if ('getIcon' in pm) return 'marker';
-    if ('getVertex' in pm) {
-        return 'setFillStyle' in pm ? 'polygon' : 'polyline';
-    }
-    return false;
-}
-
-/**
- * Refresh the timeline, maintaining the current date
- */
-TimeMap.prototype.refreshTimeline = function () {
-    var topband = this.timeline.getBand(0);
-    var centerDate = topband.getCenterVisibleDate();
-    topband.getEventPainter().getLayout()._laidout = false;
-    this.timeline.layout();
-    topband.setCenterVisibleDate(centerDate);
 }
 
 /**

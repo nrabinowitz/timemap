@@ -10,7 +10,7 @@
       type="text/javascript"></script>
     <script type="text/javascript" src="http://simile.mit.edu/timeline/api/timeline-api.js"></script>
     <script src="../timemap.js" type="text/javascript"></script>
-    <script src="../timemapinit.js" type="text/javascript"></script>
+    <script src="../manipulation.js" type="text/javascript"></script>
 <script language="JavaScript" type="text/javascript">
 
 function exposeTestFunctionNames() {
@@ -59,7 +59,7 @@ function testEventIconPath() {
 var tm = null;
 
 function setUpPage() {
-    tm = timemapInit({
+    tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
         timelineId: "timeline",     // Id of timeline div element (required)
         options: {

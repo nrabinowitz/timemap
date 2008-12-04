@@ -10,7 +10,6 @@
     <script src="../timemap.js" type="text/javascript"></script>
     <script src="../lib/json2.pack.js" type="text/javascript"></script>
     <script src="../metawebloader.js" type="text/javascript"></script>
-    <script src="../timemapinit.js" type="text/javascript"></script>
 	<script type="text/javascript">
 
 function onLoad() {
@@ -66,7 +65,7 @@ function onLoad() {
     ];
 
 
-    timemapInit({
+    TimeMap.init({
         mapId: "map",               // Id of map div element (required)
         timelineId: "timeline",     // Id of timeline div element (required) 
         datasets: [
