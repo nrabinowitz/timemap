@@ -12,6 +12,54 @@
  *---------------------------------------------------------------------------*/
 
 /**
+ * Clean up TimeMap into a nice object for serialization
+ * This is called automatically by the JSON.stringify() function
+ */
+TimeMap.prototype.toJSON = function() {
+    var data = {
+        'options': this.makeOptionData,
+        'datasets': this.datasets
+    }
+    data = this.addExportData(data);
+}
+
+/**
+ * Make a cleaned up object for the TimeMap options
+ */
+TimeMap.prototype.makeOptionData = function() {
+    var data = this.opts;
+    // clean up: mapCenter
+    if (data['mapCenter']) data['mapCenter'] = TimeMap.makePoint(data['mapCenter']);
+    // clean up: mapType
+    if (data['mapType']) data['mapType'] = revHash(TimeMap.mapTypes, data['mapType']);
+    // clean up: mapTypes
+    if (data['mapTypes']) {
+        var mts=[], mt;
+        for (var x=0; x<data['mapTypes'].length; x++) {
+            mt = revHash(TimeMap.mapTypes, data['mapTypes'][x]);
+            if (mt) mts.push(mt);
+        }
+        data['mapTypes'] = mts;
+    }
+    // clean up: bandIntervals
+    if (data['bandIntervals']) data['bandIntervals'] = revHash(TimeMap.intervals, data['bandIntervals']);
+    return data;
+}
+
+/**
+ * Specify additional data for export. Replace this function to change settings.
+ *
+ * @param data      Initial map of export data
+ * @return          Expanded map of export data
+ */
+TimeMap.prototype.addExportData = function(data) {
+    data['options'] = data['options'] || {};
+    // set any additional server info (e.g. a database key) in opts.saveOpts
+    data['options']['saveOpts'] = this.opts['saveOpts'];
+    return data;
+}
+
+/**
  * Clean up dataset into a nice object for serialization
  * This is called automatically by the JSON.stringify() function
  *
@@ -69,23 +117,16 @@ TimeMapItem.prototype.toJSON = function() {
     if (this.placemark) {
         // internal function - takes type, placemark, data
         var makePlacemarkJSON = function(type, pm, pdata) {
-            // make timemap-style point objects
-            var makePoint = function(latLng) {
-                return {
-                    'lat': latLng.lat(),
-                    'lon': latLng.lng()
-                }
-            }
             type = type || TimeMapItem.getPlacemarkType(pm);
             switch (type) {
                 case "marker":
-                    pdata['point'] = makePoint(pm.getLatLng());
+                    pdata['point'] = TimeMap.makePoint(pm.getLatLng());
                     break;
                 case "polyline":
                 case "polygon":
                     line = [];
                     for (var x=0; x<pm.getVertexCount(); x++) {
-                        line.push(makePoint(pm.getVertex(x)));
+                        line.push(TimeMap.makePoint(pm.getVertex(x)));
                     }
                     pdata[type] = line;
                     break;
@@ -117,3 +158,31 @@ TimeMapItem.prototype.addExportData = function(data) {
     data['options']['saveOpts'] = this.opts['saveOpts'];
     return data;
 }
+
+/**
+ * Make TimeMap.init()-style points from a GLatLng
+ *
+ * @param (GLatLng) latLng      GLatLng to convert
+ * @return (Object)
+ */
+TimeMap.makePoint = function(latLng) {
+    return {
+        'lat': latLng.lat(),
+        'lon': latLng.lng()
+    }
+}
+
+/**
+ * Util function: get the key from the map if the val is found
+ *
+ * @param (Object) map      Object to search
+ * @param (?) val           Value to look for
+ * @return (String)         Key if found, null if not
+ */
+function revHash(map, val) {
+    for (k in map)
+        if (map[k] == val)
+            return k;
+    // nothing found
+    return null;
+} 
