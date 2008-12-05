@@ -394,46 +394,11 @@ TimeMap.prototype.initTimeline = function(bands) {
     
     // filter: hide off-timeline items
     if (this.opts.hidePastFuture) {
-        this.addFilter("map", function(item) {
-            var topband = item.dataset.timemap.timeline.getBand(0);
-            var maxVisibleDate = topband.getMaxVisibleDate().getTime();
-            var minVisibleDate = topband.getMinVisibleDate().getTime();
-            if (item.event != null) {
-                var itemStart = item.event.getStart().getTime();
-                var itemEnd = item.event.getEnd().getTime();
-                // hide items in the future
-                if (itemStart > maxVisibleDate) {
-                    return false;
-                } 
-                // hide items in the past
-                else if (itemEnd < minVisibleDate || 
-                    (item.event.isInstant() && itemStart < minVisibleDate)) {
-                    return false;
-                }
-            }
-            return true;
-        });
+        this.addFilter("map", TimeMap.hidePastFuture);
     }
     // filter: hide all but the present moment - overridden by hidePastFuture
     else if (this.opts.showMomentOnly) {
-        this.addFilter("map", function(item) {
-            var topband = item.dataset.timemap.timeline.getBand(0);
-            var momentDate = topband.getCenterVisibleDate().getTime();
-            if (item.event != null) {
-                var itemStart = item.event.getStart().getTime();
-                var itemEnd = item.event.getEnd().getTime();
-                // hide items in the future
-                if (itemStart > momentDate) {
-                    return false;
-                } 
-                // hide items in the past
-                else if (itemEnd < momentDate || 
-                    (item.event.isInstant() && itemStart < momentDate)) {
-                    return false;
-                }
-            }
-            return true;
-        });
+        this.addFilter("map", TimeMap.showMomentOnly);
     }
     
     // add callback for window resize
@@ -522,6 +487,57 @@ TimeMap.prototype.removeFilter = function(fid) {
         this.filters[fid].chain.pop();
 }
 
+/**
+ * Static filter function: Hide items not shown on the timeline
+ *
+ * @param {TimeMapItem} item    Item to test for filter
+ * @return {Boolean}            Whether to show the item
+ */
+TimeMap.hidePastFuture = function(item) {
+    var topband = item.dataset.timemap.timeline.getBand(0);
+    var maxVisibleDate = topband.getMaxVisibleDate().getTime();
+    var minVisibleDate = topband.getMinVisibleDate().getTime();
+    if (item.event != null) {
+        var itemStart = item.event.getStart().getTime();
+        var itemEnd = item.event.getEnd().getTime();
+        // hide items in the future
+        if (itemStart > maxVisibleDate) {
+            return false;
+        } 
+        // hide items in the past
+        else if (itemEnd < minVisibleDate || 
+            (item.event.isInstant() && itemStart < minVisibleDate)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
+ * Static filter function: Hide items not shown on the timeline
+ *
+ * @param {TimeMapItem} item    Item to test for filter
+ * @return {Boolean}            Whether to show the item
+ */
+TimeMap.showMomentOnly = function(item) {
+    var topband = item.dataset.timemap.timeline.getBand(0);
+    var momentDate = topband.getCenterVisibleDate().getTime();
+    if (item.event != null) {
+        var itemStart = item.event.getStart().getTime();
+        var itemEnd = item.event.getEnd().getTime();
+        // hide items in the future
+        if (itemStart > momentDate) {
+            return false;
+        } 
+        // hide items in the past
+        else if (itemEnd < momentDate || 
+            (item.event.isInstant() && itemStart < momentDate)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 /*----------------------------------------------------------------------------
  * TimeMapDataset Class - holds references to items and visual themes
  *---------------------------------------------------------------------------*/
@@ -564,7 +580,7 @@ function TimeMapDataset(timemap, options) {
     // allow for other data parsers (e.g. Gregorgian) by key or function
     if (typeof(options["dateParser"]) == "string") 
         options["dateParser"] = TimeMapDataset.dateParsers[options["dateParser"]];
-    this.opts.dateParser = options["dateParser"] || Timeline.DateTime.parseIso8601DateTime;
+    this.opts.dateParser = options["dateParser"] || TimeMapDataset.dateParsers['iso8601'];
     
     // get functions
     this.getItems = function() { return this.items; }
@@ -1149,17 +1165,23 @@ function TimeMapItem(placemark, event, dataset, options) {
  * Standard open info window function, using static text in map window
  */
 TimeMapItem.openInfoWindowBasic = function() {
+    var html = this.opts.infoHtml;
     // create content for info window if none is provided
-    if (this.opts.infoHtml == "" && this.opts.infoUrl == "") {
-        this.opts.infoHtml = '<div class="infotitle">' + this.opts.title + '</div>';
+    if (html == "") {
+        html = '<div class="infotitle">' + this.opts.title + '</div>';
         if (this.opts.description != "") 
-            this.opts.infoHtml += '<div class="infodescription">' + this.opts.description + '</div>';
+            html += '<div class="infodescription">' + this.opts.description + '</div>';
+    }
+    // scroll timeline if necessary
+    if (this.placemark && !this.visible && this.event) {
+        var topband = this.dataset.timemap.timeline.getBand(0);
+        topband.setCenterVisibleDate(this.event.getStart());
     }
     // open window
     if (this.getType() == "marker") {
-        this.placemark.openInfoWindowHtml(this.opts.infoHtml);
+        this.placemark.openInfoWindowHtml(html);
     } else {
-        this.map.openInfoWindowHtml(this.getInfoPoint(), this.opts.infoHtml);
+        this.map.openInfoWindowHtml(this.getInfoPoint(), html);
     }
 }
 

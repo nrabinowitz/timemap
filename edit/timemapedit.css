@@ -57,7 +57,6 @@ Styles for editing tools
 }
 #dspane .dataset .dstitle {
     font-weight: bold;
-    border-bottom: 1px solid #CCCCCC;
     cursor: pointer;
     margin-left: 23px;
     padding-top: 2px;
