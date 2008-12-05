@@ -52,6 +52,8 @@ function TimeMap(tElement, mElement, options) {
     // set defaults for options
     // other options can be set directly on the map or timeline
     this.opts = options || {};   // make sure the options object isn't null
+    // allow map types to be specified by key
+    if (typeof(options['mapType']) == 'string') options['mapType'] = TimeMap.mapTypes[options['mapType']];
     this.opts.mapCenter =        options['mapCenter'] || new GLatLng(0,0); 
     this.opts.mapZoom =          options['mapZoom'] || 0;
     this.opts.mapType =          options['mapType'] || G_PHYSICAL_MAP;
@@ -62,6 +64,7 @@ function TimeMap(tElement, mElement, options) {
     this.opts.hidePastFuture =   ('hidePastFuture' in options) ? options['hidePastFuture'] : true;
     this.opts.showMomentOnly =   ('showMomentOnly' in options) ? options['showMomentOnly'] : false;
     this.opts.centerMapOnItems = ('centerMapOnItems' in options) ? options['centerMapOnItems'] : true;
+    
     
     // initialize map
     if (GBrowserIsCompatible()) {
@@ -134,7 +137,13 @@ TimeMap.init = function(config) {
     config['scrollTo'] = config['scrollTo'] || "earliest";
     if (!config['bandInfo']) {
         var intervals = config['bandIntervals'] || 
+            config['options']['bandIntervals'] ||
             [Timeline.DateTime.WEEK, Timeline.DateTime.MONTH];
+        // allow intervals to be specified by key
+        if (typeof(intervals) == 'string') intervals = TimeMap.intervals[intervals];
+        // save for later reference
+        config['options']['bandIntervals'] = intervals;
+        // make band info
         config['bandInfo'] = [
     		{
                width:          "80%", 
@@ -287,6 +296,19 @@ TimeMap.intervals = {
     'mon': [Timeline.DateTime.MONTH, Timeline.DateTime.YEAR],
     'yr': [Timeline.DateTime.YEAR, Timeline.DateTime.DECADE],
     'dec': [Timeline.DateTime.DECADE, Timeline.DateTime.CENTURY]
+}
+
+/**
+ * Map of Google map types. Using keys rather than literals allows
+ * for serialization of the map type.
+ */
+TimeMap.mapTypes = {
+    'normal':G_NORMAL_MAP, 
+    'satellite':G_SATELLITE_MAP, 
+    'hybrid':G_HYBRID_MAP, 
+    'physical':G_PHYSICAL_MAP, 
+    'moon':G_MOON_VISIBLE_MAP, 
+    'sky':G_SKY_VISIBLE_MAP
 }
 
 /**

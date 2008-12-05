@@ -12,7 +12,7 @@
  *---------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------
- * TimeMap manipulation: global settings, stuff affecting every dataset
+ * TimeMap manipulation: stuff affecting every dataset
  *---------------------------------------------------------------------------*/
  
 /**
@@ -75,6 +75,69 @@ TimeMap.prototype.showDatasets = function() {
 		ds.visible = true;
 	});
     this.filter("map");
+}
+ 
+/**
+ * Change the default map type
+ *
+ * @param {String or Object} mapType   New map type If string, looks up in TimeMap.mapTypes.
+ */
+TimeMap.prototype.changeMapType = function (mapType) {
+    // check for no change
+    if (mapType == this.opts['mapType']) return;
+    // look for mapType
+    if (typeof(mapType) == 'string') mapType = TimeMap.mapTypes[mapType];
+    // no mapType specified
+    if (!mapType) return;
+    // change it
+    this.opts['mapType'] = mapType;
+    this.map.setMapType(mapType);
+}
+
+/*----------------------------------------------------------------------------
+ * TimeMap manipulation: stuff affecting the timeline
+ *---------------------------------------------------------------------------*/
+
+/**
+ * Refresh the timeline, maintaining the current date
+ */
+TimeMap.prototype.refreshTimeline = function () {
+    var topband = this.timeline.getBand(0);
+    var centerDate = topband.getCenterVisibleDate();
+    topband.getEventPainter().getLayout()._laidout = false;
+    this.timeline.layout();
+    topband.setCenterVisibleDate(centerDate);
+}
+
+/**
+ * Change the intervals on the timeline.
+ *
+ * @param {String or Array} intervals   New intervals. If string, looks up in TimeMap.intervals.
+ */
+TimeMap.prototype.changeTimeIntervals = function (intervals) {
+    // check for no change
+    if (intervals == this.opts['bandIntervals']) return;
+    // look for intervals
+    if (typeof(intervals) == 'string') intervals = TimeMap.intervals[intervals];
+    // no intervals specified
+    if (!intervals) return;
+    this.opts['bandIntervals'] = intervals;
+    // internal function - change band interval
+    var changeInterval = function(band, interval) {
+      band.getEther()._interval = Timeline.DateTime.gregorianUnitLengths[interval];
+      band.getEtherPainter()._unit = interval;
+    }
+    // grab date
+    var topband = this.timeline.getBand(0);
+    var centerDate = topband.getCenterVisibleDate();
+    // change interval for each band
+    for (var x=0; x<this.timeline.getBandCount(); x++) {
+        changeInterval(this.timeline.getBand(x), intervals[x]);
+    }
+    // re-layout timeline
+    topband.getEventPainter().getLayout()._laidout = false;
+    this.timeline.layout();
+    topband.setCenterVisibleDate(centerDate);
 }
  
 /**
@@ -265,42 +328,4 @@ TimeMapItem.getPlacemarkType = function(pm) {
         return 'setFillStyle' in pm ? 'polygon' : 'polyline';
     }
     return false;
-}
-
-/**
- * Refresh the timeline, maintaining the current date
- */
-TimeMap.prototype.refreshTimeline = function () {
-    var topband = this.timeline.getBand(0);
-    var centerDate = topband.getCenterVisibleDate();
-    topband.getEventPainter().getLayout()._laidout = false;
-    this.timeline.layout();
-    topband.setCenterVisibleDate(centerDate);
-}
-
-/**
- * Change the intervals on the timeline.
- *
- * @param {String or Array} intervals   New intervals. If string, looks up in TimeMap.intervals.
- */
-TimeMap.prototype.changeTimeIntervals = function (intervals) {
-    // look for intervals
-    if (typeof(intervals) == 'string') intervals = TimeMap.intervals[intervals];
-    if (!intervals) return;
-    // internal function - change band interval
-    var changeInterval = function(band, interval) {
-      band.getEther()._interval = Timeline.DateTime.gregorianUnitLengths[interval];
-      band.getEtherPainter()._unit = interval;
-    }
-    // grab date
-    var topband = this.timeline.getBand(0);
-    var centerDate = topband.getCenterVisibleDate();
-    // change interval for each band
-    for (var x=0; x<this.timeline.getBandCount(); x++) {
-        changeInterval(this.timeline.getBand(x), intervals[x]);
-    }
-    // re-layout timeline
-    topband.getEventPainter().getLayout()._laidout = false;
-    this.timeline.layout();
-    topband.setCenterVisibleDate(centerDate);
 }
