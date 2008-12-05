@@ -27,7 +27,9 @@ TimeMap.prototype.toJSON = function() {
  * Make a cleaned up object for the TimeMap options
  */
 TimeMap.prototype.makeOptionData = function() {
-    var data = this.opts;
+    var data = {};
+    // copy options
+    for (k in this.opts) data[k] = this.opts[k];
     // clean up: mapCenter
     if (data['mapCenter']) data['mapCenter'] = TimeMap.makePoint(data['mapCenter']);
     // clean up: mapType
@@ -43,6 +45,13 @@ TimeMap.prototype.makeOptionData = function() {
     }
     // clean up: bandIntervals
     if (data['bandIntervals']) data['bandIntervals'] = revHash(TimeMap.intervals, data['bandIntervals']);
+    // including themes here too - might be a TimeMap attribute
+    var themes=[], t;
+    for (id in this.datasets) {
+        t = revHash(TimeMapDataset.themes, this.datasets[id].opts.theme)
+        if (t) themes.push(t);
+    }
+    data['themes'] = t;
     return data;
 }
 
@@ -70,6 +79,7 @@ TimeMap.prototype.addExportData = function(data) {
 TimeMapDataset.prototype.toJSON = function() {
     var data = {
         'title': this.getTitle(),
+        'theme': revHash(TimeMapDataset.themes, this.opts.theme),
         'data': {
             'type':'basic', // only type supported by serialization at the moment
             'value': this.getItems()

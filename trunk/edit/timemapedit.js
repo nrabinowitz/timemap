@@ -10,7 +10,7 @@
  * Functions in this file offer tools for editing a timemap dataset in
  * a browser-based GUI. Call tm.enterEditMode() and tm.closeEditMode() 
  * to turn the tools on and off; set configuration options in 
- * tm.opts.editOpts (set as {options{editOpts{...}} in TimeMap.init()).
+ * tm.opts.saveOpts (set as {options{saveOpts{...}} in TimeMap.init()).
  * 
  * 
  * Depends on:
@@ -34,11 +34,11 @@
   */
 TimeMap.prototype.enterEditMode = function(editPaneId, options) {
     // set default options if none have been specified
-    if (!this.opts.editOpts) {
+    if (!this.opts.saveOpts) {
         var opts = options || {};
         opts.saveTarget = opts.saveTarget || "";
         opts.saveMode =   opts.saveMode || "explicit";
-        this.opts.editOpts = opts;
+        this.opts.saveOpts = opts;
     }
     // create edit pane
     if (!this.editPane) {
@@ -107,12 +107,18 @@ TimeMap.prototype.closeEditMode = function() {
  * @param (Function) f    Optional callback function
  */
 TimeMap.prototype.saveAllChanges = function(f) {
-    var target = this.opts.editOpts.saveTarget;
+    try {
+        var target = this.opts.saveOpts.saveTarget;
+    } catch(e) {
+        return;
+    }
     f = f || function(d){};
     if (target) {
-        // XXX: Save options as well
-        var data = {'datasets':JSON.stringify( this.datasets)}
-        // send the datasets to the server, serialized
+        var data = {
+          'options':JSON.stringify(this.makeOptionData()),
+          'datasets':JSON.stringify(this.datasets)
+        }
+        // send the data to the server, serialized
         $.post(target, data, f);
     }
 }
@@ -166,7 +172,7 @@ TimeMapDataset.prototype.closeEditMode = function() {
  */
 TimeMapDataset.prototype.saveAllChanges = function(f) {
     try {
-        var target = this.timemap.opts.editOpts.saveTarget;
+        var target = this.timemap.opts.saveOpts.saveTarget;
     } catch(e) {
       return;
     }
@@ -236,7 +242,7 @@ TimeMapDataset.prototype.updateEditPane = function() {
                 return(value);
             })
     );
-    // save and close button
+    /* save and close button - leaving this off for now
     $(this.editpane).append(
         $('<span class="editlink saveds">save &amp; close</span>')
             .click(function() {
@@ -244,7 +250,7 @@ TimeMapDataset.prototype.updateEditPane = function() {
                 ds.closeEditMode();
                 $(ds.editpane).remove();
             })
-    );
+    ); */
     // close button
     $(this.editpane).append(
         $('<span class="editlink closeds">close</span>')
@@ -447,7 +453,7 @@ TimeMapItem.prototype.updateEditPane = function() {
                     item.updateEditPane();
                 }
                 item.dataset.timemap.refreshTimeline();
-                return(value);
+                return(item.dataset.timemap.formatDate(s));
             }, { placeholder: '<span class="missingelement">(add start date)</span>' })
     );
     // add end time
@@ -476,7 +482,7 @@ TimeMapItem.prototype.updateEditPane = function() {
                     item.event._instant = false;
                 }
                 item.dataset.timemap.refreshTimeline();
-                return(value);
+                return(item.dataset.timemap.formatDate(e));
             }, { placeholder: '<span class="missingelement">(add end date)</span>' })
     );
     // add description
@@ -564,6 +570,8 @@ TimeMapItem.prototype.disablePlacemarkEdits = function() {
  */
 TimeMap.prototype.formatDate = function(d) {
     if (d) {
+        // check for date.js support
+        if (d.toISOString) return d.toISOString();
         // adjust granularity based on band intervals
         var str = d.getFullYear() + '-' + (d.getMonth() + 1 ) + '-' + d.getDate();
         var interval = this.timeline.getBand(0).getEther()._interval;
