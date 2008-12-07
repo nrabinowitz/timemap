@@ -141,28 +141,34 @@ TimeMap.prototype.updateEditDatasets = function() {
  * Turn on editing for a single dataset.
  */
 TimeMapDataset.prototype.enterEditMode = function() {
-    if (!this.editpane) {
-        // make the dataset div
-        var dsdiv = $('<div class="dataset" />').get(0);
-        // save reference
-        this.editpane = dsdiv;
+    if (!this.editmode) {
+        if (!this.editpane) {
+            // make the dataset div
+            var dsdiv = $('<div class="dataset" />').get(0);
+            // save reference
+            this.editpane = dsdiv;
+        }
+        this.updateEditPane();
+        this.each(function(item) {
+            item.enablePlacemarkEdits();
+        });
+        this.editmode = true;
+        GEvent.trigger(this, 'entereditmode');
     }
-    this.updateEditPane();
-    this.each(function(item) {
-        item.enablePlacemarkEdits();
-    });
-    GEvent.trigger(this, 'entereditmode');
 }
 
 /**
  * Turn off editing for a single dataset.
  */
 TimeMapDataset.prototype.closeEditMode = function() {
-    $(this.editpane).empty();
-    this.each(function(item) {
-        item.disablePlacemarkEdits();
-    });
-    GEvent.trigger(this, 'closeeditmode');
+    if (this.editmode) {
+        $(this.editpane).empty();
+        this.each(function(item) {
+            item.disablePlacemarkEdits();
+        });
+        this.editmode = false;
+        GEvent.trigger(this, 'closeeditmode');
+    }
 }
 
 /**
