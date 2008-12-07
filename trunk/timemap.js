@@ -909,7 +909,7 @@ TimeMapDataset.parseKML = function(kml) {
             if (nList.length > 0) {
                 data[geom] = [];
                 coords = getTagValue(nList[0], "coordinates");
-                coordArr = trim(coords).split(/[\r\n\f]+/);
+                coordArr = trim(coords).split(/[\r\n\f ]+/);
                 for (var x=0; x<coordArr.length; x++) {
                     latlon = coordArr[x].split(",");
                     data[geom].push({
