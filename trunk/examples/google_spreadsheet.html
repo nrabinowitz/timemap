@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Google Spreadsheet</title>
+    <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRQHs9wgZpGwRjGwil_qtDm9gEic5BTUz8hqqsNZYYfvNUhOqSJ-Bmk30A"
+      type="text/javascript"></script>
+    <script type="text/javascript" src="http://simile.mit.edu/timeline/api/timeline-api.js"></script>
+    <script src="../timemap.js" type="text/javascript"></script>
+    <script src="../jsonloader.js" type="text/javascript"></script>
+	<script type="text/javascript">
+
+var tm;
+function onLoad() {
+
+    tm = TimeMap.init({
+        mapId: "map",               // Id of map div element (required)
+        timelineId: "timeline",     // Id of timeline div element (required) 
+        datasets: [
+            {
+                title: "Events",
+                id: "events",
+                theme: TimeMapDataset.redTheme({eventIconPath: "../images/"}),
+                data: {
+                    type: "json",
+                    // note that your spreadsheet must be published for this to work
+                    url: "http://spreadsheets.google.com/feeds/list/pjUcDAp-oNIOjmx3LCxT4XA/1/public/values?alt=json-in-script&callback="
+                },
+                // remove wrapper
+                preloadFunction: preloadGSS,
+                // transform data from spreadsheet format
+                transformFunction: transformGSS
+            }
+        ], 
+        bandIntervals: [
+            Timeline.DateTime.WEEK, 
+            Timeline.DateTime.MONTH
+        ]
+    });
+};
+
+// Preload function for the spreadsheet data
+// The preloadFunction should leave you with an array of
+// elements, stripping off outer envelopes, etc.
+function preloadGSS(result) {
+    return result["feed"]["entry"]; 
+}
+
+// Transform function for a single spreadsheet row
+// The transformFunction should transform a single element from
+// your JSON format to the format required by loadItem().
+function transformGSS(data) {
+    // map spreadsheet column ids to corresponding TimeMap elements
+    // see http://code.google.com/apis/spreadsheets/docs/2.0/reference.html#gsx_reference
+    // for details on how spreadsheet column ids are derived
+    var fieldMap = {
+        'title':'title',
+        'lat':'lat',
+        'lon':'lon',
+        // note that date fields must be in yyyy-mm-dd format - you may need
+        // to set the cell format as "plain text" in the spreadsheet
+        'start':'date',
+        'end':'',
+        'description':'description'
+    }
+    var getField = function(f) {
+        if (f in fieldMap) {
+            return data['gsx$' + fieldMap[f]]['$t'];
+        } else return false;
+    };
+    return {
+        title: getField("title"),
+        start: getField("start"),
+        point: {
+            lat: getField("lat"),
+            lon: getField("lon")
+        },
+        options: {
+            description: getField("description")
+        }
+    };
+}
+    </script>
+	<link href="examples.css" type="text/css" rel="stylesheet"/>
+    <style>
+    div#timelinecontainer{
+    width: 100%;
+    height: 40%;
+    }
+    
+    div#timeline{
+    width: 100%;
+    height: 100%;
+    font-size: 12px;
+    background: #CCCCCC;
+    }
+    
+    div#mapcontainer {
+    width: 100%;
+    height: 60%;
+    }
+    
+    #timemap {
+    height: 650px;
+    }
+    div#map {
+    width: 100%;
+    height: 100%;
+    background: #EEEEEE;
+    }
+    
+    div.infodescription {
+    width: 300px;
+    }
+    </style>
+  </head>
+
+  <body onload="onLoad();" onunload="GUnload();">
+    <div id="help">
+    <h1>Data from a Google Spreadsheet</h1>
+    In this example, we're loading items from a Google Spreadsheet (<a href="http://spreadsheets.google.com/pub?key=pjUcDAp-oNIOjmx3LCxT4XA" target=_blank>published here</a>).
+    </div>
+    <div id="timemap">
+        <div id="timelinecontainer">
+          <div id="timeline"></div>
+        </div>
+        <div id="mapcontainer">
+          <div id="map"></div>
+        </div>
+    </div>
+  </body>
+</html>
