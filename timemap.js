@@ -257,9 +257,12 @@ TimeMap.init = function(config) {
                     });
                     break;
                 case 'kml':
-                    // data to be loaded from kml file
+                case 'georss':
+                    // data to be loaded from kml or rss file
+                    var parserFunc = data['type']=='kml' ? 
+                        TimeMapDataset.parseKML : TimeMapDataset.parseGeoRSS;
                     GDownloadUrl(data['url'], function(result) {
-                        var items = TimeMapDataset.parseKML(result);
+                        var items = parserFunc(result);
                         items = preload(items);
                         ds.loadItems(items, transform);
                 	    loadMgr.ifLoaded();
