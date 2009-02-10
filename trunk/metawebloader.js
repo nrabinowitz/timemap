@@ -8,7 +8,7 @@
  * Depends on lib/json2.pack.js
  * This file was pulled directly from the Freebase API site:
  * http://www.freebase.com/view/freebase/api
- **/
+ */
 var Metaweb = {};                               // Define our namespace
 Metaweb.HOST = "http://www.freebase.com";       // The Metaweb server
 Metaweb.QUERY_SERVICE = "/api/service/mqlread"; // The service on that server
