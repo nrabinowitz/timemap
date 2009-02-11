@@ -65,7 +65,7 @@ function transformGSS(data) {
         'description':'description'
     }
     var getField = function(f) {
-        if (f in fieldMap) {
+        if (f in fieldMap && fieldMap[f]) {
             return data['gsx$' + fieldMap[f]]['$t'];
         } else return false;
     };
