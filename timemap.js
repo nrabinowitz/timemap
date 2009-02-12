@@ -583,7 +583,7 @@ function TimeMapDataset(timemap, options) {
     // allow for other data parsers (e.g. Gregorgian) by key or function
     if (typeof(options["dateParser"]) == "string") 
         options["dateParser"] = TimeMapDataset.dateParsers[options["dateParser"]];
-    this.opts.dateParser = options["dateParser"] || TimeMapDataset.dateParsers['iso8601'];
+    this.opts.dateParser = options["dateParser"] || TimeMapDataset.hybridParser;
     
     // get functions
     this.getItems = function() { return this.items; }
@@ -591,10 +591,24 @@ function TimeMapDataset(timemap, options) {
 }
 
 /**
+ * Parse dates with the ISO 8601 parser, then fall back on the Gregorian
+ * parser if the first parse fails
+ *
+ * @param {String} s    String to parse into a Date object
+ * @return {Date}       Parsed date or null
+ */
+TimeMapDataset.hybridParser = function(s) {
+    var d = Timeline.DateTime.parseIso8601DateTime(s);
+    if (!d) d = Timeline.DateTime.parseGregorianDateTime(s);
+    return d;
+}
+
+/**
  * Map of supported date parsers. Add custom date parsers here if you
  * want to refer to them by key rather than as a function name.
  */
 TimeMapDataset.dateParsers = {
+    'hybrid': TimeMapDataset.hybridParser,
     'iso8601': Timeline.DateTime.parseIso8601DateTime,
     'gregorian': Timeline.DateTime.parseGregorianDateTime
 }
