@@ -25,18 +25,16 @@ function testItemLoadedInEventSource() {
 
 function testEarliestDate() {
     var ds = tm.datasets["test"];
-    assertEquals("year matches", ds.eventSource.getEarliestDate().getFullYear(), 1980);
-    assertEquals("month matches", ds.eventSource.getEarliestDate().getMonth(), 0);
-    // Timeline seems to adjust for the timezone after parsing :(
-    assertEquals("day matches", ds.eventSource.getEarliestDate().getDate(), 1);
+    assertEquals("year matches", ds.eventSource.getEarliestDate().getUTCFullYear(), 1980);
+    assertEquals("month matches", ds.eventSource.getEarliestDate().getUTCMonth(), 0);
+    assertEquals("day matches", ds.eventSource.getEarliestDate().getUTCDate(), 2);
 }
 
 function testLatestDate() {
     var ds = tm.datasets["test"];
     assertEquals("year matches", ds.eventSource.getLatestDate().getFullYear(), 2000);
     assertEquals("month matches", ds.eventSource.getEarliestDate().getMonth(), 0);
-    // Timeline seems to adjust for the timezone after parsing :(
-    assertEquals("day matches", ds.eventSource.getEarliestDate().getDate(), 1);
+    assertEquals("day matches", ds.eventSource.getEarliestDate().getUTCDate(), 2);
 }
 
 function testItemAttributes() {
