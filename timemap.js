@@ -1113,7 +1113,6 @@ TimeMapItem.closeInfoWindowBasic = function() {
 /*----------------------------------------------------------------------------
  * Utility functions, attached to TimeMap to avoid namespace issues
  *---------------------------------------------------------------------------*/
- 
 
 /**
  * Convenience trim function
@@ -1214,4 +1213,44 @@ TimeMap.makePoint = function(coords) {
         "lat": TimeMap.trim(latlon[0]),
         "lon": TimeMap.trim(latlon[1])
     };
+}
+
+/**
+ * Format a date as an ISO 8601 string
+ *
+ * @param {Date} d          Date to format
+ * @param {int} precision   Optional precision indicator:
+ *                              3 (default): Show full date and time
+ *                              2: Show full date and time, omitting seconds
+ *                              1: Show date only
+ * @return {String}         Formatted string
+ */
+TimeMap.formatDate = function(d, precision) {
+    // default to high precision
+    precision = precision || 3;
+    var str = "";
+    if (d) {
+        // check for date.js support
+        if (d.toISOString) return d.toISOString();
+        // otherwise, build ISO 8601 string
+        var yyyy = d.getUTCFullYear(),
+            mm = d.getUTCMonth(),
+            dd = d.getUTCDate();
+        str += yyyy + '-' + ((mm < 9) ? "0" : "") + (mm + 1 ) + '-' 
+            + ((dd < 10) ? "0" : "") + dd;
+        // show time if top interval less than a week
+        if (precision > 1) {
+            var hh = d.getUTCHours(),
+                mm = d.getUTCMinutes(),
+                ss = d.getUTCSeconds();
+            str += 'T' + ((hh < 10) ? "0" : "") + hh + ':' 
+                + ((mm < 10) ? "0" : "") + mm;
+            // show seconds if the interval is less than a day
+            if (precision > 2) {
+                str += ((ss < 10) ? "0" : "") + ss;
+            }
+            str += 'Z';
+        }
+    }
+    return str;
 }

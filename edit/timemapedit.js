@@ -432,9 +432,17 @@ TimeMapItem.prototype.updateEditPane = function() {
             )
         );
     }
+    // set date precision
+    var precision = 1;
+    var interval = item.dataset.timemap.timeline.getBand(0).getEther()._interval;
+    // show time if top interval less than a week
+    if (interval < Timeline.DateTime.WEEK) {
+        // show seconds if the interval is less than a day
+        precision = (interval < Timeline.DateTime.DAY) ? 3 : 2;
+    }
     // add start time
     var startDate = this.event ?
-        item.dataset.timemap.formatDate(this.event.getStart()) : "";
+        TimeMap.formatDate(this.event.getStart(), precision) : "";
     $(this.editpane).append(
         $('<div class="itemlabel">Start:</div>')
     ).append(
@@ -444,7 +452,7 @@ TimeMapItem.prototype.updateEditPane = function() {
                 // check for invalid dates
                 if (s == null) {
                     return item.event ? 
-                        item.dataset.timemap.formatDate(item.event.getStart()) : "";
+                        TimeMap.formatDate(item.event.getStart(), precision) : "";
                 }
                 // create the event if it doesn't exist
                 if (!item.event) item.createEvent(s);
@@ -459,12 +467,12 @@ TimeMapItem.prototype.updateEditPane = function() {
                     item.updateEditPane();
                 }
                 item.dataset.timemap.refreshTimeline();
-                return(item.dataset.timemap.formatDate(s));
+                return(TimeMap.formatDate(s, precision));
             }, { placeholder: '<span class="missingelement">(add start date)</span>' })
     );
     // add end time
     var endDate = this.event && !this.event.isInstant() ? 
-        item.dataset.timemap.formatDate(this.event.getEnd()) : "";
+        TimeMap.formatDate(this.event.getEnd(), precision) : "";
     $(this.editpane).append(
         $('<div class="itemlabel">End:</div>')
     ).append(
@@ -474,7 +482,7 @@ TimeMapItem.prototype.updateEditPane = function() {
                 // check for invalid dates
                 if (e == null) {
                     return item.event && !item.event.isInstant() ?
-                        item.dataset.timemap.formatDate(item.event.getEnd()) : "";
+                        TimeMap.formatDate(item.event.getEnd(), precision) : "";
                 }
                 // create the event if it doesn't exist
                 if (!item.event) item.createEvent(e);
@@ -488,7 +496,7 @@ TimeMapItem.prototype.updateEditPane = function() {
                     item.event._instant = false;
                 }
                 item.dataset.timemap.refreshTimeline();
-                return(item.dataset.timemap.formatDate(e));
+                return(TimeMap.formatDate(e, precision));
             }, { placeholder: '<span class="missingelement">(add end date)</span>' })
     );
     // add description
@@ -566,30 +574,4 @@ TimeMapItem.prototype.disablePlacemarkEdits = function() {
             this.placemark.disableEditing({onEvent: "mouseover"});
             break;
     }
-}
-
-/**
- * Static utility function - format a date as a string
- *
- * @param d (Date)  Date to format
- * @return (String) Formatted string
- */
-TimeMap.prototype.formatDate = function(d) {
-    if (d) {
-        // check for date.js support
-        if (d.toISOString) return d.toISOString();
-        // adjust granularity based on band intervals
-        var str = d.getFullYear() + '-' + (d.getMonth() + 1 ) + '-' + d.getDate();
-        var interval = this.timeline.getBand(0).getEther()._interval;
-        // show time if top interval less than a week
-        if (interval < Timeline.DateTime.WEEK) {
-            str = str + ' ' + ((d.getHours() < 10) ? "0" : "") + d.getHours() + ':' 
-                + ((d.getMinutes() < 10) ? "0" : "") + d.getMinutes();
-            // show seconds if the interval is less than a day
-            if (interval < Timeline.DateTime.DAY) {
-                str = str + ((d.getSeconds() < 10) ? "0" : "") + d.getSeconds();
-            }
-        }
-        return str;
-    } else return "";
 }
