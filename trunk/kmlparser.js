@@ -31,7 +31,7 @@ TimeMapDataset.parseKML = function(kml) {
     var findNodeTime = function(n, data) {
         var check = false;
         // look for instant timestamp
-        nList = getNodeList(n, "TimeStamp");
+        var nList = getNodeList(n, "TimeStamp");
         if (nList.length > 0) {
             data["start"] = getTagValue(nList[0], "when");
             check = true;
@@ -67,7 +67,7 @@ TimeMapDataset.parseKML = function(kml) {
         findNodeTime(pm, data);
         // find placemark
         PLACEMARK: {
-            var coords, coordArr, latlon, geom;
+            var nList, coords, coordArr, latlon, geom;
             // look for marker
             nList = getNodeList(pm, "Point");
             if (nList.length > 0) {
