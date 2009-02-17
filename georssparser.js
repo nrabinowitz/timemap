@@ -30,60 +30,24 @@ TimeMapDataset.parseGeoRSS = function(rss) {
     var items = [], data, node, placemarks, pm;
     node = GXml.parse(rss);
     
+    // get TimeMap utilty functions
+    // assigning to variables should compress better
+    var getTagValue = TimeMap.getTagValue,
+        getNodeList = TimeMap.getNodeList,
+        makePoint = TimeMap.makePoint,
+        trim = TimeMap.trim;
+    
     // define namespaces
-    nsMap = {
-        'georss':'http://www.georss.org/georss',
-        'gml':'http://www.opengis.net/gml',
-        'geo':'http://www.w3.org/2003/01/geo/wgs84_pos#'
-    };
-    
-    // internal function: get tag value as a string
-    var getTagValue = function(n, tag, ns) {
-        var nList = getNodeList(n, tag, ns);
-        if (nList.length > 0) {
-            return nList[0].firstChild.nodeValue;
-        } else {
-            return "";
-        }
-    };
-    
-    // internal function to deal with cross-browser namespace issues
-    var getNodeList = function(n, tag, ns) {
-        if (ns == undefined)
-            // no namespace
-            return n.getElementsByTagName(tag);
-        if (n.getElementsByTagNameNS)
-            // function exists
-            return n.getElementsByTagNameNS(nsMap[ns], tag);
-        // no function, try the colon tag name
-        return n.getElementsByTagName(ns + ':' + tag);
-    };
-    
-    // internal function: make a point object from array or string
-    var makePoint = function(coords) {
-        var latlon;
-        if (isArray(coords)) latlon = coords;
-        else {
-            if (coords.indexOf(',') > -1) {
-                // split on commas
-                latlon = coords.split(",");
-            } else {
-                // split on whitespace
-                latlon = coords.split(/[\r\n\f ]+/);
-            }
-        }
-        return {
-            "lat": trim(latlon[0]),
-            "lon": trim(latlon[1])
-        };
-    }
+    TimeMap.nsMap['georss'] = 'http://www.georss.org/georss';
+    TimeMap.nsMap['gml'] = 'http://www.opengis.net/gml';
+    TimeMap.nsMap['geo'] = 'http://www.w3.org/2003/01/geo/wgs84_pos#';
     
     // determine whether this is an Atom feed or an RSS feed
     var feedType = (node.firstChild.tagName == 'rss') ? 'rss' : 'atom';
     
     // look for placemarks
     tName = (feedType == 'rss' ? "item" : "entry");
-    placemarks = node.getElementsByTagName(tName);
+    placemarks = getNodeList(node, tName);
     for (var i=0; i<placemarks.length; i++) {
         pm = placemarks[i];
         data = { options: {} };

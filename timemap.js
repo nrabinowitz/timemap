@@ -990,7 +990,7 @@ function TimeMapItem(placemark, event, dataset, options) {
     this.map =       dataset.timemap.map;
     
     // initialize placemark(s) with some type juggling
-    if (placemark && isArray(placemark) && placemark.length == 0) placemark = null;
+    if (placemark && TimeMap.isArray(placemark) && placemark.length == 0) placemark = null;
     if (placemark && placemark.length == 1) placemark = placemark[0];
     this.placemark = placemark;
     
@@ -1109,15 +1109,109 @@ TimeMapItem.closeInfoWindowBasic = function() {
                 this.map.closeInfoWindow();
     }
 }
+
+/*----------------------------------------------------------------------------
+ * Utility functions, attached to TimeMap to avoid namespace issues
+ *---------------------------------------------------------------------------*/
  
 
-// convenience trim function
-function trim(str) {
+/**
+ * Convenience trim function
+ * 
+ * @param {String} str      String to trim
+ * @return {String}         Trimmed string
+ */
+TimeMap.trim = function(str) {
+    str = str && String(str) || '';
     return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 }
 
-// convenience array tester
-function isArray(o) {   
+/**
+ * Convenience array tester
+ *
+ * @param {Object} o        Object to test
+ * @return {Boolean}        Whether the object is an array
+ */
+TimeMap.isArray = function(o) {   
     return o && !(o.propertyIsEnumerable('length')) && 
         typeof o === 'object' && typeof o.length === 'number';
+}
+
+/**
+ * Get XML tag value as a string
+ *
+ * @param {XML Node} n      Node in which to look for tag
+ * @param {String} tag      Name of tag to look for
+ * @param {String} ns       Optional namespace
+ * @return {String}         Tag value as string
+ */
+TimeMap.getTagValue = function(n, tag, ns) {
+    var str = "";
+    var nList = TimeMap.getNodeList(n, tag, ns);
+    if (nList.length > 0) {
+        var n = nList[0].firstChild;
+        // fix for extra-long nodes
+        // see http://code.google.com/p/timemap/issues/detail?id=36
+        while(n != null) {
+            str += n.nodeValue;
+            n = n.nextSibling;
+        }
+    }
+    return str;
+};
+
+/**
+ * Empty container for mapping XML namespaces to URLs
+ */
+TimeMap.nsMap = {};
+
+/**
+ * Cross-browser implementation of getElementsByTagNameNS
+ * Note: Expects any applicable namespaces to be mapped in
+ * TimeMap.nsMap. XXX: There may be better ways to do this.
+ *
+ * @param {XML Node} n      Node in which to look for tag
+ * @param {String} tag      Name of tag to look for
+ * @param {String} ns       Optional namespace
+ * @return {XML Node List}  List of nodes with the specified tag name
+ */
+TimeMap.getNodeList = function(n, tag, ns) {
+    if (ns == undefined)
+        // no namespace
+        return n.getElementsByTagName(tag);
+    if (n.getElementsByTagNameNS && TimeMap.nsMap[ns])
+        // function and namespace both exist
+        return n.getElementsByTagNameNS(TimeMap.nsMap[ns], tag);
+    // no function, try the colon tag name
+    return n.getElementsByTagName(ns + ':' + tag);
+};
+
+/**
+ * Make TimeMap.init()-style points from a GLatLng, array, or string
+ *
+ * @param (Object) coords      GLatLng, array, or string to convert
+ * @return (Object)
+ */
+TimeMap.makePoint = function(coords) {
+    var latlon;
+    // GLatLng
+    if (coords.lat && coords.lng) {
+        latlon = [coords.lat(), coords.lng()]
+    }
+    // array of coordinates
+    if (TimeMap.isArray(coords)) latlon = coords;
+    // string
+    else {
+        if (coords.indexOf(',') > -1) {
+            // split on commas
+            latlon = coords.split(",");
+        } else {
+            // split on whitespace
+            latlon = coords.split(/[\r\n\f ]+/);
+        }
+    }
+    return {
+        "lat": TimeMap.trim(latlon[0]),
+        "lon": TimeMap.trim(latlon[1])
+    };
 }
