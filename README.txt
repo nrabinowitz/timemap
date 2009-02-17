@@ -15,26 +15,28 @@ Files in the project, in order of importance:
 
 Packed files (YUI Compressor)
 - timemap_full.pack.js:  The library and all helper files
-- timemap.pack.js:       Just the library file
+- timemap.pack.js:       Just the core library file
 
 Source files
 - timemap.js:       The core TimeMap library - all you need to load and display local
-                    JSON or KML data on a timemap.
+                    JSON data on a timemap.
 - manipulation.js:  Additional functions to manipulate a TimeMap after loading
+- kmlparser.js      Parser functions for loading KML files
+- georssparser.js   Parser functions for loading GeoRSS files
 - jsonloader.js:    A helper script to load remote JSON data
-- metawebloader.js  A helper script to load remote Metaweb data
+- metawebloader.js  A helper script to load remote Metaweb data from freebase.com
 - timemapexport.js  Additional functions to help export a TimeMap as serialized JSON
 
 Documentation
-- LICENSE.txt:     The license
-- README.txt       This file
+- LICENSE.txt:      The license
+- README.txt        This file
 
 Other stuff
-- edit/            Semi-experimental editing UI - depends on jQuery
-- examples/        Example HTML code
-- images/          Simple icons for timeline events
-- lib/             External libraries that may be useful
-- tests/           jsUnit tests
+- edit/             Semi-experimental editing UI - depends on jQuery
+- examples/         Example HTML code
+- images/           Simple icons for timeline events
+- lib/              External libraries that may be useful
+- tests/            jsUnit tests
 
 See the examples folder for (you guessed it) working examples. More
 documentation can be found on the code site: 
@@ -49,6 +51,15 @@ Comments welcomed at nick (at) nickrabinowitz (dot) com.
 -------------------------------------------------------------------------------
 
 CHANGELOG (somewhat rough - see the SVN commit log for more detail)
+
+Version 1.4 (unreleased)
+-----------
+- Added GeoRSS parser
+- Moved KML parser to separate file. NOTE: You now need to load kmlparser.js
+separately to load KML, unless you are using timemap_full.pack.js.
+- Improvements to default date parser
+- Added several new examples: Google spreadsheet, lines between points, polytween
+- New tests and small bugfixes
 
 Version 1.3
 -----------
