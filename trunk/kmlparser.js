@@ -41,7 +41,9 @@ TimeMapDataset.parseKML = function(kml) {
             nList = getNodeList(n, "TimeSpan");
             if (nList.length > 0) {
                 data["start"] = getTagValue(nList[0], "begin");
-                data["end"] = getTagValue(nList[0], "end");
+                data["end"] = getTagValue(nList[0], "end") ||
+                    // unbounded spans end at the present time
+                    TimeMap.formatDate(new Date());
                 check = true;
             }
         }

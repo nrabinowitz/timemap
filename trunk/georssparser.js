@@ -60,12 +60,7 @@ TimeMapDataset.parseGeoRSS = function(rss) {
             // RSS needs date conversion
             var d = new Date(Date.parse(getTagValue(pm, "pubDate")));
             // reformat
-            data["start"] = d.getFullYear() + '-' 
-                + ((d.getMonth() < 9) ? "0" : "") + (d.getMonth() + 1 ) + '-' 
-                + ((d.getDate() < 10) ? "0" : "") + d.getDate()
-                + 'T' + ((d.getHours() < 10) ? "0" : "") + d.getHours() + ':' 
-                + ((d.getMinutes() < 10) ? "0" : "") + d.getMinutes() + ':' 
-                + ((d.getSeconds() < 10) ? "0" : "") + d.getSeconds() + 'Z';
+            data["start"] = TimeMap.formatDate(d);
         } else {
             // atom uses ISO 8601
             data["start"] = getTagValue(pm, "updated");
