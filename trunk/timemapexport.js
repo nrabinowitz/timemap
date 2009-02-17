@@ -170,19 +170,6 @@ TimeMapItem.prototype.addExportData = function(data) {
 }
 
 /**
- * Make TimeMap.init()-style points from a GLatLng
- *
- * @param (GLatLng) latLng      GLatLng to convert
- * @return (Object)
- */
-TimeMap.makePoint = function(latLng) {
-    return {
-        'lat': latLng.lat(),
-        'lon': latLng.lng()
-    }
-}
-
-/**
  * Util function: get the key from the map if the val is found
  *
  * @param (Object) map      Object to search
