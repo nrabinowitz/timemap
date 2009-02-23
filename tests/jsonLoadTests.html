@@ -1,41 +1,22 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-
 <html>
-
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>TimeMap Basic Load Tests</title>
-<link rel="stylesheet" type="text/css" href="../jsUnit/css/jsUnitStyle.css">
-<script language="JavaScript" type="text/javascript" src="../../jsunit/app/jsUnitCore.js"></script><script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRQHs9wgZpGwRjGwil_qtDm9gEic5BTUz8hqqsNZYYfvNUhOqSJ-Bmk30A"
-      type="text/javascript"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>TimeMap Basic Load Tests</title>
+    <link rel="stylesheet" type="text/css" href="../jsUnit/css/jsUnitStyle.css">
+    <link  rel="stylesheet" type="text/css" href="tests.css">
+    <script language="JavaScript" type="text/javascript" src="../../jsunit/app/jsUnitCore.js"></script><script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRQHs9wgZpGwRjGwil_qtDm9gEic5BTUz8hqqsNZYYfvNUhOqSJ-Bmk30A" type="text/javascript"></script>
     <script type="text/javascript" src="http://simile.mit.edu/timeline/api/timeline-api.js"></script>
     <script src="../timemap.js" type="text/javascript"></script>
     <script src="../jsonloader.js" type="text/javascript"></script>
     <script src="loadTests.js" type="text/javascript"></script>  
-<script language="JavaScript" type="text/javascript">
+    <script language="JavaScript" type="text/javascript">
 
-var tm = null;
+    function setUpPage() {
+        jsonLoadTestSetup();
+    }
 
-function setUpPage() {
-    tm = TimeMap.init({
-        mapId: "map",               // Id of map div element (required)
-        timelineId: "timeline",     // Id of timeline div element (required) 
-        datasets: [
-            {
-                title: "Test Dataset",
-                id: "test",
-                data: {
-                    type: "json",
-                    url: "data/data.js?cb=" 
-                }
-            }
-        ],
-        dataDisplayedFunction: function() { setUpPageStatus = "complete"; }
-    });
-}
-
-</script>
-<link href="tests.css" type="text/css" rel="stylesheet"/>
+    </script>
 </head>
 
 <body>
