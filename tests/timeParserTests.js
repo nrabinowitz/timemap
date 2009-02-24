@@ -86,17 +86,17 @@ var items = [
     },
     {
     // basic ISO8601 date + time
-      "start" : "1980-01-02 10:20:30",
+      "start" : "1980-01-02 10:20:30Z",
       "title" : "Test Event"
     },
     {
     // basic ISO8601 date + time, T format
-      "start" : "1980-01-02T10:20:30",
+      "start" : "1980-01-02T10:20:30Z",
       "title" : "Test Event"
     },
     {
     // basic ISO8601 date + time, T format, no dividers
-      "start" : "19800102T102030",
+      "start" : "19800102T102030Z",
       "title" : "Test Event"
     },
     {

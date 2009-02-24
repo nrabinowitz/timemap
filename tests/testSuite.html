@@ -8,7 +8,7 @@
     <script language="JavaScript" type="text/javascript" src="../../jsunit/app/jsUnitCore.js"></script>
     <script language="JavaScript" type="text/javascript">
 
-function loadSuite() {
+function loadSuite_tl12() {
     var result = new top.jsUnitTestSuite();
     result.addTestPage("../timemap/tests/basicLoadTests.html");
     result.addTestPage("../timemap/tests/kmlLoadTests.html");
@@ -23,9 +23,25 @@ function loadSuite() {
     return result;
 }
 
+function loadSuite_tl220() {
+    var result = new top.jsUnitTestSuite();
+    result.addTestPage("../timemap/tests/basicLoadTests_tl220.html");
+    result.addTestPage("../timemap/tests/kmlLoadTests_tl220.html");
+    result.addTestPage("../timemap/tests/jsonLoadTests_tl220.html");
+    result.addTestPage("../timemap/tests/geoRSSLoadTests_tl220.html");
+    result.addTestPage("../timemap/tests/visibilityTests_tl220.html");
+    result.addTestPage("../timemap/tests/missingElementTests_tl220.html");
+    result.addTestPage("../timemap/tests/placemarkTests_tl220.html");
+    result.addTestPage("../timemap/tests/deletionTests_tl220.html");
+    result.addTestPage("../timemap/tests/themeTests_tl220.html");
+    result.addTestPage("../timemap/tests/timeParserTests_tl220.html");
+    return result;
+}
+
 function suite() {
     var newsuite = new top.jsUnitTestSuite();
-    newsuite.addTestSuite(loadSuite());
+    newsuite.addTestSuite(loadSuite_tl12());
+    newsuite.addTestSuite(loadSuite_tl220());
     return newsuite;
 }
 
