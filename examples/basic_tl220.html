@@ -70,20 +70,9 @@ function onLoad() {
                 }
             }
         ],
-        bandInfo: [    
-            {
-		             width:          "85%", 
-		             intervalUnit:   Timeline.DateTime.DECADE, 
-		             intervalPixels: 200,
-		             trackHeight:    1.2,
-		             trackGap:       0.2
-		    },
-		    {
-		             eventSource:    null,
-		             width:          "15%", 
-		             intervalUnit:   Timeline.DateTime.CENTURY, 
-		             intervalPixels: 300
-            }
+        bandIntervals: [
+            Timeline.DateTime.DECADE, 
+            Timeline.DateTime.CENTURY
         ]
     });
     // manipulate the timemap further here if you like
