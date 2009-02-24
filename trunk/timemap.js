@@ -162,6 +162,7 @@ TimeMap.init = function(config) {
                 intervalUnit:   intervals[1], 
                 intervalPixels: 100,
                 showEventText:  false,
+                overview: true,
                 trackHeight:    0.4,
                 trackGap:       0.2
             }
