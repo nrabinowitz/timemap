@@ -52,8 +52,9 @@ Comments welcomed at nick (at) nickrabinowitz (dot) com.
 
 CHANGELOG (somewhat rough - see the SVN commit log for more detail)
 
-Version 1.4 (unreleased)
+Version 1.4pre (unreleased)
 -----------
+- Added support, tests, and one example for Timeline v.2.2.0
 - Added GeoRSS parser
 - Moved KML parser to separate file. NOTE: You now need to load kmlparser.js
 separately to load KML, unless you are using timemap_full.pack.js.
