@@ -103,7 +103,7 @@ function TimeMap(tElement, mElement, options) {
 /**
  * Current library version.
  */
-TimeMap.version = "1.4";
+TimeMap.version = "1.4pre";
 
 /**
  * Intializes a TimeMap.
