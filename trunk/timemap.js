@@ -91,13 +91,6 @@ function TimeMap(tElement, mElement, options) {
         // must be called after setCenter, for reasons unclear
         this.map.setMapType(this.opts.mapType);
     }
-    
-    var painter = (TimeMap.TimelineVersion() == "1.2") ? 
-        Timeline.DurationEventPainter : Timeline.OriginalEventPainter;
-    // hijack popup window callback to open info window
-    painter.prototype._showBubble = function(x, y, evt) {
-        evt.item.openInfoWindow();
-    }
 }
 
 /**
@@ -387,6 +380,11 @@ TimeMap.prototype.initTimeline = function(bands) {
     GEvent.addListener(tm.map, "moveend", function() {
         tm.filter("timeline");
     });
+    // hijack timeline popup window to open info window
+    var painter = this.timeline.getBand(0).getEventPainter().constructor;
+    painter.prototype._showBubble = function(x, y, evt) {
+        evt.item.openInfoWindow();
+    }
     
     // filter chain for map placemarks
     this.addFilterChain("map", 
