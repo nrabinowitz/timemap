@@ -8,7 +8,7 @@
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
  * The TimeMap object is intended to sync a SIMILE Timeline with a Google Map.
- * Dependencies: Google Maps API v2, SIMILE Timeline v1.2
+ * Dependencies: Google Maps API v2, SIMILE Timeline v1.2 or v2.2.0
  * Thanks to Jörn Clausen (http://www.oe-files.de) for initial concept and code.
  *---------------------------------------------------------------------------*/
 
@@ -92,8 +92,10 @@ function TimeMap(tElement, mElement, options) {
         this.map.setMapType(this.opts.mapType);
     }
     
+    var painter = (TimeMap.TimelineVersion() == "1.2") ? 
+        Timeline.DurationEventPainter : Timeline.OriginalEventPainter;
     // hijack popup window callback to open info window
-    Timeline.DurationEventPainter.prototype._showBubble = function(x, y, evt) {
+    painter.prototype._showBubble = function(x, y, evt) {
         evt.item.openInfoWindow();
     }
 }
@@ -151,17 +153,17 @@ TimeMap.init = function(config) {
         // make band info
         config['bandInfo'] = [
     		{
-               width:          "80%", 
-               intervalUnit:   intervals[0], 
-               intervalPixels: 70
+                width:          "80%", 
+                intervalUnit:   intervals[0], 
+                intervalPixels: 70
             },
             {
-               width:          "20%", 
-               intervalUnit:   intervals[1], 
-               intervalPixels: 100,
-               showEventText:  false,
-               trackHeight:    0.4,
-               trackGap:       0.2
+                width:          "20%", 
+                intervalUnit:   intervals[1], 
+                intervalPixels: 100,
+                showEventText:  false,
+                trackHeight:    0.4,
+                trackGap:       0.2
             }
         ];
     }
@@ -199,7 +201,7 @@ TimeMap.init = function(config) {
             bandInfo['eventSource'] = eventSource;
         else bandInfo['eventSource'] = null;
         bands[x] = Timeline.createBandInfo(bandInfo);
-        if (x > 0) {
+        if (x > 0 && TimeMap.TimelineVersion() == "1.2") {
             // set all to the same layout
             bands[x].eventPainter.setLayout(bands[0].eventPainter.getLayout()); 
         }
@@ -692,11 +694,23 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     var eventIcon = theme.eventIcon;
     var title = data.title;
     // allow event-less placemarks - these will be always present
-    if (start != null)
-        var event = new Timeline.DefaultEventSource.Event(start, end, null, null,
-                                                      instant, title, null, null, null, 
-                                                      eventIcon, theme.eventColor, null);
-    else var event = null;
+    if (start != null) {
+        if (TimeMap.TimelineVersion() == "1.2") {
+            // attributes by parameter
+            var event = new Timeline.DefaultEventSource.Event(start, end, null, null,
+                instant, title, null, null, null, eventIcon, theme.eventColor, null);
+        } else {
+            // attributes in object
+            var event = new Timeline.DefaultEventSource.Event({
+                "start": start,
+                "end": end,
+                "instant": instant,
+                "text": title,
+                "icon": eventIcon,
+                "color": theme.eventColor
+            });
+        }
+    } else var event = null;
     
     // internal function: create map placemark
     // takes a data object (could be full data, could be just placemark)
@@ -1258,4 +1272,15 @@ TimeMap.formatDate = function(d, precision) {
         }
     }
     return str;
+}
+
+/**
+ * Determine the SIMILE Timeline version
+ * XXX: quite rough at the moment
+ *
+ * @return {String}     At the moment, only "1.2" or "2.2.0"
+ */
+TimeMap.TimelineVersion = function() {
+    if (Timeline.DurationEventPainter) return "1.2";
+    else return "2.2.0";
 }

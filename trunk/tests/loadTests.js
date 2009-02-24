@@ -40,7 +40,10 @@ function testLatestDate() {
 function testItemAttributes() {
     var items = tm.datasets["test"].getItems();
     var item = items[0];
+    assertNotNull("event not null", item.event);
+    assertNotNull("placemark not null", item.placemark);
     assertEquals("title matches", item.getTitle(), "Test Event");
+    assertEquals("event title matches", item.event.getText(), "Test Event");
     assertEquals("placemark type matches", item.getType(), "marker");
     var point = new GLatLng(23.456, 12.345);
     assertTrue("point matches", item.getInfoPoint().equals(point));
