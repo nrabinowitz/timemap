@@ -38,10 +38,26 @@ function loadSuite_tl220() {
     return result;
 }
 
+function loadSuite_local() {
+    var result = new top.jsUnitTestSuite();
+    result.addTestPage("../timemap/tests/basicLoadTests_local.html");
+    result.addTestPage("../timemap/tests/kmlLoadTests_local.html");
+    result.addTestPage("../timemap/tests/jsonLoadTests_local.html");
+    result.addTestPage("../timemap/tests/geoRSSLoadTests_local.html");
+    result.addTestPage("../timemap/tests/visibilityTests_local.html");
+    result.addTestPage("../timemap/tests/missingElementTests_local.html");
+    result.addTestPage("../timemap/tests/placemarkTests_local.html");
+    result.addTestPage("../timemap/tests/deletionTests_local.html");
+    result.addTestPage("../timemap/tests/themeTests_local.html");
+    result.addTestPage("../timemap/tests/timeParserTests_local.html");
+    return result;
+}
+
 function suite() {
     var newsuite = new top.jsUnitTestSuite();
     newsuite.addTestSuite(loadSuite_tl12());
     newsuite.addTestSuite(loadSuite_tl220());
+    newsuite.addTestSuite(loadSuite_local());
     return newsuite;
 }
 
