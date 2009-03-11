@@ -1,0 +1,46 @@
+/*! 
+ * TimeMap Copyright 2008 Nick Rabinowitz.
+ * Licensed under the MIT License (see LICENSE.txt)
+ */
+ 
+CHANGELOG (somewhat rough - see the SVN commit log for more detail)
+-------------------------------------------------------------------------------
+
+Version 1.4
+-----------
+- Added support, tests, and one example for Timeline v.2.2.0
+- Added local optimized copy of Timeline v.1.2
+- Added GeoRSS parser (points only)
+- Moved KML parser to separate file. NOTE: You now need to load kmlparser.js
+separately to load KML, unless you are using timemap_full.pack.js.
+- Improvements to default date parser
+- Added several new examples: Google spreadsheet, lines between points, polytween
+- New tests and small bugfixes
+
+Version 1.3
+-----------
+- Relicensing with the MIT license
+- some code refactoring - IMPORTANT: I removed timemapinit.js and made the init()
+function a static method on TimeMap. The timemapInit() function still works (I
+aliased it) but is deprecated. I also moved all post-initialization manipulation
+functions to their own file, manipulation.js.
+- adding json2 library and functions for exporting TimeMaps
+- first release of experimental editing UI (jQuery-dependent)
+- better filter chain handling
+- tweaks and bugfixes
+
+Version 1.2
+-----------
+- tweaks and bugfixes
+- code cleanup
+- a few new features, notably support for image overlays
+- several new hooks for custom functions
+
+Version 1.1
+-----------
+- tweaks and bugfixes
+- added timemapInit() function
+
+Version 1.0
+-----------
+- first release of the core library
