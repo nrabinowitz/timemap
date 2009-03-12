@@ -14,5 +14,5 @@ for %%X in (*.js) do (
     :LOOP
     echo "processed"
     )
-:: add libraries
-for %%X in (lib\*.js) do (java -jar %yuic% %%X >> timemap_full.pack.js)
+:: add JSON library
+java -jar %yuic% json2.pack.js >> timemap_full.pack.js
