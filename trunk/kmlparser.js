@@ -12,13 +12,15 @@
  * multiple geometries (i.e. multiple placemarks per item) just yet.
  *---------------------------------------------------------------------------*/
 
+/*globals GXml, TimeMap, TimeMapDataset */
+
 /*
  * Static function to parse KML with time data and load it.
  *
  * @param {XML text} kml        KML to be parsed
  */
 TimeMapDataset.parseKML = function(kml) {
-    var items = [], data, kmlnode, placemarks, pm;
+    var items = [], data, kmlnode, placemarks, pm, i;
     kmlnode = GXml.parse(kml);
     
     // get TimeMap utilty functions
@@ -33,15 +35,15 @@ TimeMapDataset.parseKML = function(kml) {
         // look for instant timestamp
         var nList = getNodeList(n, "TimeStamp");
         if (nList.length > 0) {
-            data["start"] = getTagValue(nList[0], "when");
+            data.start = getTagValue(nList[0], "when");
             check = true;
         }
         // otherwise look for span
         else {
             nList = getNodeList(n, "TimeSpan");
             if (nList.length > 0) {
-                data["start"] = getTagValue(nList[0], "begin");
-                data["end"] = getTagValue(nList[0], "end") ||
+                data.start = getTagValue(nList[0], "begin");
+                data.end = getTagValue(nList[0], "end") ||
                     // unbounded spans end at the present time
                     TimeMap.formatDate(new Date());
                 check = true;
@@ -55,16 +57,16 @@ TimeMapDataset.parseKML = function(kml) {
             }
             pn = null;
         }
-    }
+    };
     
     // look for placemarks
     placemarks = getNodeList(kmlnode, "Placemark");
-    for (var i=0; i<placemarks.length; i++) {
+    for (i=0; i<placemarks.length; i++) {
         pm = placemarks[i];
         data = { options: {} };
         // get title & description
-        data["title"] = getTagValue(pm, "name");
-        data.options["description"] = getTagValue(pm, "description");
+        data.title = getTagValue(pm, "name");
+        data.options.description = getTagValue(pm, "description");
         // get time information
         findNodeTime(pm, data);
         // find placemark
@@ -73,11 +75,11 @@ TimeMapDataset.parseKML = function(kml) {
             // look for marker
             nList = getNodeList(pm, "Point");
             if (nList.length > 0) {
-                data["point"] = {};
+                data.point = {};
                 // get lat/lon
                 coords = getTagValue(nList[0], "coordinates");
                 latlon = coords.split(",");
-                data["point"] = {
+                data.point = {
                     "lat": trim(latlon[1]),
                     "lon": trim(latlon[0])
                 };
@@ -89,7 +91,9 @@ TimeMapDataset.parseKML = function(kml) {
                 geom = "polyline";
             } else {
                 nList = getNodeList(pm, "Polygon");
-                if (nList.length > 0) geom = "polygon";
+                if (nList.length > 0) {
+                    geom = "polygon";
+                }
             }
             if (nList.length > 0) {
                 data[geom] = [];
@@ -110,23 +114,23 @@ TimeMapDataset.parseKML = function(kml) {
     
     // look for ground overlays
     placemarks = getNodeList(kmlnode, "GroundOverlay");
-    for (var i=0; i<placemarks.length; i++) {
+    for (i=0; i<placemarks.length; i++) {
         pm = placemarks[i];
         data = { options: {}, overlay: {} };
         // get title & description
-        data["title"] = getTagValue(pm, "name");
-        data.options["description"] = getTagValue(pm, "description");
+        data.title = getTagValue(pm, "name");
+        data.options.description = getTagValue(pm, "description");
         // get time information
         findNodeTime(pm, data);
         // get image
         nList = getNodeList(pm, "Icon");
-        data.overlay["image"] = getTagValue(nList[0], "href");
+        data.overlay.image = getTagValue(nList[0], "href");
         // get coordinates
         nList = getNodeList(pm, "LatLonBox");
-        data.overlay["north"] = getTagValue(nList[0], "north");
-        data.overlay["south"] = getTagValue(nList[0], "south");
-        data.overlay["east"] = getTagValue(nList[0], "east");
-        data.overlay["west"] = getTagValue(nList[0], "west");
+        data.overlay.north = getTagValue(nList[0], "north");
+        data.overlay.south = getTagValue(nList[0], "south");
+        data.overlay.east = getTagValue(nList[0], "east");
+        data.overlay.west = getTagValue(nList[0], "west");
         items.push(data);
     }
     
@@ -136,4 +140,4 @@ TimeMapDataset.parseKML = function(kml) {
     pm = null;
     nList = null;
     return items;
-}
+};

@@ -11,6 +11,8 @@
  * json2: lib/json2.pack.js
  *---------------------------------------------------------------------------*/
 
+/*globals TimeMap, TimeMapDataset, TimeMapItem */
+ 
 /**
  * Clean up TimeMap into a nice object for serialization
  * This is called automatically by the JSON.stringify() function
@@ -19,9 +21,9 @@ TimeMap.prototype.toJSON = function() {
     var data = {
         'options': this.makeOptionData,
         'datasets': this.datasets
-    }
+    };
     data = this.addExportData(data);
-}
+};
 
 /**
  * Make a cleaned up object for the TimeMap options
@@ -29,31 +31,45 @@ TimeMap.prototype.toJSON = function() {
 TimeMap.prototype.makeOptionData = function() {
     var data = {};
     // copy options
-    for (k in this.opts) data[k] = this.opts[k];
+    for (var k in this.opts) {
+        data[k] = this.opts[k];
+    }
     // clean up: mapCenter
-    if (data['mapCenter']) data['mapCenter'] = TimeMap.makePoint(data['mapCenter']);
+    if (data.mapCenter) {
+        data.mapCenter = TimeMap.makePoint(data.mapCenter);
+    }
     // clean up: mapType
-    if (data['mapType']) data['mapType'] = revHash(TimeMap.mapTypes, data['mapType']);
+    if (data.mapType) {
+        data.mapType = revHash(TimeMap.mapTypes, data.mapType);
+    }
     // clean up: mapTypes
-    if (data['mapTypes']) {
+    if (data.mapTypes) {
         var mts=[], mt;
-        for (var x=0; x<data['mapTypes'].length; x++) {
-            mt = revHash(TimeMap.mapTypes, data['mapTypes'][x]);
-            if (mt) mts.push(mt);
+        for (var x=0; x<data.mapTypes.length; x++) {
+            mt = revHash(TimeMap.mapTypes, data.mapTypes[x]);
+            if (mt) {
+                mts.push(mt);
+            }
         }
-        data['mapTypes'] = mts;
+        data.mapTypes = mts;
     }
     // clean up: bandIntervals
-    if (data['bandIntervals']) data['bandIntervals'] = revHash(TimeMap.intervals, data['bandIntervals']);
-    // including themes here too - might be a TimeMap attribute
-    var themes=[], t;
-    for (id in this.datasets) {
-        t = revHash(TimeMapDataset.themes, this.datasets[id].opts.theme)
-        if (t) themes.push(t);
+    if (data.bandIntervals) {
+        data.bandIntervals = revHash(TimeMap.intervals, data.bandIntervals);
     }
-    data['themes'] = t;
+    // including themes here too - might be a TimeMap attribute
+    var themes=[], t, id;
+    for (id in this.datasets) {
+        if (this.datasets.hasOwnProperty(id)) {
+            t = revHash(TimeMapDataset.themes, this.datasets[id].opts.theme);
+            if (t) {
+                themes.push(t);
+            }
+        }
+    }
+    data.themes = t;
     return data;
-}
+};
 
 /**
  * Specify additional data for export. Replace this function to change settings.
@@ -62,11 +78,11 @@ TimeMap.prototype.makeOptionData = function() {
  * @return          Expanded map of export data
  */
 TimeMap.prototype.addExportData = function(data) {
-    data['options'] = data['options'] || {};
+    data.options = data.options || {};
     // set any additional server info (e.g. a database key) in opts.saveOpts
-    data['options']['saveOpts'] = this.opts['saveOpts'];
+    data.options.saveOpts = this.opts.saveOpts;
     return data;
-}
+};
 
 /**
  * Clean up dataset into a nice object for serialization
@@ -87,7 +103,7 @@ TimeMapDataset.prototype.toJSON = function() {
     };
     data = this.addExportData(data);
     return data;
-}
+};
 
 /**
  * Specify additional data for export. Replace this function to change settings.
@@ -96,11 +112,11 @@ TimeMapDataset.prototype.toJSON = function() {
  * @return          Expanded map of export data
  */
 TimeMapDataset.prototype.addExportData = function(data) {
-    data['options'] = data['options'] || {};
+    data.options = data.options || {};
     // set any additional server info (e.g. a database key) in opts.saveOpts
-    data['options']['saveOpts'] = this.opts['saveOpts'];
+    data.options.saveOpts = this.opts.saveOpts;
     return data;
-}
+};
 
 // XXX: export items to KML with placemark.getKmlAsync?
 
@@ -118,9 +134,9 @@ TimeMapItem.prototype.toJSON = function() {
     };
     // add event info
     if (this.event) {
-        data['start'] = this.event.getStart();
+        data.start = this.event.getStart();
         if (!this.event.isInstant()) {
-            data['end'] = this.event.getEnd();
+            data.end = this.event.getEnd();
         }
     }
     // add placemark info
@@ -130,11 +146,11 @@ TimeMapItem.prototype.toJSON = function() {
             type = type || TimeMapItem.getPlacemarkType(pm);
             switch (type) {
                 case "marker":
-                    pdata['point'] = TimeMap.makePoint(pm.getLatLng());
+                    pdata.point = TimeMap.makePoint(pm.getLatLng());
                     break;
                 case "polyline":
                 case "polygon":
-                    line = [];
+                    var line = [];
                     for (var x=0; x<pm.getVertexCount(); x++) {
                         line.push(TimeMap.makePoint(pm.getVertex(x)));
                     }
@@ -142,11 +158,11 @@ TimeMapItem.prototype.toJSON = function() {
                     break;
             }
             return pdata;
-        }
+        };
         if (this.getType() == 'array') {
-            data['placemarks'] = [];
+            data.placemarks = [];
             for (var i=0; i<this.placemark.length; i++) {
-                data['placemarks'].push(makePlacemarkJSON(false, this.placemark[i], {}));
+                data.placemarks.push(makePlacemarkJSON(false, this.placemark[i], {}));
             }
         } else {
             data = makePlacemarkJSON(this.getType(), this.placemark, data);
@@ -154,7 +170,7 @@ TimeMapItem.prototype.toJSON = function() {
     }
     data = this.addExportData(data);
     return data;
-}
+};
 
 /**
  * Specify additional data for export. Replace this function to change settings.
@@ -163,11 +179,11 @@ TimeMapItem.prototype.toJSON = function() {
  * @return          Expanded map of export data
  */
 TimeMapItem.prototype.addExportData = function(data) {
-    data['options'] = data['options'] || {};
+    data.options = data.options || {};
     // set any additional server info (e.g. a database key) in opts.saveOpts
-    data['options']['saveOpts'] = this.opts['saveOpts'];
+    data.options.saveOpts = this.opts.saveOpts;
     return data;
-}
+};
 
 /**
  * Util function: get the key from the map if the val is found
@@ -177,9 +193,11 @@ TimeMapItem.prototype.addExportData = function(data) {
  * @return (String)         Key if found, null if not
  */
 function revHash(map, val) {
-    for (k in map)
-        if (map[k] == val)
+    for (var k in map) {
+        if (map[k] == val) {
             return k;
+        }
+    }
     // nothing found
     return null;
-} 
+}

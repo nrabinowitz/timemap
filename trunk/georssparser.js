@@ -20,6 +20,7 @@
  * will be added at some later point.
  *---------------------------------------------------------------------------*/
 
+/*globals GXml, TimeMap, TimeMapDataset */
 
 /*
  * Static function to parse GeoRSS and load it.
@@ -38,32 +39,32 @@ TimeMapDataset.parseGeoRSS = function(rss) {
         trim = TimeMap.trim;
     
     // define namespaces
-    TimeMap.nsMap['georss'] = 'http://www.georss.org/georss';
-    TimeMap.nsMap['gml'] = 'http://www.opengis.net/gml';
-    TimeMap.nsMap['geo'] = 'http://www.w3.org/2003/01/geo/wgs84_pos#';
+    TimeMap.nsMap.georss = 'http://www.georss.org/georss';
+    TimeMap.nsMap.gml = 'http://www.opengis.net/gml';
+    TimeMap.nsMap.geo = 'http://www.w3.org/2003/01/geo/wgs84_pos#';
     
     // determine whether this is an Atom feed or an RSS feed
     var feedType = (node.firstChild.tagName == 'rss') ? 'rss' : 'atom';
     
     // look for placemarks
-    tName = (feedType == 'rss' ? "item" : "entry");
+    var tName = (feedType == 'rss' ? "item" : "entry");
     placemarks = getNodeList(node, tName);
     for (var i=0; i<placemarks.length; i++) {
         pm = placemarks[i];
         data = { options: {} };
         // get title & description
-        data["title"] = getTagValue(pm, "title");
+        data.title = getTagValue(pm, "title");
         tName = (feedType == 'rss' ? "description" : "summary");
-        data.options["description"] = getTagValue(pm, tName);
+        data.options.description = getTagValue(pm, tName);
         // get time information
         if (feedType == 'rss') {
             // RSS needs date conversion
             var d = new Date(Date.parse(getTagValue(pm, "pubDate")));
             // reformat
-            data["start"] = TimeMap.formatDate(d);
+            data.start = TimeMap.formatDate(d);
         } else {
             // atom uses ISO 8601
-            data["start"] = getTagValue(pm, "updated");
+            data.start = getTagValue(pm, "updated");
         }
         // find placemark - single geometry only for the moment
         PLACEMARK: {
@@ -71,18 +72,20 @@ TimeMapDataset.parseGeoRSS = function(rss) {
             // look for point, GeoRSS-Simple
             coords = getTagValue(pm, "point", 'georss');
             if (coords) {
-                data["point"] = makePoint(coords); 
+                data.point = makePoint(coords); 
                 break PLACEMARK;
             }
             // look for point, GML
-            nList = getNodeList(pm, "Point", 'gml');
+            var nList = getNodeList(pm, "Point", 'gml');
             if (nList.length > 0) {
                 // GML <pos>
                 coords = getTagValue(nList[0], "pos", 'gml');
                 // GML <coordinates>
-                if (!coords) coords = getTagValue(nList[0], "coordinates", 'gml');
+                if (!coords) {
+                    coords = getTagValue(nList[0], "coordinates", 'gml');
+                }
                 if (coords) {
-                    data["point"] = makePoint(coords); 
+                    data.point = makePoint(coords); 
                     break PLACEMARK;
                 }
             }
@@ -92,7 +95,7 @@ TimeMapDataset.parseGeoRSS = function(rss) {
                     getTagValue(pm, "lat", 'geo'),
                     getTagValue(pm, "long", 'geo')
                 ];
-                data["point"] = makePoint(coords); 
+                data.point = makePoint(coords); 
                 break PLACEMARK;
             }
             
@@ -107,4 +110,4 @@ TimeMapDataset.parseGeoRSS = function(rss) {
     pm = null;
     nList = null;
     return items;
-}
+};
