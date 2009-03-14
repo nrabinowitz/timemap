@@ -11,6 +11,8 @@
  * TimeMapItem after the initial load process.
  *---------------------------------------------------------------------------*/
 
+/*globals TimeMap, TimeMapDataset, TimeMapItem, Timeline */
+ 
 /*----------------------------------------------------------------------------
  * TimeMap manipulation: stuff affecting every dataset
  *---------------------------------------------------------------------------*/
@@ -23,7 +25,7 @@ TimeMap.prototype.clear = function() {
         ds.clear();
     });
     this.datasets = [];
-}
+};
 
 /**
  * Delete one dataset, clearing it from map and timeline
@@ -33,7 +35,7 @@ TimeMap.prototype.clear = function() {
 TimeMap.prototype.deleteDataset = function(id) {
     this.datasets[id].clear();
     delete this.datasets[id];
-}
+};
 
 /**
  * Hides placemarks for a given dataset
@@ -44,7 +46,7 @@ TimeMap.prototype.hideDataset = function (id){
     if (id in this.datasets) {
     	this.datasets[id].hide();
     }
-}
+};
 
 /**
  * Hides all the datasets on the map
@@ -54,7 +56,7 @@ TimeMap.prototype.hideDatasets = function(){
 		ds.visible = false;
 	});
     this.filter("map");
-}
+};
 
 /**
  * Shows placemarks for a given dataset
@@ -65,7 +67,7 @@ TimeMap.prototype.showDataset = function(id) {
     if (id in this.datasets) {
 	    this.datasets[id].show();
     }
-}
+};
 
 /**
  * Shows all the datasets on the map
@@ -75,7 +77,7 @@ TimeMap.prototype.showDatasets = function() {
 		ds.visible = true;
 	});
     this.filter("map");
-}
+};
  
 /**
  * Change the default map type
@@ -84,15 +86,21 @@ TimeMap.prototype.showDatasets = function() {
  */
 TimeMap.prototype.changeMapType = function (mapType) {
     // check for no change
-    if (mapType == this.opts['mapType']) return;
+    if (mapType == this.opts.mapType) {
+        return;
+    }
     // look for mapType
-    if (typeof(mapType) == 'string') mapType = TimeMap.mapTypes[mapType];
+    if (typeof(mapType) == 'string') {
+        mapType = TimeMap.mapTypes[mapType];
+    }
     // no mapType specified
-    if (!mapType) return;
+    if (!mapType) {
+        return;
+    }
     // change it
-    this.opts['mapType'] = mapType;
+    this.opts.mapType = mapType;
     this.map.setMapType(mapType);
-}
+};
 
 /*----------------------------------------------------------------------------
  * TimeMap manipulation: stuff affecting the timeline
@@ -107,7 +115,7 @@ TimeMap.prototype.refreshTimeline = function () {
     topband.getEventPainter().getLayout()._laidout = false;
     this.timeline.layout();
     topband.setCenterVisibleDate(centerDate);
-}
+};
 
 /**
  * Change the intervals on the timeline.
@@ -116,17 +124,23 @@ TimeMap.prototype.refreshTimeline = function () {
  */
 TimeMap.prototype.changeTimeIntervals = function (intervals) {
     // check for no change
-    if (intervals == this.opts['bandIntervals']) return;
+    if (intervals == this.opts.bandIntervals) {
+        return;
+    }
     // look for intervals
-    if (typeof(intervals) == 'string') intervals = TimeMap.intervals[intervals];
+    if (typeof(intervals) == 'string') {
+        intervals = TimeMap.intervals[intervals];
+    }
     // no intervals specified
-    if (!intervals) return;
-    this.opts['bandIntervals'] = intervals;
+    if (!intervals) {
+        return;
+    }
+    this.opts.bandIntervals = intervals;
     // internal function - change band interval
     var changeInterval = function(band, interval) {
-      band.getEther()._interval = Timeline.DateTime.gregorianUnitLengths[interval];
-      band.getEtherPainter()._unit = interval;
-    }
+        band.getEther()._interval = Timeline.DateTime.gregorianUnitLengths[interval];
+        band.getEtherPainter()._unit = interval;
+    };
     // grab date
     var topband = this.timeline.getBand(0);
     var centerDate = topband.getCenterVisibleDate();
@@ -138,7 +152,7 @@ TimeMap.prototype.changeTimeIntervals = function (intervals) {
     topband.getEventPainter().getLayout()._laidout = false;
     this.timeline.layout();
     topband.setCenterVisibleDate(centerDate);
-}
+};
  
 /**
  * Scrolls the timeline the number of years passed (negative numbers scroll it back)
@@ -152,7 +166,7 @@ TimeMap.prototype.scrollTimeline = function (years) {
  	var centerYear = centerDate.getFullYear() + parseFloat(years);
  	centerDate.setFullYear(centerYear);
  	topband.setCenterVisibleDate(centerDate);
-}
+};
 
 
 /*----------------------------------------------------------------------------
@@ -168,7 +182,7 @@ TimeMapDataset.prototype.clear = function() {
     });
     this.items = [];
     this.timemap.timeline.layout();
-}
+};
 
 /**
  * Delete one item, clearing it from map and timeline
@@ -184,7 +198,7 @@ TimeMapDataset.prototype.deleteItem = function(item) {
         }
     }
     this.timemap.timeline.layout();
-}
+};
 
 /**
  * Show dataset
@@ -194,7 +208,7 @@ TimeMapDataset.prototype.show = function() {
       this.visible = true;
       this.timemap.filter("map");
     }
-}
+};
 
 /**
  * Hide dataset
@@ -204,7 +218,7 @@ TimeMapDataset.prototype.hide = function() {
       this.visible = false;
       this.timemap.filter("map");
     }
-}
+};
 
  /**
  * Change the theme for every item in a dataset
@@ -217,7 +231,7 @@ TimeMapDataset.prototype.hide = function() {
         item.changeTheme(newTheme);
     });
     this.timemap.timeline.layout();
- }
+ };
  
  
 /*----------------------------------------------------------------------------
@@ -237,18 +251,21 @@ TimeMapItem.prototype.clear = function() {
     }
     if (this.placemark) {
         this.hidePlacemark();
-        f = function(p) {
+        var f = function(p) {
             try {
                 this.map.removeOverlay(p);
             } catch(e) {}
-        }
+        };
         if (this.getType() == "array") {
-            for (var i=0; i<this.placemark.length; i++)
+            for (var i=0; i<this.placemark.length; i++) {
                 f(this.placemark[i]);
-        } else f(this.placemark);
+            }
+        } else {
+            f(this.placemark);
+        }
     }
     this.event = this.placemark = null;
-}
+};
 
  /**
  * Create a new event for the item.
@@ -257,7 +274,7 @@ TimeMapItem.prototype.clear = function() {
  * @param (Date) e      (Optional) End date for the event
  */
 TimeMapItem.prototype.createEvent = function(s, e) {
-    var instant = (e == undefined);
+    var instant = (e === undefined);
     var eventIcon = this.opts.theme.eventIcon;
     var title = this.getTitle();
     // create event
@@ -267,7 +284,7 @@ TimeMapItem.prototype.createEvent = function(s, e) {
     event.item = this;
     this.event = event;
     this.dataset.eventSource.add(event);
-}
+};
  
  /**
  * Change the theme for an item
@@ -299,7 +316,7 @@ TimeMapItem.prototype.createEvent = function(s, e) {
                     });
                     break;
             }
-        }
+        };
         if (this.getType() == 'array') {
             for (var i=0; i<this.placemark.length; i++) {
                 changePlacemark(this.placemark[i], false, newTheme);
@@ -313,7 +330,7 @@ TimeMapItem.prototype.createEvent = function(s, e) {
         this.event._color = newTheme.eventColor;
         this.event._icon = newTheme.eventIcon;
     }
- }
+};
 
 
 /** 
@@ -323,9 +340,11 @@ TimeMapItem.prototype.createEvent = function(s, e) {
  * @return {String}         Type of placemark, or false if none found
  */
 TimeMapItem.getPlacemarkType = function(pm) {
-    if ('getIcon' in pm) return 'marker';
+    if ('getIcon' in pm) {
+        return 'marker';
+    }
     if ('getVertex' in pm) {
         return 'setFillStyle' in pm ? 'polygon' : 'polyline';
     }
     return false;
-}
+};
