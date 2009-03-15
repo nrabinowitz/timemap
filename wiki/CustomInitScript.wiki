@@ -1,6 +1,6 @@
-#summary Custom initialization for the TimeMap library.
+#summary Custom initialization for the timemap.js library.
 
-This page outlines how to write a custom initialization script for the TimeMap library. You may need this if you want to use a complex timeline setup or some other non-standard initialization - one good reason to do this is to have different datasets appear on different timeline bands. Otherwise, you'll probably want to use the provided `timemapInit()` function, whose various options are explained in the [http://code.google.com/p/timemap/source/browse/trunk/examples/timemapinit_usage.js timemapinit_usage.js file].
+This page outlines how to write a custom initialization script for the timemap.js library. You may need this if you want to use a complex timeline setup or some other non-standard initialization - one good reason to do this is to have different datasets appear on different timeline bands. Otherwise, you'll probably want to use the provided `timemapInit()` function, whose various options are explained in the [http://code.google.com/p/timemap/source/browse/trunk/examples/timemapinit_usage.js timemapinit_usage.js file].
 
 The simplest way to write a custom script might be to copy the `timemapinit.js` file and hack around until you get it to do what you want. But here's a quick primer that might also help:
 
