@@ -1109,9 +1109,9 @@ function TimeMapItem(placemark, event, dataset, options) {
     
     // allow for custom open/close functions, set at item, dataset, or timemap level
     this.openInfoWindow =   options.openInfoWindow ||
-                            dataset.opts.openInfoWindow ||
-                            dataset.timemap.opts.openInfoWindow ||
-                            false;
+        dataset.opts.openInfoWindow ||
+        dataset.timemap.opts.openInfoWindow ||
+        false;
     if (!this.openInfoWindow) {
         if (this.opts.infoUrl !== "") {
             // load via AJAX if URL is provided
@@ -1121,7 +1121,10 @@ function TimeMapItem(placemark, event, dataset, options) {
             this.openInfoWindow = TimeMapItem.openInfoWindowBasic;
         }
     }
-    this.closeInfoWindow = options.closeInfoWindow || TimeMapItem.closeInfoWindowBasic;
+    this.closeInfoWindow = options.closeInfoWindow ||
+        dataset.opts.closeInfoWindow ||
+        dataset.timemap.opts.closeInfoWindow ||
+        TimeMapItem.closeInfoWindowBasic;
 }
 
 /**
@@ -1147,6 +1150,8 @@ TimeMapItem.openInfoWindowBasic = function() {
     } else {
         this.map.openInfoWindowHtml(this.getInfoPoint(), html);
     }
+    // custom functions will need to set this as well
+    this.selected = true;
 };
 
 /**
@@ -1183,6 +1188,8 @@ TimeMapItem.closeInfoWindowBasic = function() {
             this.map.closeInfoWindow();
         }
     }
+    // custom functions will need to set this as well
+    this.selected = false;
 };
 
 /*----------------------------------------------------------------------------
