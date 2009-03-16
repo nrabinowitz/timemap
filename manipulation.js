@@ -348,3 +348,31 @@ TimeMapItem.getPlacemarkType = function(pm) {
     }
     return false;
 };
+
+/** 
+ * Find the next item chronologically
+ *
+ * @param {Boolean} inDataset   Whether to only look in this item's dataset
+ * @return {TimeMapItem}        Next item, if any
+ */
+TimeMapItem.prototype.getNext = function(inDataset) {
+    if (!this.event) {
+        return;
+    }
+    var eventsource = this.dataset.timemap.timeline.getBand(0).getEventSource();
+    // iterator dates are non-inclusive, hence the juggle here
+    var i = eventsource.getEventIterator(this.event.getStart(), 
+        new Date(eventsource.getLatestDate().getTime() + 1));
+    var next = null;
+    while (next === null) {
+        if (i.hasNext()) {
+            next = i.next().item;
+            if (inDataset && next.dataset != this.dataset) {
+                next = null;
+            }
+        } else {
+            break;
+        }
+    }
+    return next;
+};
