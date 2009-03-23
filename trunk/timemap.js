@@ -1276,7 +1276,7 @@ TimeMap.getNodeList = function(n, tag, ns) {
  * @return (Object)
  */
 TimeMap.makePoint = function(coords) {
-    var latlon;
+    var latlon = null;
     // GLatLng
     if (coords.lat && coords.lng) {
         latlon = [coords.lat(), coords.lng()];
@@ -1286,7 +1286,7 @@ TimeMap.makePoint = function(coords) {
         latlon = coords;
     }
     // string
-    else {
+    if (latlon === null) {
         if (coords.indexOf(',') > -1) {
             // split on commas
             latlon = coords.split(",");
