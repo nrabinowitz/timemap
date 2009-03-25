@@ -748,11 +748,14 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
         }
     }
     
+    // set the icon, if any, outside the closure
+    var markerIcon = ("icon" in data) ? data.icon : theme.icon;
+    
     // internal function: create map placemark
     // takes a data object (could be full data, could be just placemark)
     // returns an object with {placemark, type, point}
     var createPlacemark = function(pdata) {
-        var placemark = null, type = "", point = null, markerIcon;
+        var placemark = null, type = "", point = null;
         // point placemark
         if ("point" in pdata) {
             point = new GLatLng(
@@ -763,7 +766,6 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
             if (tm.opts.centerMapOnItems) {
                 tm.mapBounds.extend(point);
             }
-            markerIcon = ("icon" in pdata) ? pdata.icon : theme.icon;
             placemark = new GMarker(point, { icon: markerIcon });
             type = "marker";
             point = placemark.getLatLng();
