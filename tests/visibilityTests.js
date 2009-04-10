@@ -1,7 +1,9 @@
 function exposeTestFunctionNames() {
     return [
         'testVisible',
-        'testItemHide',
+        'testItemHideShow',
+        'testItemHideShowEvent',
+        'testItemHideShowPlacemark',
         'testDatasetHideShow',
         'testTimeMapDatasetHideShow',
         'testHidePast',
@@ -10,49 +12,118 @@ function exposeTestFunctionNames() {
 }
 
 function testVisible() {
-    var items = tm.datasets["test"].getItems();
-    var placemark = items[0].placemark;
-    assertNotUndefined(placemark);
-    assertFalse(placemark.isHidden());
+    var item = tm.datasets["test"].getItems()[0];
+    var placemark = item.placemark;
+    var eventSource = tm.timeline.getBand(0).getEventSource();
+    assertTrue("Item thinks it's visible", item.visible);
+    assertNotUndefined("Placemark exists", placemark);
+    assertNotUndefined("Event exists", item.event);
+    assertEquals("One item in eventSource", 1, eventSource.getCount());
+    assertFalse("Placemark thinks it's visible", placemark.isHidden());
+    assertTrue("Item thinks its placemark is visible", item.placemarkVisible);
+    assertTrue("Item thinks its event is visible", item.eventVisible);
 }
 
-function testItemHide() {
-    var items = tm.datasets["test"].getItems();
-    var placemark = items[0].placemark;
-    placemark.hide();
-    assertTrue(placemark.isHidden());
+function testItemHideShow() {
+    var item = tm.datasets["test"].getItems()[0];
+    var placemark = item.placemark;
+    var eventSource = tm.timeline.getBand(0).getEventSource();
+    assertTrue("Item thinks it's visible", item.visible);
+    assertFalse("Placemark thinks it's visible", placemark.isHidden());
+    assertTrue("Item thinks its placemark is visible", item.placemarkVisible);
+    assertEquals("One item in eventSource", 1, eventSource.getCount());
+    assertTrue("Item thinks its event is visible", item.eventVisible);
+    item.hide();
+    assertFalse("Item thinks it's hidden", item.visible);
+    assertEquals("Zero items in eventSource", 0, eventSource.getCount());
+    assertFalse("Item thinks its event is hidden", item.eventVisible);
+    assertTrue("Placemark thinks it's hidden", placemark.isHidden());
+    assertFalse("Item thinks its placemark is hidden", item.placemarkVisible);
+    item.show();
+    assertTrue("Item thinks it's visible", item.visible);
+    assertEquals("One item in eventSource", 1, eventSource.getCount());
+    assertTrue("Item thinks its event is visible", item.eventVisible);
+    assertFalse("Placemark thinks it's visible", placemark.isHidden());
+    assertTrue("Item thinks its placemark is visible", item.placemarkVisible);
+}
+
+function testItemHideShowPlacemark() {
+    var item = tm.datasets["test"].getItems()[0];
+    var placemark = item.placemark;
+    assertFalse("Placemark thinks it's visible", placemark.isHidden());
+    assertTrue("Item thinks its placemark is visible", item.placemarkVisible);
+    item.hidePlacemark();
+    assertTrue("Placemark thinks it's hidden", placemark.isHidden());
+    assertFalse("Item thinks its placemark is hidden", item.placemarkVisible);
+    item.showPlacemark();
+    assertFalse("Placemark thinks it's visible", placemark.isHidden());
+    assertTrue("Item thinks its placemark is visible", item.placemarkVisible);
+}
+
+function testItemHideShowEvent() {
+    var item = tm.datasets["test"].getItems()[0];
+    var eventSource = tm.timeline.getBand(0).getEventSource();
+    assertEquals("One item in eventSource", 1, eventSource.getCount());
+    assertTrue("Item thinks its event is visible", item.eventVisible);
+    item.hideEvent();
+    // no great way to test item visibility
+    assertEquals("Zero items in eventSource", 0, eventSource.getCount());
+    assertFalse("Item thinks its event is hidden", item.eventVisible);
+    item.showEvent();
+    assertEquals("One item in eventSource", 1, eventSource.getCount());
+    assertTrue("Item thinks its event is visible", item.eventVisible);
 }
 
 function testDatasetHideShow() {
     var ds = tm.datasets["test"];
-    var items = tm.datasets["test"].getItems();
-    var placemark = items[0].placemark;
-    assertTrue(ds.visible);
+    var item = tm.datasets["test"].getItems()[0];
+    var placemark = item.placemark;
+    var eventSource = tm.timeline.getBand(0).getEventSource();
+    assertTrue("Dataset thinks it's visible", ds.visible);
     ds.hide();
-    assertFalse(ds.visible);
-    assertTrue(placemark.isHidden());
+    assertFalse("Dataset thinks it's hidden", ds.visible);
+    assertTrue("Placemark thinks it's hidden", placemark.isHidden());
+    assertEquals("Zero items in eventSource", 0, eventSource.getCount());
+    assertFalse("Item thinks its event is hidden", item.eventVisible);
+    assertFalse("Item thinks its placemark is hidden", item.placemarkVisible);
     ds.show();
-    assertTrue(ds.visible);
-    assertFalse(placemark.isHidden());
+    assertTrue("Dataset thinks it's visible", ds.visible);
+    assertFalse("Placemark thinks it's visible", placemark.isHidden());
+    assertEquals("One item in eventSource", 1, eventSource.getCount());
+    assertTrue("Item thinks its event is visible", item.eventVisible);
+    assertTrue("Item thinks its placemark is visible", item.placemarkVisible);
 }
 
 function testTimeMapDatasetHideShow() {
     var ds = tm.datasets["test"];
-    var items = tm.datasets["test"].getItems();
-    var placemark = items[0].placemark;
+    var item = tm.datasets["test"].getItems()[0];
+    var placemark = item.placemark;
+    var eventSource = tm.timeline.getBand(0).getEventSource();
     tm.hideDatasets();
-    assertFalse(ds.visible);
-    assertTrue(placemark.isHidden());
+    assertFalse("Dataset thinks it's hidden", ds.visible);
+    assertTrue("Placemark thinks it's hidden", placemark.isHidden());
+    assertEquals("Zero items in eventSource", 0, eventSource.getCount());
+    assertFalse("Item thinks its event is hidden", item.eventVisible);
+    assertFalse("Item thinks its placemark is hidden", item.placemarkVisible);
     tm.showDatasets();
-    assertTrue(ds.visible);
-    assertFalse(placemark.isHidden());
+    assertTrue("Dataset thinks it's visible", ds.visible);
+    assertFalse("Placemark thinks it's visible", placemark.isHidden());
+    assertEquals("One item in eventSource", 1, eventSource.getCount());
+    assertTrue("Item thinks its event is visible", item.eventVisible);
+    assertTrue("Item thinks its placemark is visible", item.placemarkVisible);
     tm.hideDataset("test");
-    assertFalse(ds.visible);
-    assertTrue(placemark.isHidden());
+    assertFalse("Dataset thinks it's hidden", ds.visible);
+    assertTrue("Placemark thinks it's hidden", placemark.isHidden());
+    assertEquals("Zero items in eventSource", 0, eventSource.getCount());
+    assertFalse("Item thinks its event is hidden", item.eventVisible);
+    assertFalse("Item thinks its placemark is hidden", item.placemarkVisible);
     tm.showDatasets();
     tm.hideDataset("notarealid");
-    assertTrue(ds.visible);
-    assertFalse(placemark.isHidden());
+    assertTrue("Dataset thinks it's visible", ds.visible);
+    assertFalse("Placemark thinks it's visible", placemark.isHidden());
+    assertEquals("One item in eventSource", 1, eventSource.getCount());
+    assertTrue("Item thinks its event is visible", item.eventVisible);
+    assertTrue("Item thinks its placemark is visible", item.placemarkVisible);
 }
 
 function testHidePast() {

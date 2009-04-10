@@ -400,10 +400,7 @@ TimeMap.prototype.initTimeline = function(bands) {
     this.timeline.getBand(0).addOnScrollListener(function() {
         tm.filter("map");
     });
-    // update timeline on map move (no default functionality yet)
-    GEvent.addListener(tm.map, "moveend", function() {
-        tm.filter("timeline");
-    });
+
     // hijack timeline popup window to open info window
     var painter = this.timeline.getBand(0).getEventPainter().constructor;
     painter.prototype._showBubble = function(x, y, evt) {
@@ -420,6 +417,10 @@ TimeMap.prototype.initTimeline = function(bands) {
         }
     );
     
+    // filter: hide when item is hidden
+    this.addFilter("map", function(item) {
+        return item.visible;
+    });
     // filter: hide when dataset is hidden
     this.addFilter("map", function(item) {
         return item.dataset.visible;
@@ -433,6 +434,25 @@ TimeMap.prototype.initTimeline = function(bands) {
     else if (this.opts.showMomentOnly) {
         this.addFilter("map", TimeMap.showMomentOnly);
     }
+    
+    // filter chain for timeline events
+    this.addFilterChain("timeline", 
+        function(item) {
+            item.showEvent();
+        },
+        function(item) {
+            item.hideEvent();
+        }
+    );
+    
+    // filter: hide when item is hidden
+    this.addFilter("timeline", function(item) {
+        return item.visible;
+    });
+    // filter: hide when dataset is hidden
+    this.addFilter("timeline", function(item) {
+        return item.dataset.visible;
+    });
     
     // add callback for window resize
     var resizeTimerID = null;
@@ -1079,35 +1099,12 @@ function TimeMapItem(placemark, event, dataset, options) {
         return this.opts.infoPoint || this.map.getCenter(); 
     };
     
-    // items initialize hidden
-    this.visible = false;
-    
-    // show/hide functions - no action if placemark is null
-    this.showPlacemark = function() {
-        if (this.placemark) {
-            if (this.getType() == "array") {
-                for (var i=0; i<this.placemark.length; i++) {
-                    this.placemark[i].show();
-                }
-            } else {
-                this.placemark.show();
-            }
-            this.visible = true;
-        }
-    };
-    this.hidePlacemark = function() {
-        if (this.placemark) {
-            if (this.getType() == "array") {
-                for (var i=0; i<this.placemark.length; i++) {
-                    this.placemark[i].hide();
-                }
-            } else {
-                this.placemark.hide();
-            }
-            this.visible = false;
-        }
-        this.closeInfoWindow();
-    };
+    // items initialize visible
+    this.visible = true;
+    // placemarks initialize hidden
+    this.placemarkVisible = false;
+    // events initialize visible
+    this.eventVisible = true;
     
     // allow for custom open/close functions, set at item, dataset, or timemap level
     this.openInfoWindow =   options.openInfoWindow ||
@@ -1128,6 +1125,67 @@ function TimeMapItem(placemark, event, dataset, options) {
         dataset.timemap.opts.closeInfoWindow ||
         TimeMapItem.closeInfoWindowBasic;
 }
+
+/** 
+ * Show the map placemark
+ */
+TimeMapItem.prototype.showPlacemark = function() {
+    if (this.placemark) {
+        if (this.getType() == "array") {
+            for (var i=0; i<this.placemark.length; i++) {
+                this.placemark[i].show();
+            }
+        } else {
+            this.placemark.show();
+        }
+        this.placemarkVisible = true;
+    }
+};
+
+/** 
+ * Hide the map placemark
+ */
+TimeMapItem.prototype.hidePlacemark = function() {
+    if (this.placemark) {
+        if (this.getType() == "array") {
+            for (var i=0; i<this.placemark.length; i++) {
+                this.placemark[i].hide();
+            }
+        } else {
+            this.placemark.hide();
+        }
+        this.placemarkVisible = false;
+    }
+    this.closeInfoWindow();
+};
+
+/** 
+ * Show the timeline event
+ * NB: Will likely require calling timeline.layout()
+ */
+TimeMapItem.prototype.showEvent = function() {
+    if (this.event) {
+        if (this.eventVisible === false){
+            this.dataset.timemap.timeline.getBand(0)
+                .getEventSource()._events._events.add(this.event);
+        }
+        this.eventVisible = true;
+    }
+};
+
+/** 
+ * Show the timeline event
+ * NB: Will likely require calling timeline.layout()
+ */
+TimeMapItem.prototype.hideEvent = function() {
+    if (this.event) {
+        if (this.eventVisible == true){
+            this.dataset.timemap.timeline.getBand(0)
+                .getEventSource()._events._events.remove(this.event);
+        }
+        this.eventVisible = false;
+    }
+};
 
 /**
  * Standard open info window function, using static text in map window

@@ -56,6 +56,8 @@ TimeMap.prototype.hideDatasets = function(){
 		ds.visible = false;
 	});
     this.filter("map");
+    this.filter("timeline");
+    this.timeline.layout();
 };
 
 /**
@@ -77,6 +79,8 @@ TimeMap.prototype.showDatasets = function() {
 		ds.visible = true;
 	});
     this.filter("map");
+    this.filter("timeline");
+    this.timeline.layout();
 };
  
 /**
@@ -205,8 +209,10 @@ TimeMapDataset.prototype.deleteItem = function(item) {
  */
 TimeMapDataset.prototype.show = function() {
     if (!this.visible) {
-      this.visible = true;
-      this.timemap.filter("map");
+        this.visible = true;
+        this.timemap.filter("map");
+        this.timemap.filter("timeline");
+        this.timemap.timeline.layout();
     }
 };
 
@@ -215,8 +221,10 @@ TimeMapDataset.prototype.show = function() {
  */
 TimeMapDataset.prototype.hide = function() {
     if (this.visible) {
-      this.visible = false;
-      this.timemap.filter("map");
+        this.visible = false;
+        this.timemap.filter("map");
+        this.timemap.filter("timeline");
+        this.timemap.timeline.layout();
     }
 };
 
@@ -238,7 +246,23 @@ TimeMapDataset.prototype.hide = function() {
  * TimeMapItem manipulation: manipulate events and placemarks
  *---------------------------------------------------------------------------*/
 
- 
+/** 
+ * Show event and placemark
+ */
+TimeMapItem.prototype.show = function() {
+    this.showEvent();
+    this.showPlacemark();
+    this.visible = true;
+};
+
+/** 
+ * Hide event and placemark
+ */
+TimeMapItem.prototype.hide = function() {
+    this.hideEvent();
+    this.hidePlacemark();
+    this.visible = false;
+};
 
 /**
  * Delete placemark from map and event from timeline
