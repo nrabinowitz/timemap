@@ -756,6 +756,13 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
             event = new Timeline.DefaultEventSource.Event(start, end, null, null,
                 instant, title, null, null, null, eventIcon, theme.eventColor, null);
         } else {
+            var textColor;
+            if (theme.classicTape) {
+                // tweak to show old-style events
+                textColor = instant ? '#000000' : '#FFFFFF';
+            } else {
+                textColor = theme.eventColor;
+            }
             // attributes in object
             event = new Timeline.DefaultEventSource.Event({
                 "start": start,
@@ -763,7 +770,8 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
                 "instant": instant,
                 "text": title,
                 "icon": eventIcon,
-                "color": theme.eventColor
+                "color": theme.eventColor,
+                "textColor": textColor
             });
         }
     }
@@ -979,6 +987,10 @@ function TimeMapDatasetTheme(options) {
     this.eventIconPath =     options.eventIconPath || "timemap/images/";
     this.eventIconImage =    options.eventIconImage || "red-circle.png";
     this.eventIcon =         options.eventIcon || this.eventIconPath + this.eventIconImage;
+    
+    // whether to use the older "tape" event style for the newer Timeline versions
+    // NB: this needs additional css to work - see examples/artists.html
+    this.classicTape = ("classicTape" in options) ? options.classicTape : false;
 }
 
 TimeMapDataset.redTheme = function(options) {
