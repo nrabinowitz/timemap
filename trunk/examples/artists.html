@@ -6,11 +6,14 @@
     <title>Artists of the Renaissance TimeMap</title>
     <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w"
       type="text/javascript"></script>
-    <script type="text/javascript" src="http://static.simile.mit.edu/timeline/api/timeline-api.js"></script>
+    <script type="text/javascript" src="http://static.simile.mit.edu/timeline/api-2.2.0/timeline-api.js"></script>
     <script src="../timemap.js" type="text/javascript"></script>
     <script src="../lib/json2.pack.js" type="text/javascript"></script>
     <script src="../metawebloader.js" type="text/javascript"></script>
+    <script src="../manipulation.js" type="text/javascript"></script>
 	<script type="text/javascript">
+
+var tm;
 
 function onLoad() {
 
@@ -26,7 +29,7 @@ function onLoad() {
           "/people/deceased_person/date_of_death" : null,
           "/people/person/date_of_birth" : null,
           "/people/person/date_of_birth<" : "1700",
-          "/people/person/date_of_birth>" : "1400",
+          "/people/person/date_of_birth>" : "1440",
           "/people/person/place_of_birth" : {
             "geolocation" : {
               "latitude" : null,
@@ -50,7 +53,7 @@ function onLoad() {
           "/people/deceased_person/date_of_death" : null,
           "/people/person/date_of_birth" : null,
           "/people/person/date_of_birth<" : "1700",
-          "/people/person/date_of_birth>" : "1400",
+          "/people/person/date_of_birth>" : "1440",
           "/people/person/place_of_birth" : {
             "geolocation" : {
               "latitude" : null,
@@ -65,13 +68,14 @@ function onLoad() {
     ];
 
 
-    TimeMap.init({
+    tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
         timelineId: "timeline",     // Id of timeline div element (required) 
         datasets: [
             {
+                id: "artists",
                 title: "Artists",
-                theme: TimeMapDataset.greenTheme({eventIconPath: "../images/"}),
+                theme: TimeMapDataset.greenTheme({classicTape: true}),
                 data: {
                     type: "metaweb",    // Data to be loaded from freebase.com
                     query: artistQuery
@@ -79,8 +83,9 @@ function onLoad() {
                 transformFunction: transformPersonData
             },
             {
+                id: "authors",
                 title: "Authors",
-                theme: TimeMapDataset.redTheme({eventIconPath: "../images/"}),
+                theme: TimeMapDataset.redTheme({classicTape: true}),
                 data: {
                     type: "metaweb",    // Data to be loaded from freebase.com
                     query: authorQuery
@@ -142,18 +147,56 @@ function transformPersonData(data) {
     }
 	return newData;
 }
+
+// toggle the visibility of a dataset
+function toggleDataset(dsid, toggle) {
+    if (toggle) {
+        tm.datasets[dsid].show();
+    } else {
+        tm.datasets[dsid].hide();
+    }
+}
+
     </script>
 	<link href="examples.css" type="text/css" rel="stylesheet"/>
     <style>
     div#timelinecontainer{ height: 300px; }
     div#mapcontainer{ height: 300px; }
+    span#artbox { 
+        color: #FFFFFF; 
+        font-weight: bold;
+        background: #19CF54; 
+        float: left; 
+        padding: 5px;
+        margin: 4px;
+    }
+    span#authbox { 
+        color: #FFFFFF; 
+        font-weight: bold;
+        background: #FE766A; 
+        float: left; 
+        padding: 5px;
+        margin: 4px;
+    }
+    /* This is necessary to get old-style duration events */
+    .timeline-event-tape {
+        height:18px;
+    }
+    .timeline-event-label {
+        margin-top: -2px;
+        margin-left: 2px;
+    }
     </style>
   </head>
 
   <body onload="onLoad();" onunload="GUnload();">
     <div id="help">
     <h1>Metaweb Datasets</h1>
-    In this example, we're loading two Metaweb datasets from freebase.com.
+    <p>In this example, we're loading two Metaweb datasets from freebase.com.</p>
+    <p>Show:&nbsp;
+        <span id="artbox"><input type="checkbox" onclick="toggleDataset('artists', this.checked);" checked> Artists</span> &nbsp;&nbsp;&nbsp;
+        <span id="authbox"><input type="checkbox" onclick="toggleDataset('authors', this.checked);" checked> Authors</span>
+    </p>
     </div>
     <div id="timemap">
         <div id="timelinecontainer">
