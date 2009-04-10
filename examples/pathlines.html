@@ -97,7 +97,7 @@ function onLoad() {
                         }
                     }
                 }
-                return (item.next && item.visible && item.next.visible);
+                return (item.next && item.placemarkVisible && item.next.placemarkVisible);
             });
             // invoke the filter once data is displayed
             tm.filter("pathlines");
