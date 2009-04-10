@@ -961,6 +961,8 @@ function TimeMapDatasetTheme(options) {
         markerIcon.iconSize = new GSize(32, 32);
         markerIcon.shadow = "http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png";
         markerIcon.shadowSize = new GSize(59, 32);
+        markerIcon.iconAnchor = new GPoint(16, 33);
+        markerIcon.infoWindowAnchor = new GPoint(18, 3);
     }
     
     this.icon =              options.icon || markerIcon;
