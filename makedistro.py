@@ -12,6 +12,7 @@ else:
 
 # pack and copy core lib
 os.system("java -jar %s timemap.js > timemap.pack.js" % yuic)
+print "Packed timemap.js"
 shutil.copy("timemap.pack.js", "timemap_full.pack.js")
 
 # make list of files to pack
@@ -21,3 +22,4 @@ files = [os.path.join('lib', 'json2.pack.js')] + files
 
 for f in files:
     os.system("java -jar %s %s >> timemap_full.pack.js" % (yuic, f))
+    print "Packed and added %s" % f
