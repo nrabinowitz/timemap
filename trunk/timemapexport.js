@@ -23,6 +23,7 @@ TimeMap.prototype.toJSON = function() {
         'datasets': this.datasets
     };
     data = this.addExportData(data);
+    return data;
 };
 
 /**
