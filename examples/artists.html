@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <title>Artists of the Renaissance TimeMap</title>
+    <title>Renaissance Artists and Authors Example</title>
     <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w"
       type="text/javascript"></script>
     <script type="text/javascript" src="http://static.simile.mit.edu/timeline/api-2.2.0/timeline-api.js"></script>
@@ -162,6 +162,12 @@ function toggleDataset(dsid, toggle) {
     <style>
     div#timelinecontainer{ height: 300px; }
     div#mapcontainer{ height: 300px; }
+    div#fblicense {
+        font-size: x-small; 
+        float: right; 
+        padding: 1em;
+        margin-top: 28px;
+    }
     span#artbox { 
         color: #FFFFFF; 
         font-weight: bold;
@@ -190,9 +196,13 @@ function toggleDataset(dsid, toggle) {
   </head>
 
   <body onload="onLoad();" onunload="GUnload();">
+  
+    <div id="fblicense"> <img src="http://www.freebase.com/api/trans/raw/freebase/attribution" style="float:left; margin-right: 5px" /> <div style="margin-left:30px"> Source: <a href="http://www.freebase.com" title="Freebase &ndash; The World's Database">Freebase</a> - The World's Database <br/> Freely licensed under <a href="http://www.freebase.com/view/common/license/cc_attribution_25">CC-BY</a>. </div> </div>
+    
     <div id="help">
     <h1>Metaweb Datasets</h1>
-    <p>In this example, we're loading two Metaweb datasets from freebase.com.</p>
+    <p>In this example, we're loading two Metaweb datasets from freebase.com. Toggle boxes like the ones below might be one way to deal with large datasets, which can be difficult to show on the timeline.</p>
+    
     <p>Show:&nbsp;
         <span id="artbox"><input type="checkbox" onclick="toggleDataset('artists', this.checked);" checked> Artists</span> &nbsp;&nbsp;&nbsp;
         <span id="authbox"><input type="checkbox" onclick="toggleDataset('authors', this.checked);" checked> Authors</span>
