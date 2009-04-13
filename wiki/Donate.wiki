@@ -1,7 +1,7 @@
 #summary Donate via PayPal to support this project
 #labels Featured
 
-If you are using timemap.js and appreciate the work that went into it, please consider making a donation to support the project. Donations go to Nick Rabinowitz, the project maintainer, and I'll treat them as incentives to add features, clean up remaining issues, and write more documentation.
+If you are using timemap.js and appreciate the work that went into it, please consider making a donation to support the project. I'll treat donations as incentives to add features, clean up remaining issues, and write more documentation.
 
 [https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4682190 https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif]
 
