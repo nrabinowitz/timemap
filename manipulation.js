@@ -116,7 +116,9 @@ TimeMap.prototype.changeMapType = function (mapType) {
 TimeMap.prototype.refreshTimeline = function () {
     var topband = this.timeline.getBand(0);
     var centerDate = topband.getCenterVisibleDate();
-    topband.getEventPainter().getLayout()._laidout = false;
+    if (TimeMap.TimelineVersion() == "1.2") {
+        topband.getEventPainter().getLayout()._laidout = false;
+    }
     this.timeline.layout();
     topband.setCenterVisibleDate(centerDate);
 };
