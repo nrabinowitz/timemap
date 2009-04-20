@@ -1422,9 +1422,13 @@ TimeMap.formatDate = function(d, precision) {
  * Determine the SIMILE Timeline version
  * XXX: quite rough at the moment
  *
- * @return {String}     At the moment, only "1.2" or "2.2.0"
+ * @return {String}     At the moment, only "1.2", "2.2.0", or what Timeline provides
  */
 TimeMap.TimelineVersion = function() {
+    // check for Timeline.version support - added in 2.3.0
+    if (Timeline.version) {
+        return Timeline.version;
+    }
     if (Timeline.DurationEventPainter) {
         return "1.2";
     } else {
