@@ -1361,6 +1361,8 @@ TimeMap.makePoint = function(coords) {
     }
     // string
     if (latlon === null) {
+        // trim extra whitespace
+        coords = TimeMap.trim(coords);
         if (coords.indexOf(',') > -1) {
             // split on commas
             latlon = coords.split(",");
