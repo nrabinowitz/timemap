@@ -52,7 +52,7 @@ TimeMapDataset.parseKML = function(kml) {
         // try looking recursively at parent nodes
         if (!check) {
             var pn = n.parentNode;
-            if (pn.nodename == "Folder" || pn.nodename=="Document") {
+            if (pn.nodeName == "Folder" || pn.nodeName=="Document") {
                 findNodeTime(pn, data);
             }
             pn = null;
