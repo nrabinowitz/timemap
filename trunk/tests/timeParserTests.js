@@ -10,14 +10,17 @@ function exposeTestFunctionNames() {
 function testHybridParser() {
     subTestISO8601('hybrid');
     subTestGregorian('hybrid');
+    subTestError('hybrid');
 }
 
 function testISO8601Parser() {
     subTestISO8601('iso8601');
+    subTestError('iso8601');
 }
 
 function testGregorianParser() {
     subTestGregorian('gregorian');
+    subTestError('gregorian');
 }
 
 // test subroutines and set up for date/time tests
@@ -72,56 +75,82 @@ function subTestGregorian(dsid) {
     testFunc(9, -200);
 }
 
+function subTestError(dsid) {
+    var ds = tm.datasets[dsid];
+    var items = ds.getItems();
+    var title = ds.getTitle();
+    var testFunc = function(i) {
+        var prefix = title + ", item " + i + " -- ";
+        assertNull(prefix + "event is null", items[i].event);
+    }
+    for (i=10; i<13; i++)
+        testFunc(i, false);
+}
+
 // set up items
 var items = [
     {
-    // basic ISO8601 date
+    // 0: basic ISO8601 date
       "start" : "1980-01-02",
       "title" : "Test Event"
     },
     {
-    // basic ISO8601 date, no dividers
+    // 1: basic ISO8601 date, no dividers
       "start" : "19800102",
       "title" : "Test Event"
     },
     {
-    // basic ISO8601 date + time
+    // 2: basic ISO8601 date + time
       "start" : "1980-01-02 10:20:30Z",
       "title" : "Test Event"
     },
     {
-    // basic ISO8601 date + time, T format
+    // 3: basic ISO8601 date + time, T format
       "start" : "1980-01-02T10:20:30Z",
       "title" : "Test Event"
     },
     {
-    // basic ISO8601 date + time, T format, no dividers
+    // 4: basic ISO8601 date + time, T format, no dividers
       "start" : "19800102T102030Z",
       "title" : "Test Event"
     },
     {
-    // basic gregorian date
+    // 5: basic gregorian date
       "start" : "1980",
       "title" : "Test Event"
     },
     {
-    // basic gregorian date, early year
+    // 6: basic gregorian date, early year
       "start" : "200",
       "title" : "Test Event"
     },
     {
-    // basic gregorian date, early year AD
+    // 7: basic gregorian date, early year AD
       "start" : "5 AD",
       "title" : "Test Event"
     },
     {
-    // basic gregorian date, early year BC
+    // 8: basic gregorian date, early year BC
       "start" : "200 BC",
       "title" : "Test Event"
     },
     {
-    // basic gregorian date, negative
+    // 9: basic gregorian date, negative
       "start" : "-200",
+      "title" : "Test Event"
+    },
+    {
+    // 10: no start at all
+      "title" : "Test Event"
+    },
+    {
+    // 11: start is empty string
+      "start" : "",
+      "title" : "Test Event"
+    },
+    {
+    // 12: start is invalid string
+      "start" : "test",
       "title" : "Test Event"
     }
 ];

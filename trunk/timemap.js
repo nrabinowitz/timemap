@@ -647,6 +647,19 @@ function TimeMapDataset(timemap, options) {
 }
 
 /**
+ * Wrapper to fix Timeline Gregorian parser for invalid strings
+ *
+ * @param {String} s    String to parse into a Date object
+ * @return {Date}       Parsed date or null
+ */
+TimeMapDataset.gregorianParser = function(s) {
+    d = Timeline.DateTime.parseGregorianDateTime(s);
+    // check for invalid dates
+    if (!d.getFullYear()) d = null;
+    return d;
+};
+
+/**
  * Parse dates with the ISO 8601 parser, then fall back on the Gregorian
  * parser if the first parse fails
  *
@@ -656,7 +669,7 @@ function TimeMapDataset(timemap, options) {
 TimeMapDataset.hybridParser = function(s) {
     var d = Timeline.DateTime.parseIso8601DateTime(s);
     if (!d) {
-        d = Timeline.DateTime.parseGregorianDateTime(s);
+        d = TimeMapDataset.gregorianParser(s);
     }
     return d;
 };
@@ -668,7 +681,7 @@ TimeMapDataset.hybridParser = function(s) {
 TimeMapDataset.dateParsers = {
     'hybrid': TimeMapDataset.hybridParser,
     'iso8601': Timeline.DateTime.parseIso8601DateTime,
-    'gregorian': Timeline.DateTime.parseGregorianDateTime
+    'gregorian': TimeMapDataset.gregorianParser
 };
 
 /**
