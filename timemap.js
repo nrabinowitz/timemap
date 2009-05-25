@@ -147,7 +147,7 @@ TimeMap.init = function(config) {
     config.datasets = config.datasets || [];
     config.bandInfo = config.bandInfo || false;
     config.scrollTo = config.scrollTo || "earliest";
-    if (!config.bandInfo) {
+    if (!config.bandInfo && !config.bands) {
         var intervals = config.bandIntervals || 
             config.options.bandIntervals ||
             [Timeline.DateTime.WEEK, Timeline.DateTime.MONTH];
@@ -157,7 +157,7 @@ TimeMap.init = function(config) {
         }
         // save for later reference
         config.options.bandIntervals = intervals;
-        // make band info
+        // make default band info
         config.bandInfo = [
     		{
                 width:          "80%", 
@@ -202,18 +202,34 @@ TimeMap.init = function(config) {
     var bands = [];
     // ensure there's at least an empty eventSource
     var eventSource = (datasets[0] && datasets[0].eventSource) || new Timeline.DefaultEventSource();
-    for (x=0; x < config.bandInfo.length; x++) {
-        var bandInfo = config.bandInfo[x];
-        if (!(('eventSource' in bandInfo) && bandInfo.eventSource===null)) {
-            bandInfo.eventSource = eventSource;
+    // check for pre-initialized bands (manually created with Timeline.createBandInfo())
+    if (config.bands) {
+        bands = config.bands;
+        // substitute dataset event source
+        for (x=0; x < bands.length; x++) {
+            // assume that these have been set up like "normal" Timeline bands:
+            // with an empty event source if events are desired, and null otherwise
+            if (bands[x].eventSource !== null) {
+                bands[x].eventSource = eventSource;
+            }
         }
-        else {
-            bandInfo.eventSource = null;
-        }
-        bands[x] = Timeline.createBandInfo(bandInfo);
-        if (x > 0 && TimeMap.TimelineVersion() == "1.2") {
-            // set all to the same layout
-            bands[x].eventPainter.setLayout(bands[0].eventPainter.getLayout()); 
+    }
+    // otherwise, make bands from band info
+    else {
+        for (x=0; x < config.bandInfo.length; x++) {
+            var bandInfo = config.bandInfo[x];
+            // if eventSource is explicitly set to null or false, ignore
+            if (!(('eventSource' in bandInfo) && !bandInfo.eventSource)) {
+                bandInfo.eventSource = eventSource;
+            }
+            else {
+                bandInfo.eventSource = null;
+            }
+            bands[x] = Timeline.createBandInfo(bandInfo);
+            if (x > 0 && TimeMap.TimelineVersion() == "1.2") {
+                // set all to the same layout
+                bands[x].eventPainter.setLayout(bands[0].eventPainter.getLayout()); 
+            }
         }
     }
     // initialize timeline
@@ -767,14 +783,13 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
         if (TimeMap.TimelineVersion() == "1.2") {
             // attributes by parameter
             event = new Timeline.DefaultEventSource.Event(start, end, null, null,
-                instant, title, null, null, null, eventIcon, theme.eventColor, null);
+                instant, title, null, null, null, eventIcon, theme.eventColor, 
+                theme.eventTextColor);
         } else {
-            var textColor;
-            if (theme.classicTape) {
+            var textColor = theme.eventTextColor;
+            if (!textColor) {
                 // tweak to show old-style events
-                textColor = instant ? '#000000' : '#FFFFFF';
-            } else {
-                textColor = theme.eventColor;
+                textColor = (theme.classicTape && !instant) ? '#FFFFFF' : '#000000';
             }
             // attributes in object
             event = new Timeline.DefaultEventSource.Event({
@@ -997,6 +1012,7 @@ function TimeMapDatasetTheme(options) {
     this.fillColor =         options.fillColor || this.color;
     this.fillOpacity =       options.fillOpacity || 0.25;
     this.eventColor =        options.eventColor || this.color;
+    this.eventTextColor =    options.eventTextColor || null;
     this.eventIconPath =     options.eventIconPath || "timemap/images/";
     this.eventIconImage =    options.eventIconImage || "red-circle.png";
     this.eventIcon =         options.eventIcon || this.eventIconPath + this.eventIconImage;
