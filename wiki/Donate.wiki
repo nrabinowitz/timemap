@@ -5,4 +5,6 @@ If you are using timemap.js and appreciate the work that went into it, please co
 
 [https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4682190 https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif]
 
+If you prefer, you could also make a donation as a [http://www.kiva.org/app.php?page=gift&action=giftPromotion Kiva.org gift certificate] for public (at) nickrabinowitz (dot) com.
+
 Thanks for your support!
