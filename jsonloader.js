@@ -19,6 +19,8 @@
  *          dataset.loadItems(result);
  *      });
  *
+ * Depends on lib/json2.pack.js for plain json loads
+ *
  *---------------------------------------------------------------------------*/
 
 var JSONLoader = {};
@@ -45,3 +47,47 @@ JSONLoader.read = function(jsonUrl, f) {
     script.src = jsonUrl + "JSONLoader." + callbackName;
     document.body.appendChild(script);
 };
+
+/**
+ * JSONP loader function - expects a url to which a callback function name can
+ * be appended.
+ *
+ * @param {Object} data             Data object from TimeMap.init()
+ * @param {TimeMapDataset} dataset  Dataset to load data into
+ * @param {Function} preload        Function to manipulate data before load
+ * @param {Function} transform      Function to transform individual items before load
+ * @param {Function} loadMgr        Load manager object
+ */
+TimeMap.loaders.jsonp = function(data, dataset, preload, transform, loadMgr) {
+    // get items
+    JSONLoader.read(data.url, function(result) {
+        var items = preload(result);
+        dataset.loadItems(items, transform);
+        loadMgr.increment();
+    });
+}
+
+/**
+ * JSON loader function - expects to retrieve a plain JSON string.
+ *
+ * @param {Object} data             Data object from TimeMap.init()
+ * @param {TimeMapDataset} dataset  Dataset to load data into
+ * @param {Function} preload        Function to manipulate data before load
+ * @param {Function} transform      Function to transform individual items before load
+ * @param {Function} loadMgr        Load manager object
+ */
+TimeMap.loaders.json_string = function(data, dataset, preload, transform, loadMgr) {
+    // get json string
+    GDownloadUrl(data.url, function(result) {
+        var items = JSON.parse(result);
+        items = preload(items);
+        dataset.loadItems(items, transform);
+        // tell the load manager we're done
+        loadMgr.increment();
+    });
+}
+
+// Probably the default json loader should be json_string, not
+// jsonp. I may change this in the future, so I'd encourage you to use
+// the specific one you want.
+TimeMap.loaders.json = TimeMap.loaders.jsonp;

@@ -239,7 +239,7 @@ TimeMap.init = function(config) {
     var loadMgr = {};
     loadMgr.count = 0;
     loadMgr.loadTarget = config.datasets.length;
-    loadMgr.ifLoadedFunction = function() {
+    loadMgr.complete = function() {
         // custom function including timeline scrolling and layout
         if (config.dataLoadedFunction) {
             config.dataLoadedFunction(tm);
@@ -261,10 +261,10 @@ TimeMap.init = function(config) {
             }
         }
     };
-    loadMgr.ifLoaded = function() {
+    loadMgr.increment = function() {
         this.count++;
         if (this.count == this.loadTarget) {
-            this.ifLoadedFunction();
+            this.complete();
         }
     };
     
@@ -272,47 +272,13 @@ TimeMap.init = function(config) {
     for (x=0; x < config.datasets.length; x++) {
         (function(x) { // magic trick to deal with closure issues
             var data = config.datasets[x].data;
-            var ds = datasets[x];
-            // use dummy function as default
+            // use dummy function for defaults
             var dummy = function(data) { return data; };
             var preload = config.datasets[x].preloadFunction || dummy;
             var transform = config.datasets[x].transformFunction || dummy;
-            switch(data.type) {
-                case 'basic':
-                    // data already loaded
-                    var items = preload(data.value);
-                    ds.loadItems(items, transform);
-                    loadMgr.ifLoaded();
-                    break;
-                case 'json':
-                    // data to be loaded from remote json
-                    JSONLoader.read(data.url, function(result) {
-                        var items = preload(result);
-                        ds.loadItems(items, transform);
-                        loadMgr.ifLoaded();
-                    });
-                    break;
-                case 'kml':
-                case 'georss':
-                    // data to be loaded from kml or rss file
-                    var parserFunc = data.type=='kml' ? 
-                        TimeMapDataset.parseKML : TimeMapDataset.parseGeoRSS;
-                    GDownloadUrl(data.url, function(result) {
-                        var items = parserFunc(result);
-                        items = preload(items);
-                        ds.loadItems(items, transform);
-                	    loadMgr.ifLoaded();
-                    });
-                    break;
-                case 'metaweb':
-                    // data to be loaded from freebase query
-                    Metaweb.read(data.query, function(result) {
-                        var items = preload(result);
-                        ds.loadItems(result, transform);
-                	    loadMgr.ifLoaded();
-                    });
-                    break;
-            }
+            // load with appropriate loader
+            loader = TimeMap.loaders[data.type];
+            loader(data, datasets[x], preload, transform, loadMgr);
         })(x);
     }
     // return timemap object for later manipulation
@@ -321,6 +287,32 @@ TimeMap.init = function(config) {
 
 // for backwards compatibility
 var timemapInit = TimeMap.init;
+
+/**
+ * Map of different data loader functions.
+ * New loaders should add their loader function to this map; loader
+ * functions are passed an object with parameters in TimeMap.init().
+ */
+TimeMap.loaders = {};
+
+/**
+ * Basic loader function, for pre-loaded data. 
+ * Other types of loaders should take the same parameters.
+ *
+ * @param {Object} data             Data object from TimeMap.init()
+ * @param {TimeMapDataset} dataset  Dataset to load data into
+ * @param {Function} preload        Function to manipulate data before load
+ * @param {Function} transform      Function to transform individual items before load
+ * @param {Function} complete       Function to fire when load is complete
+ */
+TimeMap.loaders.basic = function(data, dataset, preload, transform, loadMgr) {
+    // preload
+    var items = preload(data.value);
+    // load
+    dataset.loadItems(items, transform);
+    // tell the load manager we're done
+    loadMgr.increment();
+} 
 
 /**
  * Map of common timeline intervals. Add custom intervals here if you

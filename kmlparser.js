@@ -141,3 +141,23 @@ TimeMapDataset.parseKML = function(kml) {
     nList = null;
     return items;
 };
+
+/**
+ * KML loader function
+ *
+ * @param {Object} data             Data object from TimeMap.init()
+ * @param {TimeMapDataset} dataset  Dataset to load data into
+ * @param {Function} preload        Function to manipulate data before load
+ * @param {Function} transform      Function to transform individual items before load
+ * @param {Function} loadMgr        Load manager object
+ */
+TimeMap.loaders.kml = function(data, dataset, preload, transform, loadMgr) {
+    // get items
+    GDownloadUrl(data.url, function(result) {
+        var items = TimeMapDataset.parseKML(result);
+        items = preload(items);
+        dataset.loadItems(items, transform);
+        // tell the load manager we're done
+        loadMgr.increment();
+    });
+}
