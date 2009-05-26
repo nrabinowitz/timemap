@@ -5,6 +5,10 @@
  
 CHANGELOG (somewhat rough - see the SVN commit log for more detail)
 -------------------------------------------------------------------------------
+Version 1.5
+-----------
+- Added more flexibility to data loaders for TimeMap.init()
+- Added loader for JSON strings
 
 Version 1.4
 -----------

@@ -104,7 +104,7 @@ function kmlLoadTestSetup() {
     });
 }
 
-// page setup function - json
+// page setup function - jsonp
 function jsonLoadTestSetup() {
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
@@ -114,8 +114,27 @@ function jsonLoadTestSetup() {
                 title: "Test Dataset",
                 id: "test",
                 data: {
-                    type: "json",
+                    type: "jsonp",
                     url: "data/data.js?cb=" 
+                }
+            }
+        ],
+        dataDisplayedFunction: function() { setUpPageStatus = "complete"; }
+    });
+}
+
+// page setup function - json string
+function jsonStringLoadTestSetup() {
+    tm = TimeMap.init({
+        mapId: "map",               // Id of map div element (required)
+        timelineId: "timeline",     // Id of timeline div element (required) 
+        datasets: [
+            {
+                title: "Test Dataset",
+                id: "test",
+                data: {
+                    type: "json_string",
+                    url: "data/data_string.js" 
                 }
             }
         ],

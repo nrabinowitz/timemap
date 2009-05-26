@@ -6,13 +6,15 @@
  * route the response to a specified JavaScript function.
  *
  * Depends on lib/json2.pack.js
- * This file was pulled directly from the Freebase API site:
+ * This code was largely pulled directly from the Freebase API site:
  * http://www.freebase.com/view/freebase/api
  */
-var Metaweb = {};                               // Define our namespace
-Metaweb.HOST = "http://www.freebase.com";       // The Metaweb server
-Metaweb.QUERY_SERVICE = "/api/service/mqlread"; // The service on that server
-Metaweb.counter = 0;                            // For unique function names
+ 
+var Metaweb = {                            // Define our namespace
+    HOST: "http://www.freebase.com",       // The Metaweb server
+    QUERY_SERVICE: "/api/service/mqlread", // The service on that server
+    counter: 0                             // For unique function names
+};
 
 // Send query q to Metaweb, and pass the result asynchronously to function f
 Metaweb.read = function(q, f) {
@@ -28,8 +30,8 @@ Metaweb.read = function(q, f) {
         var innerEnvelope = outerEnvelope.qname;         // Open outer envelope
         // Make sure the query was successful.
         if (innerEnvelope.code.indexOf("/api/status/ok") != 0) {  // Check for errors
-          var error = innerEnvelope.messages[0]          // Get error message
-          throw error.code + ": " + error.message      // And throw it!
+            var error = innerEnvelope.messages[0]          // Get error message
+            throw error.code + ": " + error.message      // And throw it!
         }
         var result = innerEnvelope.result;   // Get result from inner envelope
         document.body.removeChild(script);   // Clean up <script> tag
@@ -50,6 +52,24 @@ Metaweb.read = function(q, f) {
     // Create a script tag, set its src attribute and add it to the document
     // This triggers the HTTP request and submits the query
     var script = document.createElement("script");
-    script.src = url
+    script.src = url;
     document.body.appendChild(script);
 };
+
+/**
+ * Metaweb loader function
+ *
+ * @param {Object} data             Data object from TimeMap.init()
+ * @param {TimeMapDataset} dataset  Dataset to load data into
+ * @param {Function} preload        Function to manipulate data before load
+ * @param {Function} transform      Function to transform individual items before load
+ * @param {Function} loadMgr        Load manager object
+ */
+TimeMap.loaders.metaweb = function(data, dataset, preload, transform, loadMgr) {
+    // get items
+    Metaweb.read(data.query, function(result) {
+        var items = preload(result);
+        dataset.loadItems(result, transform);
+        loadMgr.increment();
+    });
+}
