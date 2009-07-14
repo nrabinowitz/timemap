@@ -8,7 +8,7 @@
       type="text/javascript"></script>
     <script type="text/javascript" src="http://static.simile.mit.edu/timeline/api/timeline-api.js"></script>
     <script src="../timemap.js" type="text/javascript"></script>
-    <script src="../kmlparser.js" type="text/javascript"></script>
+    <script src="../loaders/kml.js" type="text/javascript"></script>
 	<script type="text/javascript">
 
 function onLoad() {
@@ -19,8 +19,8 @@ function onLoad() {
             {
                 title: "Violence in Kenya",
                 theme: TimeMapDataset.redTheme({eventIconPath: '../images/'}),
-                data: {
-                    type: "kml",     // Data to be loaded in KML - must be a local URL
+                type: "kml",     // Data to be loaded in KML - must be a local URL
+                options: {
                     url: "kenya.kml" // KML file to load
                 }
             }

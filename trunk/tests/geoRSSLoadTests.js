@@ -88,24 +88,24 @@ function setUpPage() {
             {
                 title: "Test Dataset: RSS",
                 id: "rss",
-                data: {
-                    type: "georss",
+                type: "georss",
+                options: {
                     url: "data/data.rss" 
                 }
             },
             {
                 title: "Test Dataset: Atom",
                 id: "atom",
-                data: {
-                    type: "georss",
+                type: "georss",
+                options: {
                     url: "data/data-atom.xml" 
                 }
             },
             {
                 title: "Test Dataset: RSS, mixed formats",
                 id: "mixed",
-                data: {
-                    type: "georss",
+                type: "georss",
+                options: {
                     url: "data/data-mixed.xml" 
                 }
             }

@@ -166,27 +166,27 @@ function setUpPage() {
                 title: "Test Dataset: Hybrid",
                 id: "hybrid",
                 dateParser: "hybrid",
-                data: {
-                    type: "basic",
-                    value: items
+                type: "basic",
+                options: {
+                    items: items
                 }
             },
             {
                 title: "Test Dataset: ISO8601",
                 id: "iso8601",
                 dateParser: "iso8601",
-                data: {
-                    type: "basic",
-                    value: items
+                type: "basic",
+                options: {
+                    items: items
                 }
             }, 
             {
                 title: "Test Dataset: Gregorian",
                 id: "gregorian",
                 dateParser: "gregorian",
-                data: {
-                    type: "basic",
-                    value: items
+                type: "basic",
+                options: {
+                    items: items
                 }
             }
         ]

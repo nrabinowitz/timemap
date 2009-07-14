@@ -18,7 +18,10 @@ shutil.copy("timemap.pack.js", "timemap_full.pack.js")
 # make list of files to pack
 ignore = ['timemap.js', 'timemap.pack.js', 'timemap_full.pack.js']
 files = [f for f in glob.glob('*.js') if not f in ignore]
+# prepend libraries
 files = [os.path.join('lib', 'json2.pack.js')] + files
+# append loaders
+files += [f for f in glob.glob(os.path.join('loaders','*.js'))]
 
 for f in files:
     os.system("java -jar %s %s >> timemap_full.pack.js" % (yuic, f))

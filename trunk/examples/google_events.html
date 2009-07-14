@@ -8,7 +8,7 @@
       type="text/javascript"></script>
     <script type="text/javascript" src="http://static.simile.mit.edu/timeline/api/timeline-api.js"></script>
     <script src="../timemap.js" type="text/javascript"></script>
-    <script src="../jsonloader.js" type="text/javascript"></script>
+    <script src="../loaders/json.js" type="text/javascript"></script>
 	<script type="text/javascript">
 
 function onLoad() {
@@ -19,28 +19,28 @@ function onLoad() {
             {
                 title: "Developer Community Calendar",
                 theme: TimeMapDataset.greenTheme({eventIconPath: "../images/"}),
-                data: {
-                    type: "json",    // Data to be loaded in JSON from a remote URL
+                type: "jsonp",    // Data to be loaded in JSON from a remote URL
+                options: {
                     url: "http://www.google.com/calendar/feeds/" +
                           "dev-community-calendar@google.com/public/full?futureevents=true" +
                           "&orderby=starttime&sortorder=ascending&singleevents=true" +
-                          "&alt=json-in-script&callback="
-                },
-                preloadFunction: preloadGCal,
-                transformFunction: transformGCal
+                          "&alt=json-in-script&callback=",
+                    preloadFunction: preloadGCal,
+                    transformFunction: transformGCal
+                }
             },
             {
                 title: "Developer Calendar",
                 theme: TimeMapDataset.blueTheme({eventIconPath: "../images/"}),
-                data: {
-                    type: "json",    // Data to be loaded in JSON from a remote URL
+                type: "jsonp",    // Data to be loaded in JSON from a remote URL
+                options: {
                     url: "http://www.google.com/calendar/feeds/" +
                           "developer-calendar@google.com/public/full?futureevents=true" +
                           "&orderby=starttime&sortorder=ascending&singleevents=true" +
-                          "&alt=json-in-script&callback="
-                },
-                preloadFunction: preloadGCal,
-                transformFunction: transformGCal
+                          "&alt=json-in-script&callback=",
+                    preloadFunction: preloadGCal,
+                    transformFunction: transformGCal
+                }
             }
         ]   
     });

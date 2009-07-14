@@ -85,12 +85,10 @@ function setUpPage() {
                 title: "Test Dataset A",
                 id: "testA",
                 theme: TimeMapDataset.greenTheme(),
+                type: "basic",
                 options: {
-                    eventIconPath: '../images/dsA/'
-                },
-                data: {
-                    type: "basic",
-                    value: [
+                    eventIconPath: '../images/dsA/',
+                    items: [
                         {
                           "start" : "1980-01-02",
                           "end" : "1990-01-02",
@@ -119,9 +117,9 @@ function setUpPage() {
             {
                 title: "Test Dataset B",
                 id: "testB",
-                data: {
-                    type: "basic",
-                    value: [
+                type: "basic",
+                options: {
+                    items: [
                         {
                           "start" : "1980-01-02",
                           "end" : "1990-01-02",
@@ -150,9 +148,9 @@ function setUpPage() {
                 title: "Test Dataset C",
                 id: "testC",
                 theme: "purple",
-                data: {
-                    type: "basic",
-                    value: [
+                type: "basic",
+                options: {
+                    items: [
                         {
                           "start" : "1980-01-02",
                           "end" : "1990-01-02",

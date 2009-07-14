@@ -271,14 +271,16 @@ TimeMap.init = function(config) {
     // load data!
     for (x=0; x < config.datasets.length; x++) {
         (function(x) { // magic trick to deal with closure issues
-            var data = config.datasets[x].data;
-            // use dummy function for defaults
-            var dummy = function(data) { return data; };
-            var preload = config.datasets[x].preloadFunction || dummy;
-            var transform = config.datasets[x].transformFunction || dummy;
+            var data = config.datasets[x];
+            // support some older syntax
+            var options = data.options || data.data || {};
+            var type = data.type || options.type;
+            var callback = function() { loadMgr.increment() };
+            // get loader class
+            var loaderClass = (typeof(type) == 'string') ? TimeMap.loaders[type] : type;
             // load with appropriate loader
-            loader = TimeMap.loaders[data.type];
-            loader(data, datasets[x], preload, transform, loadMgr);
+            var loader = new loaderClass(options);
+            loader.load(datasets[x], callback);
         })(x);
     }
     // return timemap object for later manipulation
@@ -296,23 +298,88 @@ var timemapInit = TimeMap.init;
 TimeMap.loaders = {};
 
 /**
- * Basic loader function, for pre-loaded data. 
- * Other types of loaders should take the same parameters.
+ * Basic loader class, for pre-loaded data. 
+ * Other types of loaders should take the same parameter.
  *
- * @param {Object} data             Data object from TimeMap.init()
- * @param {TimeMapDataset} dataset  Dataset to load data into
- * @param {Function} preload        Function to manipulate data before load
- * @param {Function} transform      Function to transform individual items before load
- * @param {Function} complete       Function to fire when load is complete
+ * @param {Object} options          All options for the loader:
+ *   {Array} data                       Array of items to load
+ *   {Function} preloadFunction         Function to call on data before loading
+ *   {Function} transformFunction       Function to call on individual items before loading
  */
-TimeMap.loaders.basic = function(data, dataset, preload, transform, loadMgr) {
+TimeMap.loaders.basic = function(options) {
+    // get standard functions
+    TimeMap.loaders.mixin(this, options);
+    // allow "value" for backwards compatibility
+    this.data = options.items || options.value || [];
+}
+
+/**
+ * New loaders should implement a load function with the same parameters.
+ *
+ * @param {TimeMapDataset} dataset  Dataset to load data into
+ * @param {Function} callback       Function to call once data is loaded
+ */
+TimeMap.loaders.basic.prototype.load = function(dataset, callback) {
     // preload
-    var items = preload(data.value);
+    var items = this.preload(this.data);
     // load
-    dataset.loadItems(items, transform);
-    // tell the load manager we're done
-    loadMgr.increment();
-} 
+    dataset.loadItems(items, this.transform);
+    // run callback
+    callback();
+}
+
+/**
+ * Generic class for loading remote data with a custom parser function
+ *
+ * @param {Object} options          All options for the loader:
+ *   {Array} url                        URL of file to load (NB: must be local address)
+ *   {Function} parserFunction          Parser function to turn data into JavaScript array
+ *   {Function} preloadFunction         Function to call on data before loading
+ *   {Function} transformFunction       Function to call on individual items before loading
+ */
+TimeMap.loaders.remote = function(options) {
+    // get standard functions
+    TimeMap.loaders.mixin(this, options);
+    // get URL to load
+    this.url = options.url;
+}
+
+/**
+ * KML load function.
+ *
+ * @param {TimeMapDataset} dataset  Dataset to load data into
+ * @param {Function} callback       Function to call once data is loaded
+ */
+TimeMap.loaders.remote.prototype.load = function(dataset, callback) {
+    var loader = this;
+    // get items
+    GDownloadUrl(this.url, function(result) {
+        // parse
+        var items = loader.parse(result);
+        // load
+        items = loader.preload(items);
+        dataset.loadItems(items, loader.transform);
+        // callback
+        callback();
+    });
+}
+
+/**
+ * Save a few lines of code by adding standard functions
+ *
+ * @param {Function} loader         Loader to add functions to
+ * @param {Object} options          Options for the loader:
+ *   {Function} parserFunction          Parser function to turn data into JavaScript array
+ *   {Function} preloadFunction         Function to call on data before loading
+ *   {Function} transformFunction       Function to call on individual items before loading
+ */
+TimeMap.loaders.mixin = function(loader, options) {
+    // set preload and transform functions
+    var dummy = function(data) { return data; };
+    loader.parse = options.parserFunction || dummy;
+    loader.preload = options.preloadFunction || dummy;
+    loader.transform = options.transformFunction || dummy;
+}  
 
 /**
  * Map of common timeline intervals. Add custom intervals here if you
