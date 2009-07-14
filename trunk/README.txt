@@ -21,11 +21,13 @@ Source files
 - timemap.js:       The core TimeMap library - all you need to load and display local
                     JSON data on a timemap.
 - manipulation.js:  Additional functions to manipulate a TimeMap after loading
-- kmlparser.js      Parser functions for loading KML files
-- georssparser.js   Parser functions for loading GeoRSS files
-- jsonloader.js:    A helper script to load remote JSON data
-- metawebloader.js  A helper script to load remote Metaweb data from freebase.com
-- timemapexport.js  Additional functions to help export a TimeMap as serialized JSON
+- export.js  Additional functions to help export a TimeMap as serialized JSON
+
+Loaders (in loaders/ directory)
+- kml.js            Loader for KML files
+- georss.js         Loader for GeoRSS files
+- json.js:          Loaders for JSON (both string and jsonp)
+- metaweb.js        Loader for Metaweb data from freebase.com
 
 Documentation
 - LICENSE.txt:      The license
