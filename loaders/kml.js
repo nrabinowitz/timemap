@@ -4,22 +4,36 @@
  */
  
 /*----------------------------------------------------------------------------
- * KML Parser
+ * KML Loader
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
- * This is a function for parsing KML files. Currently supports all geometry
+ * This is a loader class for KML files. Currently supports all geometry
  * types (point, polyline, polygon, and overlay), but does not support
  * multiple geometries (i.e. multiple placemarks per item) just yet.
  *---------------------------------------------------------------------------*/
 
-/*globals GXml, TimeMap, TimeMapDataset */
+/*globals GXml, TimeMap */
+
+/**
+ * KML loader factory - inherits from remote loader
+ *
+ * @param {Object} options          All options for the loader:
+ *   {Array} url                        URL of KML file to load (NB: must be local address)
+ *   {Function} preloadFunction         Function to call on data before loading
+ *   {Function} transformFunction       Function to call on individual items before loading
+ */
+TimeMap.loaders.kml = function(options) {
+    var loader = new TimeMap.loaders.remote(options);
+    loader.parse = TimeMap.loaders.kml.parse;
+    return loader;
+}
 
 /*
  * Static function to parse KML with time data and load it.
  *
- * @param {XML text} kml        KML to be parsed
+ * @param {XML string} kml        KML to be parsed
  */
-TimeMapDataset.parseKML = function(kml) {
+TimeMap.loaders.kml.parse = function(kml) {
     var items = [], data, kmlnode, placemarks, pm, i;
     kmlnode = GXml.parse(kml);
     
@@ -141,23 +155,3 @@ TimeMapDataset.parseKML = function(kml) {
     nList = null;
     return items;
 };
-
-/**
- * KML loader function
- *
- * @param {Object} data             Data object from TimeMap.init()
- * @param {TimeMapDataset} dataset  Dataset to load data into
- * @param {Function} preload        Function to manipulate data before load
- * @param {Function} transform      Function to transform individual items before load
- * @param {Function} loadMgr        Load manager object
- */
-TimeMap.loaders.kml = function(data, dataset, preload, transform, loadMgr) {
-    // get items
-    GDownloadUrl(data.url, function(result) {
-        var items = TimeMapDataset.parseKML(result);
-        items = preload(items);
-        dataset.loadItems(items, transform);
-        // tell the load manager we're done
-        loadMgr.increment();
-    });
-}

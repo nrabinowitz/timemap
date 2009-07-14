@@ -21,9 +21,10 @@ function onLoad() {
                 id: "artists",
                 title: "Artists",
                 theme: TimeMapDataset.orangeTheme({eventIconPath: "../images/"}),
-                data: {
-                    type: "basic",
-                    value: [
+                // note that the lines below are now the preferred syntax
+                type: "basic",
+                options: {
+                    items: [
                         {
                           "start" : "1449",
                           "end" : "1494-01-11",

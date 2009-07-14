@@ -7,7 +7,7 @@
  * GeoRSS Parser
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
- * This is a function for parsing GeoRSS feeds. Parsing is complicated by the 
+ * This is a loader class for GeoRSS feeds. Parsing is complicated by the 
  * diversity of GeoRSS formats; this parser handles:
  * - RSS feeds
  * - Atom feeds
@@ -22,12 +22,26 @@
 
 /*globals GXml, TimeMap, TimeMapDataset */
 
+/**
+ * GeoRSS loader factory - inherits from remote loader
+ *
+ * @param {Object} options          All options for the loader:
+ *   {Array} url                        URL of KML file to load (NB: must be local address)
+ *   {Function} preloadFunction         Function to call on data before loading
+ *   {Function} transformFunction       Function to call on individual items before loading
+ */
+TimeMap.loaders.georss = function(options) {
+    var loader = new TimeMap.loaders.remote(options);
+    loader.parse = TimeMap.loaders.georss.parse;
+    return loader;
+}
+
 /*
- * Static function to parse GeoRSS and load it.
+ * Static function to parse GeoRSS
  *
  * @param {XML text} rss        GeoRSS to be parsed
  */
-TimeMapDataset.parseGeoRSS = function(rss) {
+TimeMap.loaders.georss.parse = function(rss) {
     var items = [], data, node, placemarks, pm;
     node = GXml.parse(rss);
     
@@ -111,23 +125,3 @@ TimeMapDataset.parseGeoRSS = function(rss) {
     nList = null;
     return items;
 };
-
-/**
- * GeoRSS loader function
- *
- * @param {Object} data             Data object from TimeMap.init()
- * @param {TimeMapDataset} dataset  Dataset to load data into
- * @param {Function} preload        Function to manipulate data before load
- * @param {Function} transform      Function to transform individual items before load
- * @param {Function} loadMgr        Load manager object
- */
-TimeMap.loaders.georss = function(data, dataset, preload, transform, loadMgr) {
-    // get items
-    GDownloadUrl(data.url, function(result) {
-        var items = TimeMapDataset.parseGeoRSS(result);
-        items = preload(items);
-        dataset.loadItems(items, transform);
-        // tell the load manager we're done
-        loadMgr.increment();
-    });
-}

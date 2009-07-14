@@ -161,9 +161,9 @@ function setUpPage() {
             {
                 title: "Test Dataset",
                 id: "test",
-                data: {
-                    type: "basic",
-                    value: [
+                type: "basic",
+                options: {
+                    items: [
                         {
                           "start" : "1980-01-02",
                           "end" : "1990-01-02",

@@ -8,7 +8,7 @@
       type="text/javascript"></script>
     <script type="text/javascript" src="http://static.simile.mit.edu/timeline/api/timeline-api.js"></script>
     <script src="../timemap.js" type="text/javascript"></script>
-    <script src="../jsonloader.js" type="text/javascript"></script>
+    <script src="../loaders/json.js" type="text/javascript"></script>
 	<script type="text/javascript">
 
 var tm;
@@ -22,15 +22,15 @@ function onLoad() {
                 title: "Events",
                 id: "events",
                 theme: TimeMapDataset.redTheme({eventIconPath: "../images/"}),
-                data: {
-                    type: "json",
+                type: "jsonp",
+                options: {
                     // note that your spreadsheet must be published for this to work
-                    url: "http://spreadsheets.google.com/feeds/list/pjUcDAp-oNIOjmx3LCxT4XA/1/public/values?alt=json-in-script&callback="
-                },
-                // remove wrapper
-                preloadFunction: preloadGSS,
-                // transform data from spreadsheet format
-                transformFunction: transformGSS
+                    url: "http://spreadsheets.google.com/feeds/list/pjUcDAp-oNIOjmx3LCxT4XA/1/public/values?alt=json-in-script&callback=",
+                    // remove wrapper
+                    preloadFunction: preloadGSS,
+                    // transform data from spreadsheet format
+                    transformFunction: transformGSS
+                }
             }
         ], 
         bandIntervals: [

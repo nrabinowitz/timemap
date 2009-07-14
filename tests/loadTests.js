@@ -62,6 +62,7 @@ function basicLoadTestSetup() {
             {
                 title: "Test Dataset",
                 id: "test",
+                // this syntax should still work
                 data: {
                     type: "basic",
                     value: [
@@ -94,8 +95,8 @@ function kmlLoadTestSetup() {
             {
                 title: "Test Dataset",
                 id: "test",
-                data: {
-                    type: "kml",
+                type: "kml",
+                options: {
                     url: "data/data.kml" 
                 }
             }
@@ -113,8 +114,8 @@ function jsonLoadTestSetup() {
             {
                 title: "Test Dataset",
                 id: "test",
-                data: {
-                    type: "jsonp",
+                type: "jsonp",
+                options: {
                     url: "data/data.js?cb=" 
                 }
             }
@@ -132,8 +133,8 @@ function jsonStringLoadTestSetup() {
             {
                 title: "Test Dataset",
                 id: "test",
-                data: {
-                    type: "json_string",
+                type: "json_string",
+                options: {
                     url: "data/data_string.js" 
                 }
             }
