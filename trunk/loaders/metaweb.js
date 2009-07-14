@@ -14,6 +14,28 @@
  * Depends on:
  * - lib/json2.pack.js
  * - loaders/jsonp.js
+ *
+ * Usage in TimeMap.init():
+ 
+    datasets: [
+        {
+            title: "Freebase Dataset",
+            type: "metaweb",
+            options: {
+                query: [
+                    {
+                      // query here - see Metaweb API
+                    }
+                ],
+                transformFunction: function(data) {
+                    // map returned data to the expected format - see
+                    // http://code.google.com/p/timemap/wiki/JsonFormat
+                    return data;
+                }
+            }
+        }
+    ]
+ 
  */
 
 /**

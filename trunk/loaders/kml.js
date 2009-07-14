@@ -10,6 +10,19 @@
  * This is a loader class for KML files. Currently supports all geometry
  * types (point, polyline, polygon, and overlay), but does not support
  * multiple geometries (i.e. multiple placemarks per item) just yet.
+ *
+ * Usage in TimeMap.init():
+ 
+    datasets: [
+        {
+            title: "KML Dataset",
+            type: "kml",
+            options: {
+                url: "mydata.kml"   // Must be local
+            }
+        }
+    ]
+ 
  *---------------------------------------------------------------------------*/
 
 /*globals GXml, TimeMap */

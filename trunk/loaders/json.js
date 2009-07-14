@@ -18,6 +18,27 @@
  * callback function - this will require a local URL. 
  * json_string depends on lib/json2.pack.js
  *
+ * Usage in TimeMap.init():
+ 
+    datasets: [
+        // jsonp
+        {
+            title: "JSONP Dataset",
+            type: "jsonp",
+            options: {
+                url: "http://www.test.com/getsomejson.php?callback="
+            }
+        },
+        // json string
+        {
+            title: "JSON String Dataset",
+            type: "json_string",
+            options: {
+                url: "mydata.js"    // Must be a local URL
+            }
+        }
+    ]
+ 
  *---------------------------------------------------------------------------*/
 
 
