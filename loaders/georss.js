@@ -18,6 +18,19 @@
  *
  * At the moment, this only supports points; polygons, polylines, and boxes
  * will be added at some later point.
+ *
+ * Usage in TimeMap.init():
+ 
+    datasets: [
+        {
+            title: "GeoRSS Dataset",
+            type: "georss", // Data to be loaded in GeoRSS
+            options: {
+                url: "mydata.rss" // GeoRSS file to load - must be a local URL
+            }
+        }
+    ]
+ 
  *---------------------------------------------------------------------------*/
 
 /*globals GXml, TimeMap, TimeMapDataset */
