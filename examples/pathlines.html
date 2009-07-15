@@ -9,6 +9,7 @@
     <script type="text/javascript" src="http://static.simile.mit.edu/timeline/api/timeline-api.js"></script>
     <script src="../timemap.js" type="text/javascript"></script>
     <script src="../loaders/json.js" type="text/javascript"></script>
+    <script src="../loaders/flickr.js" type="text/javascript"></script>
 	<script type="text/javascript">
     
 var tm;
@@ -24,29 +25,10 @@ function onLoad() {
                 id: "photos",
                 theme: TimeMapDataset.greenTheme({eventIconPath: "../images/"}),
                 // load JSON data from Flickr - see the Flickr API for more info
-                type: "jsonp",
+                type: "flickr",
                 options: {
                     // Thanks to Ken-ichi for his geotagged photos
-                    url: "http://www.flickr.com/services/feeds/geo/?format=json&id=18024068@N00&jsoncallback=",
-                    // remove wrapper
-                    preloadFunction: function(result) { return result["items"]; },
-                    // transform data
-                    transformFunction: function(data) {
-                        return {
-                            title: data["title"],
-                            start: data["date_taken"],
-                            point: {
-                                lat: data["latitude"],
-                                lon: data["longitude"]
-                            },
-                            options: {
-                                description: data["description"]
-                                    .replace(/&gt;/g, ">")
-                                    .replace(/&lt;/g, "<")
-                                    .replace(/&quot;/g, '"')
-                            }
-                        }
-                    }
+                    url: "http://www.flickr.com/services/feeds/geo/?format=json&id=18024068@N00&jsoncallback="
                 }
             }
         ], 
