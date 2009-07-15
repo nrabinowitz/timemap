@@ -14,6 +14,7 @@ Flickr, etc). IMPORTANT: Loader files have moved to the loaders/ directory.
 are the preloadFunction and transformFunction params, which should now go in an
 options object within the dataset object.
 - Added loaders for JSON strings, Google Spreadsheets, and Flickr
+- Added polyline and polygon support to GeoRSS
 
 Version 1.4
 -----------
