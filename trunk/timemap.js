@@ -34,12 +34,12 @@
  *   {Boolean} syncBands            Whether to synchronize all bands in timeline
  *   {GLatLng} mapCenter            Point for map center
  *   {Number} mapZoom               Intial map zoom level
- *   {GMapType} mapType             The maptype for the map
+ *   {GMapType/String} mapType      The maptype for the map
  *   {Array} mapTypes               The set of maptypes available for the map
+ *   {Function/String} mapFilter    How to hide/show map items depending on timeline state;
+                                    options: "hidePastFuture", "showMomentOnly"
  *   {Boolean} showMapTypeCtrl      Whether to display the map type control
  *   {Boolean} showMapCtrl          Whether to show map navigation control
- *   {Boolean} hidePastFuture       Whether to hide map placemarks for events not visible on timeline
- *   {Boolean} showMomentOnly       Whether to hide all but the current moment (bad for instant events)
  *   {Boolean} centerMapOnItems     Whether to center and zoom the map based on loaded item positions
  *   {Function} openInfoWindow      Function redefining how info window opens
  *   {Function} closeInfoWindow     Function redefining how info window closes
@@ -62,15 +62,18 @@ function TimeMap(tElement, mElement, options) {
     if (typeof(options.mapType) == 'string') {
         options.mapType = TimeMap.mapTypes[options.mapType];
     }
+    // allow map filters to be specified by key
+    if (typeof(options.mapFilter) == 'string') {
+        options.mapFilter = TimeMap.filters[options.mapFilter];
+    }
     this.opts.mapCenter =        options.mapCenter || new GLatLng(0,0); 
     this.opts.mapZoom =          options.mapZoom || 0;
     this.opts.mapType =          options.mapType || G_PHYSICAL_MAP;
     this.opts.mapTypes =         options.mapTypes || [G_NORMAL_MAP, G_SATELLITE_MAP, G_PHYSICAL_MAP];
+    this.opts.mapFilter =        options.mapFilter || TimeMap.filters.hidePastFuture;
     this.opts.syncBands =        ('syncBands' in options) ? options.syncBands : true;
     this.opts.showMapTypeCtrl =  ('showMapTypeCtrl' in options) ? options.showMapTypeCtrl : true;
     this.opts.showMapCtrl =      ('showMapCtrl' in options) ? options.showMapCtrl : true;
-    this.opts.hidePastFuture =   ('hidePastFuture' in options) ? options.hidePastFuture : true;
-    this.opts.showMomentOnly =   ('showMomentOnly' in options) ? options.showMomentOnly : false;
     this.opts.centerMapOnItems = ('centerMapOnItems' in options) ? options.centerMapOnItems : true;
     
     
@@ -501,14 +504,8 @@ TimeMap.prototype.initTimeline = function(bands) {
         return item.dataset.visible;
     });
     
-    // filter: hide off-timeline items
-    if (this.opts.hidePastFuture) {
-        this.addFilter("map", TimeMap.hidePastFuture);
-    }
-    // filter: hide all but the present moment - overridden by hidePastFuture
-    else if (this.opts.showMomentOnly) {
-        this.addFilter("map", TimeMap.showMomentOnly);
-    }
+    // filter: hide map items depending on timeline state
+    this.addFilter("map", this.opts.mapFilter);
     
     // filter chain for timeline events
     this.addFilterChain("timeline", 
@@ -620,12 +617,18 @@ TimeMap.prototype.removeFilter = function(fid) {
 };
 
 /**
+ * Map of different filter functions. Adding new filters to this
+ * map allows them to be specified by string name.
+ */
+TimeMap.filters = {};
+
+/**
  * Static filter function: Hide items not shown on the timeline
  *
  * @param {TimeMapItem} item    Item to test for filter
  * @return {Boolean}            Whether to show the item
  */
-TimeMap.hidePastFuture = function(item) {
+TimeMap.filters.hidePastFuture = function(item) {
     var topband = item.dataset.timemap.timeline.getBand(0);
     var maxVisibleDate = topband.getMaxVisibleDate().getTime();
     var minVisibleDate = topband.getMinVisibleDate().getTime();
@@ -651,7 +654,7 @@ TimeMap.hidePastFuture = function(item) {
  * @param {TimeMapItem} item    Item to test for filter
  * @return {Boolean}            Whether to show the item
  */
-TimeMap.showMomentOnly = function(item) {
+TimeMap.filters.showMomentOnly = function(item) {
     var topband = item.dataset.timemap.timeline.getBand(0);
     var momentDate = topband.getCenterVisibleDate().getTime();
     if (item.event !== null) {
