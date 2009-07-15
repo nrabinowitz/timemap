@@ -200,6 +200,8 @@ TimeMap.init = function(config) {
             datasets[x].eventSource = datasets[0].eventSource;
         }
     }
+    // add a pointer to the eventSource in the TimeMap
+    tm.eventSource = datasets[0].eventSource;
     
     // set up timeline bands
     var bands = [];
@@ -238,38 +240,8 @@ TimeMap.init = function(config) {
     // initialize timeline
     tm.initTimeline(bands);
     
-    // set up load manager
-    var loadMgr = {};
-    loadMgr.count = 0;
-    loadMgr.loadTarget = config.datasets.length;
-    loadMgr.complete = function() {
-        // custom function including timeline scrolling and layout
-        if (config.dataLoadedFunction) {
-            config.dataLoadedFunction(tm);
-        } else {
-            var d = new Date();
-            // make sure there are events to scroll to
-            if (eventSource.getCount() > 0) {
-                if (config.scrollTo=="earliest") {
-                    d = eventSource.getEarliestDate();
-                } else if (config.scrollTo!="now" && config.scrollTo!==null) {
-                    d = eventSource.getLatestDate();
-                }
-                tm.timeline.getBand(0).setCenterVisibleDate(d);
-            }
-            tm.timeline.layout();
-            // custom function to be called when data is loaded
-            if (config.dataDisplayedFunction) {
-                config.dataDisplayedFunction(tm);
-            }
-        }
-    };
-    loadMgr.increment = function() {
-        this.count++;
-        if (this.count == this.loadTarget) {
-            this.complete();
-        }
-    };
+    // initialize load manager
+    TimeMap.loadManager.init(tm, config.datasets.length, config);
     
     // load data!
     for (x=0; x < config.datasets.length; x++) {
@@ -278,7 +250,7 @@ TimeMap.init = function(config) {
             // support some older syntax
             var options = data.options || data.data || {};
             var type = data.type || options.type;
-            var callback = function() { loadMgr.increment() };
+            var callback = function() { TimeMap.loadManager.increment() };
             // get loader class
             var loaderClass = (typeof(type) == 'string') ? TimeMap.loaders[type] : type;
             // load with appropriate loader
@@ -292,6 +264,76 @@ TimeMap.init = function(config) {
 
 // for backwards compatibility
 var timemapInit = TimeMap.init;
+
+/**
+ * Load manager - static singleton for managing multiple asynchronous loads
+ */
+TimeMap.loadManager = new function() {
+    
+    /**
+     * Initialize (or reset) the load manager
+     *
+     * @param {TimeMap} tm          TimeMap instance
+     * @param {int} countTarget     Number of datasets we're loading
+     * @param {Object} options      Container for optional functions
+     */
+    this.init = function(tm, countTarget, config) {
+        this.count = 0;
+        this.tm = tm;
+        this.countTarget = countTarget;
+        this.opts = config || {};
+    };
+    
+    /**
+     * Increment the count of loaded datasets
+     */
+    this.increment = function() {
+        this.count++;
+        if (this.count >= this.countTarget) {
+            this.complete();
+        }
+    };
+    
+    /**
+     * Function to fire when all loads are complete
+     */
+    this.complete = function() {
+        // custom function including timeline scrolling and layout
+        if (this.opts.dataLoadedFunction) {
+            this.opts.dataLoadedFunction(tm);
+        } else {
+            var d = new Date();
+            var eventSource = this.tm.eventSource;
+            var scrollTo = this.opts.scrollTo;
+            // make sure there are events to scroll to
+            if (scrollTo && eventSource.getCount() > 0) {
+                switch (scrollTo) {
+                    case "now":
+                        break;
+                    case "earliest":
+                        d = eventSource.getEarliestDate();
+                        break;
+                    case "latest":
+                        d = eventSource.getLatestDate();
+                        break;
+                    default:
+                        // assume it's a date, try to parse
+                        if (typeof(scrollTo) == 'string') {
+                            scrollTo = TimeMapDataset.hybridParser(scrollTo);
+                        }
+                        // either the parse worked, or it was a date to begin with
+                        if (scrollTo.constructor == Date) d = scrollTo;
+                }
+                this.tm.timeline.getBand(0).setCenterVisibleDate(d);
+            }
+            this.tm.timeline.layout();
+            // custom function to be called when data is loaded
+            if (this.opts.dataDisplayedFunction) {
+                this.opts.dataDisplayedFunction(tm);
+            }
+        }
+    };
+};
 
 /**
  * Map of different data loader functions.
