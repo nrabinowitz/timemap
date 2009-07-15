@@ -53,8 +53,7 @@ TimeMap.loaders.kml.parse = function(kml) {
     // get TimeMap utilty functions
     // assigning to variables should compress better
     var getTagValue = TimeMap.getTagValue,
-        getNodeList = TimeMap.getNodeList,
-        trim = TimeMap.trim;
+        getNodeList = TimeMap.getNodeList;
     
     // recursive time data search
     var findNodeTime = function(n, data) {
@@ -105,11 +104,7 @@ TimeMap.loaders.kml.parse = function(kml) {
                 data.point = {};
                 // get lat/lon
                 coords = getTagValue(nList[0], "coordinates");
-                latlon = coords.split(",");
-                data.point = {
-                    "lat": trim(latlon[1]),
-                    "lon": trim(latlon[0])
-                };
+                data.point = TimeMap.makePoint(coords, 1);
                 break PLACEMARK;
             }
             // look for polylines and polygons
@@ -123,16 +118,8 @@ TimeMap.loaders.kml.parse = function(kml) {
                 }
             }
             if (nList.length > 0) {
-                data[geom] = [];
                 coords = getTagValue(nList[0], "coordinates");
-                coordArr = trim(coords).split(/[\r\n\f ]+/);
-                for (var x=0; x<coordArr.length; x++) {
-                    latlon = coordArr[x].split(",");
-                    data[geom].push({
-                        "lat": trim(latlon[1]),
-                        "lon": trim(latlon[0])
-                    });
-                }
+                data[geom] = TimeMap.makePoly(coords, 1);
                 break PLACEMARK;
             }
         }

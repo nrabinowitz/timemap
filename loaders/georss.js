@@ -63,7 +63,7 @@ TimeMap.loaders.georss.parse = function(rss) {
     var getTagValue = TimeMap.getTagValue,
         getNodeList = TimeMap.getNodeList,
         makePoint = TimeMap.makePoint,
-        trim = TimeMap.trim;
+        makePoly = TimeMap.makePoly;
     
     // define namespaces
     TimeMap.nsMap.georss = 'http://www.georss.org/georss';
@@ -125,8 +125,42 @@ TimeMap.loaders.georss.parse = function(rss) {
                 data.point = makePoint(coords); 
                 break PLACEMARK;
             }
+            // look for polyline, GeoRSS-Simple
+            coords = getTagValue(pm, "line", 'georss');
+            if (coords) {
+                data.polyline = makePoly(coords); 
+                break PLACEMARK;
+            }
+            // look for polygon, GeoRSS-Simple
+            coords = getTagValue(pm, "polygon", 'georss');
+            if (coords) {
+                data.polygon = makePoly(coords); 
+                break PLACEMARK;
+            }
+            // look for polyline, GML
+            nList = getNodeList(pm, "LineString");
+            if (nList.length > 0) {
+                geom = "polyline";
+            } else {
+                nList = getNodeList(pm, "Polygon");
+                if (nList.length > 0) {
+                    geom = "polygon";
+                }
+            }
+            if (nList.length > 0) {
+                // GML <posList>
+                coords = getTagValue(nList[0], "posList", 'gml');
+                // GML <coordinates>
+                if (!coords) {
+                    coords = getTagValue(nList[0], "coordinates", 'gml');
+                }
+                if (coords) {
+                    data[geom] = makePoly(coords);
+                    break PLACEMARK;
+                }
+            }
             
-            // XXX: look for polylines, polygons, and boxes
+            // XXX: deal with boxes
         }
         items.push(data);
     }
