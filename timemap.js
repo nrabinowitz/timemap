@@ -18,7 +18,12 @@
 /*global GMarker, GPolygon, GPolyline, GSize, GLatLng, G_DEFAULT_ICON       */
 /*global G_DEFAULT_MAP_TYPES, G_NORMAL_MAP, G_PHYSICAL_MAP, G_HYBRID_MAP    */
 /*global G_MOON_VISIBLE_MAP, G_SKY_VISIBLE_MAP, G_SATELLITE_MAP, Timeline   */
- 
+
+// A couple of aliases to save a few bytes
+var DT = Timeline.DateTime, 
+// Google icon path
+GIP = "http://www.google.com/intl/en_us/mapfiles/ms/icons/";
+
 /*----------------------------------------------------------------------------
  * TimeMap Class - holds references to timeline, map, and datasets
  *---------------------------------------------------------------------------*/
@@ -138,12 +143,10 @@ TimeMap.init = function(config) {
     
     // check required elements
     if (!('mapId' in config) || !config.mapId) {
-        alert("TimeMap init: No map id was specified!");
-        return;
+        throw "TimeMap.init: No id for map";
     }
     if (!('timelineId' in config) || !config.timelineId) {
-        alert("TimeMap init: No timeline id was specified!");
-        return;
+        throw "TimeMap.init: No id for timeline";
     }
     
     // set defaults
@@ -155,7 +158,7 @@ TimeMap.init = function(config) {
     if (!config.bandInfo && !config.bands) {
         var intervals = config.bandIntervals || 
             config.options.bandIntervals ||
-            [Timeline.DateTime.WEEK, Timeline.DateTime.MONTH];
+            [DT.WEEK, DT.MONTH];
         // allow intervals to be specified by key
         if (typeof(intervals) == 'string') {
             intervals = TimeMap.intervals[intervals];
@@ -435,16 +438,15 @@ TimeMap.loaders.mixin = function(loader, options) {
  * Map of common timeline intervals. Add custom intervals here if you
  * want to refer to them by key rather than as literals.
  */
-var dt = Timeline.DateTime; // save some bytes
 TimeMap.intervals = {
-    'sec': [dt.SECOND, dt.MINUTE],
-    'min': [dt.MINUTE, dt.HOUR],
-    'hr': [dt.HOUR, dt.DAY],
-    'day': [dt.DAY, dt.WEEK],
-    'wk': [dt.WEEK, dt.MONTH],
-    'mon': [dt.MONTH, dt.YEAR],
-    'yr': [dt.YEAR, dt.DECADE],
-    'dec': [dt.DECADE, dt.CENTURY]
+    'sec': [DT.SECOND, DT.MINUTE],
+    'min': [DT.MINUTE, DT.HOUR],
+    'hr': [DT.HOUR, DT.DAY],
+    'day': [DT.DAY, DT.WEEK],
+    'wk': [DT.WEEK, DT.MONTH],
+    'mon': [DT.MONTH, DT.YEAR],
+    'yr': [DT.YEAR, DT.DECADE],
+    'dec': [DT.DECADE, DT.CENTURY]
 };
 
 /**
@@ -780,7 +782,7 @@ function TimeMapDataset(timemap, options) {
  * @return {Date}       Parsed date or null
  */
 TimeMapDataset.gregorianParser = function(s) {
-    d = Timeline.DateTime.parseGregorianDateTime(s);
+    d = DT.parseGregorianDateTime(s);
     // check for invalid dates
     if (!d.getFullYear()) d = null;
     return d;
@@ -794,7 +796,7 @@ TimeMapDataset.gregorianParser = function(s) {
  * @return {Date}       Parsed date or null
  */
 TimeMapDataset.hybridParser = function(s) {
-    var d = Timeline.DateTime.parseIso8601DateTime(s);
+    var d = DT.parseIso8601DateTime(s);
     if (!d) {
         d = TimeMapDataset.gregorianParser(s);
     }
@@ -807,7 +809,7 @@ TimeMapDataset.hybridParser = function(s) {
  */
 TimeMapDataset.dateParsers = {
     'hybrid': TimeMapDataset.hybridParser,
-    'iso8601': Timeline.DateTime.parseIso8601DateTime,
+    'iso8601': DT.parseIso8601DateTime,
     'gregorian': TimeMapDataset.gregorianParser
 };
 
@@ -1078,7 +1080,7 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
 /*----------------------------------------------------------------------------
  * Predefined visual themes for datasets, based on Google markers
  *---------------------------------------------------------------------------*/
- 
+
 /**
  * Create a new theme for a TimeMap dataset, defining colors and images
  *
@@ -1104,11 +1106,10 @@ function TimeMapDatasetTheme(options) {
     if (!options.icon) {
         // make new red icon
         var markerIcon = new GIcon(G_DEFAULT_ICON);
-        this.iconImage = options.iconImage || 
-            "http://www.google.com/intl/en_us/mapfiles/ms/icons/red-dot.png";
+        this.iconImage = options.iconImage || GIP + "red-dot.png";
         markerIcon.image = this.iconImage;
         markerIcon.iconSize = new GSize(32, 32);
-        markerIcon.shadow = "http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png";
+        markerIcon.shadow = GIP + "msmarker.shadow.png";
         markerIcon.shadowSize = new GSize(59, 32);
         markerIcon.iconAnchor = new GPoint(16, 33);
         markerIcon.infoWindowAnchor = new GPoint(18, 3);
@@ -1141,7 +1142,7 @@ TimeMapDataset.redTheme = function(options) {
 
 TimeMapDataset.blueTheme = function(options) {
     options = options || {};
-    options.iconImage = "http://www.google.com/intl/en_us/mapfiles/ms/icons/blue-dot.png";
+    options.iconImage = GIP + "blue-dot.png";
     options.color = "#5A7ACF";
     options.eventIconImage = "blue-circle.png";
     return new TimeMapDatasetTheme(options);
@@ -1149,7 +1150,7 @@ TimeMapDataset.blueTheme = function(options) {
 
 TimeMapDataset.greenTheme = function(options) {
     options = options || {};
-    options.iconImage = "http://www.google.com/intl/en_us/mapfiles/ms/icons/green-dot.png";
+    options.iconImage = GIP + "green-dot.png";
     options.color = "#19CF54";
     options.eventIconImage = "green-circle.png";
     return new TimeMapDatasetTheme(options);
@@ -1157,7 +1158,7 @@ TimeMapDataset.greenTheme = function(options) {
 
 TimeMapDataset.ltblueTheme = function(options) {
     options = options || {};
-    options.iconImage = "http://www.google.com/intl/en_us/mapfiles/ms/icons/ltblue-dot.png";
+    options.iconImage = GIP + "ltblue-dot.png";
     options.color = "#5ACFCF";
     options.eventIconImage = "ltblue-circle.png";
     return new TimeMapDatasetTheme(options);
@@ -1165,7 +1166,7 @@ TimeMapDataset.ltblueTheme = function(options) {
 
 TimeMapDataset.purpleTheme = function(options) {
     options = options || {};
-    options.iconImage = "http://www.google.com/intl/en_us/mapfiles/ms/icons/purple-dot.png";
+    options.iconImage = GIP + "purple-dot.png";
     options.color = "#8E67FD";
     options.eventIconImage = "purple-circle.png";
     return new TimeMapDatasetTheme(options);
@@ -1173,7 +1174,7 @@ TimeMapDataset.purpleTheme = function(options) {
 
 TimeMapDataset.orangeTheme = function(options) {
     options = options || {};
-    options.iconImage = "http://www.google.com/intl/en_us/mapfiles/ms/icons/orange-dot.png";
+    options.iconImage = GIP + "orange-dot.png";
     options.color = "#FF9900";
     options.eventIconImage = "orange-circle.png";
     return new TimeMapDatasetTheme(options);
@@ -1181,7 +1182,7 @@ TimeMapDataset.orangeTheme = function(options) {
 
 TimeMapDataset.yellowTheme = function(options) {
     options = options || {};
-    options.iconImage = "http://www.google.com/intl/en_us/mapfiles/ms/icons/yellow-dot.png";
+    options.iconImage = GIP + "yellow-dot.png";
     options.color = "#ECE64A";
     options.eventIconImage = "yellow-circle.png";
     return new TimeMapDatasetTheme(options);
