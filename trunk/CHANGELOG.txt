@@ -13,7 +13,7 @@ Flickr, etc). IMPORTANT: Loader files have moved to the loaders/ directory.
 - Some changes to TimeMap.init() syntax - the only things not backwards-compatible
 are the preloadFunction and transformFunction params, which should now go in an
 options object within the dataset object.
-- Added loaders for JSON strings, Google Spreadsheets
+- Added loaders for JSON strings, Google Spreadsheets, and Flickr
 
 Version 1.4
 -----------

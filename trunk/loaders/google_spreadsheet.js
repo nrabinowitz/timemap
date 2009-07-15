@@ -77,7 +77,7 @@ TimeMap.loaders.gss = function(options) {
                 return data['gsx$' + fieldMap[f]]['$t'];
             } else return false;
         };
-        return {
+        var item = {
             title: getField("title"),
             start: getField("start"),
             point: {
@@ -88,6 +88,10 @@ TimeMap.loaders.gss = function(options) {
                 description: getField("description")
             }
         };
+        // hook for further transformation
+        if (options.transformFunction) 
+            item = options.transformFunction(item);
+        return item;
     };
 
     return loader;
