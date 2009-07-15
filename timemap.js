@@ -66,45 +66,47 @@ function TimeMap(tElement, mElement, options) {
     if (typeof(options.mapFilter) == 'string') {
         options.mapFilter = TimeMap.filters[options.mapFilter];
     }
-    this.opts.mapCenter =        options.mapCenter || new GLatLng(0,0); 
-    this.opts.mapZoom =          options.mapZoom || 0;
-    this.opts.mapType =          options.mapType || G_PHYSICAL_MAP;
-    this.opts.mapTypes =         options.mapTypes || [G_NORMAL_MAP, G_SATELLITE_MAP, G_PHYSICAL_MAP];
-    this.opts.mapFilter =        options.mapFilter || TimeMap.filters.hidePastFuture;
-    this.opts.syncBands =        ('syncBands' in options) ? options.syncBands : true;
-    this.opts.showMapTypeCtrl =  ('showMapTypeCtrl' in options) ? options.showMapTypeCtrl : true;
-    this.opts.showMapCtrl =      ('showMapCtrl' in options) ? options.showMapCtrl : true;
-    this.opts.centerMapOnItems = ('centerMapOnItems' in options) ? options.centerMapOnItems : true;
+    // these options only needed for map initialization
+    var mapCenter =        options.mapCenter || new GLatLng(0,0),
+        mapZoom =          options.mapZoom || 0,
+        mapType =          options.mapType || G_PHYSICAL_MAP,
+        mapTypes =         options.mapTypes || [G_NORMAL_MAP, G_SATELLITE_MAP, G_PHYSICAL_MAP],
+        showMapTypeCtrl =  ('showMapTypeCtrl' in options) ? options.showMapTypeCtrl : true,
+        showMapCtrl =      ('showMapCtrl' in options) ? options.showMapCtrl : true;
     
+    // these options need to be saved for later
+    this.opts.syncBands =        ('syncBands' in options) ? options.syncBands : true;
+    this.opts.mapFilter =        options.mapFilter || TimeMap.filters.hidePastFuture;
+    this.opts.centerOnItems =    ('centerMapOnItems' in options) ? options.centerMapOnItems : true;
     
     // initialize map
     if (GBrowserIsCompatible()) {
-        this.map = new GMap2(this.mElement);
-        if (this.opts.showMapCtrl) {
-            this.map.addControl(new GLargeMapControl());
+        var map = this.map = new GMap2(this.mElement);
+        if (showMapCtrl) {
+            map.addControl(new GLargeMapControl());
         }
-        if (this.opts.showMapTypeCtrl) {
-            this.map.addControl(new GMapTypeControl());
+        if (showMapTypeCtrl) {
+            map.addControl(new GMapTypeControl());
         }
         // drop all existing types
         var i;
         for (i=G_DEFAULT_MAP_TYPES.length-1; i>0; i--) {
-            this.map.removeMapType(G_DEFAULT_MAP_TYPES[i]);
+            map.removeMapType(G_DEFAULT_MAP_TYPES[i]);
         }
         // you can't remove the last maptype, so add a new one first
-        this.map.addMapType(this.opts.mapTypes[0]);
-        this.map.removeMapType(G_DEFAULT_MAP_TYPES[0]);
+        map.addMapType(mapTypes[0]);
+        map.removeMapType(G_DEFAULT_MAP_TYPES[0]);
         // add the rest of the new types
-        for (i=1; i<this.opts.mapTypes.length; i++) {
-            this.map.addMapType(this.opts.mapTypes[i]);
+        for (i=1; i<mapTypes.length; i++) {
+            map.addMapType(mapTypes[i]);
         }
-        this.map.enableDoubleClickZoom();
-        this.map.enableScrollWheelZoom();
-        this.map.enableContinuousZoom();
+        map.enableDoubleClickZoom();
+        map.enableScrollWheelZoom();
+        map.enableContinuousZoom();
         // initialize map center and zoom
-        this.map.setCenter(this.opts.mapCenter, this.opts.mapZoom);
+        map.setCenter(mapCenter, mapZoom);
         // must be called after setCenter, for reasons unclear
-        this.map.setMapType(this.opts.mapType);
+        map.setMapType(mapType);
     }
 }
 
@@ -186,14 +188,14 @@ TimeMap.init = function(config) {
 		config.options);
     
     // create the dataset objects
-    var datasets = [], x;
+    var datasets = [], x, ds, dsOptions, dsId;
     for (x=0; x < config.datasets.length; x++) {
-        var ds = config.datasets[x];
-        var dsOptions = ds.options || {};
+        ds = config.datasets[x];
+        dsOptions = ds.options || {};
         dsOptions.title = ds.title || '';
         dsOptions.theme = ds.theme;
         dsOptions.dateParser = ds.dateParser;
-        var dsId = ds.id || "ds" + x;
+        dsId = ds.id || "ds" + x;
         datasets[x] = tm.createDataset(dsId, dsOptions);
         if (x > 0) {
             // set all to the same eventSource
@@ -241,20 +243,21 @@ TimeMap.init = function(config) {
     tm.initTimeline(bands);
     
     // initialize load manager
-    TimeMap.loadManager.init(tm, config.datasets.length, config);
+    var loadManager = TimeMap.loadManager;
+    loadManager.init(tm, config.datasets.length, config);
     
     // load data!
     for (x=0; x < config.datasets.length; x++) {
-        (function(x) { // magic trick to deal with closure issues
-            var data = config.datasets[x];
+        (function(x) { // deal with closure issues
+            var data = config.datasets[x], options, type, callback, loaderClass, loader;
             // support some older syntax
-            var options = data.options || data.data || {};
-            var type = data.type || options.type;
-            var callback = function() { TimeMap.loadManager.increment() };
+            options = data.options || data.data || {};
+            type = data.type || options.type;
+            callback = function() { loadManager.increment() };
             // get loader class
-            var loaderClass = (typeof(type) == 'string') ? TimeMap.loaders[type] : type;
+            loaderClass = (typeof(type) == 'string') ? TimeMap.loaders[type] : type;
             // load with appropriate loader
-            var loader = new loaderClass(options);
+            loader = new loaderClass(options);
             loader.load(datasets[x], callback);
         })(x);
     }
@@ -274,13 +277,13 @@ TimeMap.loadManager = new function() {
      * Initialize (or reset) the load manager
      *
      * @param {TimeMap} tm          TimeMap instance
-     * @param {int} countTarget     Number of datasets we're loading
+     * @param {int} target     Number of datasets we're loading
      * @param {Object} options      Container for optional functions
      */
-    this.init = function(tm, countTarget, config) {
+    this.init = function(tm, target, config) {
         this.count = 0;
         this.tm = tm;
-        this.countTarget = countTarget;
+        this.target = target;
         this.opts = config || {};
     };
     
@@ -289,7 +292,7 @@ TimeMap.loadManager = new function() {
      */
     this.increment = function() {
         this.count++;
-        if (this.count >= this.countTarget) {
+        if (this.count >= this.target) {
             this.complete();
         }
     };
@@ -299,8 +302,9 @@ TimeMap.loadManager = new function() {
      */
     this.complete = function() {
         // custom function including timeline scrolling and layout
-        if (this.opts.dataLoadedFunction) {
-            this.opts.dataLoadedFunction(tm);
+        var func = this.opts.dataLoadedFunction;
+        if (func) {
+            func(tm);
         } else {
             var d = new Date();
             var eventSource = this.tm.eventSource;
@@ -328,8 +332,9 @@ TimeMap.loadManager = new function() {
             }
             this.tm.timeline.layout();
             // custom function to be called when data is loaded
-            if (this.opts.dataDisplayedFunction) {
-                this.opts.dataDisplayedFunction(tm);
+            func = this.opts.dataDisplayedFunction;
+            if (func) {
+                func(tm);
             }
         }
     };
@@ -430,15 +435,16 @@ TimeMap.loaders.mixin = function(loader, options) {
  * Map of common timeline intervals. Add custom intervals here if you
  * want to refer to them by key rather than as literals.
  */
+var dt = Timeline.DateTime; // save some bytes
 TimeMap.intervals = {
-    'sec': [Timeline.DateTime.SECOND, Timeline.DateTime.MINUTE],
-    'min': [Timeline.DateTime.MINUTE, Timeline.DateTime.HOUR],
-    'hr': [Timeline.DateTime.HOUR, Timeline.DateTime.DAY],
-    'day': [Timeline.DateTime.DAY, Timeline.DateTime.WEEK],
-    'wk': [Timeline.DateTime.WEEK, Timeline.DateTime.MONTH],
-    'mon': [Timeline.DateTime.MONTH, Timeline.DateTime.YEAR],
-    'yr': [Timeline.DateTime.YEAR, Timeline.DateTime.DECADE],
-    'dec': [Timeline.DateTime.DECADE, Timeline.DateTime.CENTURY]
+    'sec': [dt.SECOND, dt.MINUTE],
+    'min': [dt.MINUTE, dt.HOUR],
+    'hr': [dt.HOUR, dt.DAY],
+    'day': [dt.DAY, dt.WEEK],
+    'wk': [dt.WEEK, dt.MONTH],
+    'mon': [dt.MONTH, dt.YEAR],
+    'yr': [dt.YEAR, dt.DECADE],
+    'dec': [dt.DECADE, dt.CENTURY]
 };
 
 /**
@@ -469,13 +475,14 @@ TimeMap.prototype.createDataset = function(id, options) {
     var dataset = new TimeMapDataset(this, options);
     this.datasets[id] = dataset;
     // add event listener
-    if (this.opts.centerMapOnItems) {
+    if (this.opts.centerOnItems) {
         var tm = this;
         GEvent.addListener(dataset, 'itemsloaded', function() {
+            var map = tm.map, bounds = tm.mapBounds;
             // determine the zoom level from the bounds
-            tm.map.setZoom(tm.map.getBoundsZoomLevel(tm.mapBounds));
+            map.setZoom(map.getBoundsZoomLevel(bounds));
             // determine the center from the bounds
-            tm.map.setCenter(tm.mapBounds.getCenter());
+            map.setCenter(bounds.getCenter());
         });
     }
     return dataset;
@@ -874,19 +881,19 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     var tm = this.timemap;
     
     // create timeline event
-    var start = (data.start === undefined||data.start === "") ? null :
-        this.opts.dateParser(data.start);
-    var end = (data.end === undefined||data.end === "") ? null : 
-        this.opts.dateParser(data.end);
-    var instant = (data.end === undefined);
-    var eventIcon = theme.eventIcon;
-    var title = data.title;
-    // allow event-less placemarks - these will be always present on map
-    var event = null;
+    var parser = this.opts.dateParser, start = data.start, end = data.end, instant;
+    start = (start === undefined||start === "") ? null : parser(start);
+    end = (end === undefined||end === "") ? null : parser(end);
+    instant = (end === undefined);
+    var eventIcon = theme.eventIcon,
+        title = data.title,
+        // allow event-less placemarks - these will be always present on map
+        event = null;
     if (start !== null) {
+        var eventClass = Timeline.DefaultEventSource.Event;
         if (TimeMap.TimelineVersion() == "1.2") {
             // attributes by parameter
-            event = new Timeline.DefaultEventSource.Event(start, end, null, null,
+            event = new eventClass(start, end, null, null,
                 instant, title, null, null, null, eventIcon, theme.eventColor, 
                 theme.eventTextColor);
         } else {
@@ -896,7 +903,7 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
                 textColor = (theme.classicTape && !instant) ? '#FFFFFF' : '#000000';
             }
             // attributes in object
-            event = new Timeline.DefaultEventSource.Event({
+            event = new eventClass({
                 "start": start,
                 "end": end,
                 "instant": instant,
@@ -909,7 +916,9 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     }
     
     // set the icon, if any, outside the closure
-    var markerIcon = ("icon" in data) ? data.icon : theme.icon;
+    var markerIcon = ("icon" in data) ? data.icon : theme.icon,
+        bounds = tm.mapBounds; // save some bytes
+    
     
     // internal function: create map placemark
     // takes a data object (could be full data, could be just placemark)
@@ -923,8 +932,8 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
                 parseFloat(pdata.point.lon)
             );
             // add point to visible map bounds
-            if (tm.opts.centerMapOnItems) {
-                tm.mapBounds.extend(point);
+            if (tm.opts.centerOnItems) {
+                bounds.extend(point);
             }
             placemark = new GMarker(point, { icon: markerIcon });
             type = "marker";
@@ -945,8 +954,8 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
                 );
                 points.push(point);
                 // add point to visible map bounds
-                if (tm.opts.centerMapOnItems) {
-                    tm.mapBounds.extend(point);
+                if (tm.opts.centerOnItems) {
+                    bounds.extend(point);
                 }
             }
             if ("polyline" in pdata) {
@@ -978,9 +987,9 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
                 parseFloat(pdata.overlay.east)
             );
             // add to visible bounds
-            if (tm.opts.centerMapOnItems) {
-                tm.mapBounds.extend(sw);
-                tm.mapBounds.extend(ne);
+            if (tm.opts.centerOnItems) {
+                bounds.extend(sw);
+                bounds.extend(ne);
             }
             // create overlay
             var overlayBounds = new GLatLngBounds(sw, ne);
