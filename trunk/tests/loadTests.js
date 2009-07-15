@@ -15,12 +15,12 @@ function testDatasetIsDefined() {
 
 function testItemLoaded() {
     var ds = tm.datasets["test"];
-    assertEquals("one item in item array", ds.getItems().length, 1);
+    assertEquals("two items in item array", ds.getItems().length, 2);
 }
 
 function testItemLoadedInEventSource() {
     var ds = tm.datasets["test"];
-    assertEquals("one item in eventSource", ds.eventSource.getCount(), 1);
+    assertEquals("two items in eventSource", ds.eventSource.getCount(), 2);
 }
 
 function testEarliestDate() {
@@ -39,6 +39,7 @@ function testLatestDate() {
 
 function testItemAttributes() {
     var items = tm.datasets["test"].getItems();
+    // point
     var item = items[0];
     assertNotNull("event not null", item.event);
     assertNotNull("placemark not null", item.placemark);
@@ -46,7 +47,21 @@ function testItemAttributes() {
     assertEquals("event title matches", item.event.getText(), "Test Event");
     assertEquals("placemark type matches", item.getType(), "marker");
     var point = new GLatLng(23.456, 12.345);
-    assertTrue("point matches", item.getInfoPoint().equals(point));
+    assertTrue("marker point matches", item.placemark.getLatLng().equals(point));
+    assertTrue("info point matches", item.getInfoPoint().equals(point));
+    // polyline
+    item = items[1];
+    assertNotNull("event not null", item.event);
+    assertNotNull("placemark not null", item.placemark);
+    assertEquals("title matches", item.getTitle(), "Test Event 2");
+    assertEquals("event title matches", item.event.getText(), "Test Event 2");
+    assertEquals("placemark type matches", item.getType(), "polyline");
+    var points = [new GLatLng(45.256, -110.45), new GLatLng(46.46, -109.48), new GLatLng(43.84, -109.86)];
+    assertEquals("vertex count matches", item.placemark.getVertexCount(), 3);
+    assertTrue("info point matches middle point", item.getInfoPoint().equals(points[1]));
+    for (var x=0; x<points.length; x++) {
+        assertTrue("vertex " + x + " matches", item.placemark.getVertex(x).equals(points[x]));
+    }
 }
 
 
@@ -67,16 +82,34 @@ function basicLoadTestSetup() {
                     type: "basic",
                     value: [
                         {
-                          "start" : "1980-01-02",
-                          "end" : "2000-01-02",
-                          "point" : {
-                              "lat" : 23.456,
-                              "lon" : 12.345
-                           },
-                          "title" : "Test Event",
-                          "options" : {
-                            "description": "Test Description"
-                          }
+                            "start" : "1980-01-02",
+                            "end" : "2000-01-02",
+                            "point" : {
+                                "lat" : 23.456,
+                                "lon" : 12.345
+                            },
+                            "title" : "Test Event",
+                            "options" : {
+                                "description": "Test Description"
+                            }
+                        },
+                        {
+                            "start" : "1980-01-02",
+                            "polyline" : [
+                                {
+                                    "lat" : 45.256,
+                                    "lon" : -110.45
+                                },
+                                {
+                                    "lat" : 46.46,
+                                    "lon" : -109.48
+                                },
+                                {
+                                    "lat" : 43.84,
+                                    "lon" : -109.86
+                                }
+                            ],
+                            "title" : "Test Event 2"
                         }
                     ]
                 }

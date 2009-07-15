@@ -1488,10 +1488,11 @@ TimeMap.getNodeList = function(n, tag, ns) {
 /**
  * Make TimeMap.init()-style points from a GLatLng, array, or string
  *
- * @param (Object) coords      GLatLng, array, or string to convert
- * @return (Object)
+ * @param {Object} coords       GLatLng, array, or string to convert
+ * @param {Boolean} reversed    Whether the points are KML-style lon/lat, rather than lat/lon
+ * @return {Object}             TimeMap.init()-style point 
  */
-TimeMap.makePoint = function(coords) {
+TimeMap.makePoint = function(coords, reversed) {
     var latlon = null;
     // GLatLng
     if (coords.lat && coords.lng) {
@@ -1513,11 +1514,41 @@ TimeMap.makePoint = function(coords) {
             latlon = coords.split(/[\r\n\f ]+/);
         }
     }
+    if (reversed) latlon.reverse();
     return {
         "lat": TimeMap.trim(latlon[0]),
         "lon": TimeMap.trim(latlon[1])
     };
 };
+
+/**
+ * Make TimeMap.init()-style polyline/polygons from a whitespace-delimited
+ * string of coordinates (such as those in GeoRSS and KML)
+ * XXX: Any reason for this to take arrays of GLatLngs as well?
+ *
+ * @param {Object} coords       String to convert
+ * @param {Boolean} reversed    Whether the points are KML-style lon/lat, rather than lat/lon
+ * @return {Object}             Formated coordinate array
+ */
+TimeMap.makePoly = function(coords, reversed) {
+    var poly = [], latlon;
+    var coordArr = TimeMap.trim(coords).split(/[\r\n\f ]+/);
+    if (coordArr.length == 0) return [];
+    // loop through coordinates
+    for (var x=0; x<coordArr.length; x++) {
+        latlon = (coordArr[x].indexOf(',')) ?
+            // comma-separated coordinates (KML-style lon/lat)
+            latlon = coordArr[x].split(",") :
+            // space-separated coordinates - increment to step by 2s
+            latlon = [coordArr[x], coordArr[++x]];
+        if (reversed) latlon.reverse();
+        poly.push({
+            "lat": latlon[0],
+            "lon": latlon[1]
+        });
+    }
+    return poly;
+}
 
 /**
  * Format a date as an ISO 8601 string

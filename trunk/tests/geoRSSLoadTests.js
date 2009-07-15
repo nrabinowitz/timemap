@@ -63,17 +63,38 @@ function testAtomItemAttributes() {
 
 function testMixedItemsLoaded() {
     var ds = tm.datasets["mixed"];
-    assertEquals("four items in item array", 4, ds.getItems().length);
+    assertEquals("Eight items in item array", 8, ds.getItems().length);
 }
 
 function testMixedPlacemarksFound() {
     var items = tm.datasets["mixed"].getItems();
     var pmTypes = ['GeoRSS-Simple','GML (pos)','GML (coordinates)','W3C Geo'];
-    for (x=0; x<items.length; x++) {
+    for (x=0; x<pmTypes.length; x++) {
         var item = items[x];
         assertEquals(pmTypes[x] + ": placemark type matches", item.getType(), "marker");
         var point = new GLatLng(23.456, 12.345);
         assertTrue(pmTypes[x] + ": point matches", item.getInfoPoint().equals(point));
+    }
+    pmTypes = ['Polyline Simple','Polyline GML'];
+    var points = [new GLatLng(45.256, -110.45), new GLatLng(46.46, -109.48), new GLatLng(43.84, -109.86)]
+    for (x=4; x<pmTypes.length; x++) {
+        var item = items[x];
+        assertEquals("placemark type matches", item.getType(), "polyline");;
+        assertEquals("vertex count matches", item.placemark.getVertexCount(), 3);
+        assertTrue("info point matches middle point", item.getInfoPoint().equals(points[1]));
+        for (var y=0; y<points.length; y++) {
+            assertTrue("vertex " + y + " matches", item.placemark.getVertex(y).equals(points[y]));
+        }
+    }
+    pmTypes = ['Polygon Simple','Polygon GML'];
+    for (x=6; x<pmTypes.length; x++) {
+        var item = items[x];
+        assertEquals("placemark type matches", item.getType(), "polygon");
+        assertEquals("vertex count matches", item.placemark.getVertexCount(), 3);
+        assertTrue("info point matches middle point", item.getInfoPoint().equals(points[1]));
+        for (var y=0; y<points.length; y++) {
+            assertTrue("vertex " + y + " matches", item.placemark.getVertex(y).equals(points[y]));
+        }
     }
 }
 
