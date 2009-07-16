@@ -11,8 +11,9 @@
     <script src="../loaders/kml.js" type="text/javascript"></script>
 	<script type="text/javascript">
 
+var tm;
 function onLoad() {
-    TimeMap.init({
+    tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
         timelineId: "timeline",     // Id of timeline div element (required) 
         datasets: [
