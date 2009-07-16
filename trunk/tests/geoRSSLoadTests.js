@@ -8,7 +8,8 @@ function exposeTestFunctionNames() {
         'testAtomEarliestDate',
         'testAtomItemAttributes',
         'testMixedItemsLoaded',
-        'testMixedPlacemarksFound'
+        'testMixedPlacemarksFound',
+        'testMixedKMLTime'
     ];
 }
 
@@ -63,7 +64,7 @@ function testAtomItemAttributes() {
 
 function testMixedItemsLoaded() {
     var ds = tm.datasets["mixed"];
-    assertEquals("Eight items in item array", 8, ds.getItems().length);
+    assertEquals("Ten items in item array", 10, ds.getItems().length);
 }
 
 function testMixedPlacemarksFound() {
@@ -96,6 +97,35 @@ function testMixedPlacemarksFound() {
             assertTrue("vertex " + y + " matches", item.placemark.getVertex(y).equals(points[y]));
         }
     }
+}
+
+function testMixedKMLTime() {
+    var ds = tm.datasets["mixed"];
+    var items = tm.datasets["mixed"].getItems(), item, d, prefix;
+    // TimeSpan
+    item = items[8];
+    // start
+    d = item.event.getStart();
+    prefix = item.getTitle() + " start ";
+    assertEquals(prefix + "year matches", 1985, d.getUTCFullYear());
+    assertEquals(prefix + "month matches", 0, d.getUTCMonth());
+    assertEquals(prefix + "day matches", 2, d.getUTCDate());
+    // end
+    d = item.event.getEnd();
+    prefix = item.getTitle() + " end ";
+    assertEquals(prefix + "year matches", 2000, d.getUTCFullYear());
+    assertEquals(prefix + "month matches", 0, d.getUTCMonth());
+    assertEquals(prefix + "day matches", 2, d.getUTCDate());
+    // TimeStamp
+    item = items[9];
+    // start
+    d = item.event.getStart();
+    prefix = item.getTitle() + " start ";
+    assertEquals(prefix + "year matches", 1985, d.getUTCFullYear());
+    assertEquals(prefix + "month matches", 0, d.getUTCMonth());
+    assertEquals(prefix + "day matches", 2, d.getUTCDate());
+    // is instant
+    assertTrue(item.getTitle() + " event is instant", item.event.isInstant());
 }
 
 

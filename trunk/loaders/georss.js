@@ -69,6 +69,7 @@ TimeMap.loaders.georss.parse = function(rss) {
     TimeMap.nsMap.georss = 'http://www.georss.org/georss';
     TimeMap.nsMap.gml = 'http://www.opengis.net/gml';
     TimeMap.nsMap.geo = 'http://www.w3.org/2003/01/geo/wgs84_pos#';
+    TimeMap.nsMap.kml = 'http://www.opengis.net/kml/2.2';
     
     // determine whether this is an Atom feed or an RSS feed
     var feedType = (node.firstChild.tagName == 'rss') ? 'rss' : 'atom';
@@ -83,15 +84,32 @@ TimeMap.loaders.georss.parse = function(rss) {
         data.title = getTagValue(pm, "title");
         tName = (feedType == 'rss' ? "description" : "summary");
         data.options.description = getTagValue(pm, tName);
-        // get time information
-        if (feedType == 'rss') {
-            // RSS needs date conversion
-            var d = new Date(Date.parse(getTagValue(pm, "pubDate")));
-            // reformat
-            data.start = TimeMap.formatDate(d);
-        } else {
-            // atom uses ISO 8601
-            data.start = getTagValue(pm, "updated");
+        // get time information, allowing KML-namespaced time elements
+        var nList = getNodeList(pm, "TimeStamp", "kml");
+        if (nList.length > 0) {
+            data.start = getTagValue(nList[0], "when", "kml");
+        }
+        // look for timespan
+        if (!data.start) {
+            nList = getNodeList(pm, "TimeSpan", "kml");
+            if (nList.length > 0) {
+                data.start = getTagValue(nList[0], "begin", "kml");
+                data.end = getTagValue(nList[0], "end", "kml") ||
+                    // unbounded spans end at the present time
+                    TimeMap.formatDate(new Date());
+            }
+        }
+        // otherwise, use pubDate/updated elements
+        if (!data.start) {
+            if (feedType == 'rss') {
+                // RSS needs date conversion
+                var d = new Date(Date.parse(getTagValue(pm, "pubDate")));
+                // reformat
+                data.start = TimeMap.formatDate(d);
+            } else {
+                // atom uses ISO 8601
+                data.start = getTagValue(pm, "updated");
+            }
         }
         // find placemark - single geometry only for the moment
         PLACEMARK: {
