@@ -1515,6 +1515,9 @@ TimeMap.makePoint = function(coords, reversed) {
             latlon = coords.split(/[\r\n\f ]+/);
         }
     }
+    // deal with extra coordinates (i.e. KML altitude)
+    if (latlon.length > 2) latlon = latlon.slice(0, 2);
+    // deal with backwards (i.e. KML-style) coordinates
     if (reversed) latlon.reverse();
     return {
         "lat": TimeMap.trim(latlon[0]),
