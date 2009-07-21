@@ -8,8 +8,7 @@
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
  * This is a loader class for KML files. Currently supports all geometry
- * types (point, polyline, polygon, and overlay), but does not support
- * multiple geometries (i.e. multiple placemarks per item) just yet.
+ * types (point, polyline, polygon, and overlay) and multiple geometries.
  *
  * Usage in TimeMap.init():
  
@@ -47,7 +46,7 @@ TimeMap.loaders.kml = function(options) {
  * @param {XML string} kml        KML to be parsed
  */
 TimeMap.loaders.kml.parse = function(kml) {
-    var items = [], data, kmlnode, placemarks, pm, i;
+    var items = [], data, kmlnode, placemarks, pm, i, j;
     kmlnode = GXml.parse(kml);
     
     // get TimeMap utilty functions
@@ -95,33 +94,36 @@ TimeMap.loaders.kml.parse = function(kml) {
         data.options.description = getTagValue(pm, "description");
         // get time information
         findNodeTime(pm, data);
-        // find placemark
-        PLACEMARK: {
-            var nList, coords, coordArr, latlon, geom;
-            // look for marker
-            nList = getNodeList(pm, "Point");
-            if (nList.length > 0) {
-                data.point = {};
-                // get lat/lon
-                coords = getTagValue(nList[0], "coordinates");
-                data.point = TimeMap.makePoint(coords, 1);
-                break PLACEMARK;
-            }
-            // look for polylines and polygons
-            nList = getNodeList(pm, "LineString");
-            if (nList.length > 0) {
-                geom = "polyline";
-            } else {
-                nList = getNodeList(pm, "Polygon");
-                if (nList.length > 0) {
-                    geom = "polygon";
-                }
-            }
-            if (nList.length > 0) {
-                coords = getTagValue(nList[0], "coordinates");
-                data[geom] = TimeMap.makePoly(coords, 1);
-                break PLACEMARK;
-            }
+        // find placemark(s)
+        var nList, coords, coordArr, latlon, pmobj;
+        data.placemarks = [];
+        // look for marker
+        nList = getNodeList(pm, "Point");
+        for (j=0; j<nList.length; j++) {
+            pmobj = { point: {} };
+            // get lat/lon
+            coords = getTagValue(nList[j], "coordinates");
+            pmobj.point = TimeMap.makePoint(coords, 1);
+            data.placemarks.push(pmobj);
+        }
+        // look for polylines
+        nList = getNodeList(pm, "LineString");
+        for (j=0; j<nList.length; j++) {
+            pmobj = { polyline: [] };
+            // get lat/lon
+            coords = getTagValue(nList[j], "coordinates");
+            pmobj.polyline = TimeMap.makePoly(coords, 1);
+            data.placemarks.push(pmobj);
+        }
+        // look for polygons
+        nList = getNodeList(pm, "Polygon");
+        for (j=0; j<nList.length; j++) {
+            pmobj = { polygon: [] };
+            // get lat/lon
+            coords = getTagValue(nList[j], "coordinates");
+            pmobj.polygon = TimeMap.makePoly(coords, 1);
+            // XXX: worth closing unclosed polygons?
+            data.placemarks.push(pmobj);
         }
         items.push(data);
     }

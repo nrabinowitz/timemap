@@ -1545,6 +1545,9 @@ TimeMap.makePoly = function(coords, reversed) {
             latlon = coordArr[x].split(",") :
             // space-separated coordinates - increment to step by 2s
             latlon = [coordArr[x], coordArr[++x]];
+        // deal with extra coordinates (i.e. KML altitude)
+        if (latlon.length > 2) latlon = latlon.slice(0, 2);
+        // deal with backwards (i.e. KML-style) coordinates
         if (reversed) latlon.reverse();
         poly.push({
             "lat": latlon[0],
