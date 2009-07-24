@@ -156,11 +156,11 @@ TimeMap.loaders.georss.parse = function(rss) {
                 break PLACEMARK;
             }
             // look for polyline, GML
-            nList = getNodeList(pm, "LineString");
+            nList = getNodeList(pm, "LineString", 'gml');
             if (nList.length > 0) {
                 geom = "polyline";
             } else {
-                nList = getNodeList(pm, "Polygon");
+                nList = getNodeList(pm, "Polygon", 'gml');
                 if (nList.length > 0) {
                     geom = "polygon";
                 }

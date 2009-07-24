@@ -70,6 +70,7 @@ function testMixedItemsLoaded() {
 function testMixedPlacemarksFound() {
     var items = tm.datasets["mixed"].getItems();
     var pmTypes = ['GeoRSS-Simple','GML (pos)','GML (coordinates)','W3C Geo'];
+    var offset;
     for (x=0; x<pmTypes.length; x++) {
         var item = items[x];
         assertEquals(pmTypes[x] + ": placemark type matches", item.getType(), "marker");
@@ -77,22 +78,27 @@ function testMixedPlacemarksFound() {
         assertTrue(pmTypes[x] + ": point matches", item.getInfoPoint().equals(point));
     }
     pmTypes = ['Polyline Simple','Polyline GML'];
-    var points = [new GLatLng(45.256, -110.45), new GLatLng(46.46, -109.48), new GLatLng(43.84, -109.86)]
-    for (x=4; x<pmTypes.length; x++) {
-        var item = items[x];
-        assertEquals("placemark type matches", item.getType(), "polyline");;
-        assertEquals("vertex count matches", item.placemark.getVertexCount(), 3);
-        assertTrue("info point matches middle point", item.getInfoPoint().equals(points[1]));
+    offset = 4;
+    var points = [new GLatLng(45.256, -110.45), new GLatLng(46.46, -109.48), new GLatLng(43.84, -109.86)];
+    for (x=0; x<pmTypes.length; x++) {
+        var item = items[x + offset];
+        assertEquals(pmTypes[x] + ": placemark type matches", item.getType(), "polyline");
+        assertEquals(pmTypes[x] + ": vertex count matches", item.placemark.getVertexCount(), 3);
+        assertTrue(pmTypes[x] + ": info point matches middle point", item.getInfoPoint().equals(points[1]));
         for (var y=0; y<points.length; y++) {
             assertTrue("vertex " + y + " matches", item.placemark.getVertex(y).equals(points[y]));
         }
     }
     pmTypes = ['Polygon Simple','Polygon GML'];
-    for (x=6; x<pmTypes.length; x++) {
-        var item = items[x];
-        assertEquals("placemark type matches", item.getType(), "polygon");
-        assertEquals("vertex count matches", item.placemark.getVertexCount(), 3);
-        assertTrue("info point matches middle point", item.getInfoPoint().equals(points[1]));
+    offset = 6;
+    // polygon bounds center
+    var point = new GLatLng(45.150000000000006, -109.965);
+    for (x=0; x<pmTypes.length; x++) {
+        var item = items[x + offset];
+        assertEquals(pmTypes[x] + ": placemark type matches", item.getType(), "polygon");
+        // Google seems to count the last vertex of a closed polygon
+        assertEquals(pmTypes[x] + ": vertex count matches", item.placemark.getVertexCount(), 4);
+        assertTrue(pmTypes[x] + ": info point matches middle point", item.getInfoPoint().equals(point));
         for (var y=0; y<points.length; y++) {
             assertTrue("vertex " + y + " matches", item.placemark.getVertex(y).equals(points[y]));
         }

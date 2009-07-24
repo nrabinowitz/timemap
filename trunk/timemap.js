@@ -789,7 +789,7 @@ TimeMapDataset.gregorianParser = function(s) {
         return s;
     }
     // look for BC
-    var bc = Boolean(s.match(/b\.?c\.?$/i));
+    var bc = Boolean(s.match(/b\.?c\.?/i));
     // parse - parseInt will stop at non-number characters
     var year = parseInt(s);
     // look for success
@@ -820,7 +820,7 @@ TimeMapDataset.hybridParser = function(s) {
     var d = new Date(Date.parse(s));
     if (isNaN(d)) {
         // look for Gregorian dates
-        if (s.match(/^-?\d{1,6} ?(a\.?d\.?|b\.?c\.?)?$/i)) {
+        if (s.match(/^-?\d{1,6} ?(a\.?d\.?|b\.?c\.?e?\.?|c\.?e\.?)?$/i)) {
             d = TimeMapDataset.gregorianParser(s);
         }
         // try ISO 8601 parse
@@ -1573,11 +1573,11 @@ TimeMap.makePoly = function(coords, reversed) {
     if (coordArr.length == 0) return [];
     // loop through coordinates
     for (var x=0; x<coordArr.length; x++) {
-        latlon = (coordArr[x].indexOf(',')) ?
+        latlon = (coordArr[x].indexOf(',') > 0) ?
             // comma-separated coordinates (KML-style lon/lat)
-            latlon = coordArr[x].split(",") :
+            coordArr[x].split(",") :
             // space-separated coordinates - increment to step by 2s
-            latlon = [coordArr[x], coordArr[++x]];
+            [coordArr[x], coordArr[++x]];
         // deal with extra coordinates (i.e. KML altitude)
         if (latlon.length > 2) latlon = latlon.slice(0, 2);
         // deal with backwards (i.e. KML-style) coordinates
