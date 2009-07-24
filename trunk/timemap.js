@@ -776,30 +776,63 @@ function TimeMapDataset(timemap, options) {
 }
 
 /**
- * Wrapper to fix Timeline Gregorian parser for invalid strings
+ * Better Timeline Gregorian parser... shouldn't be necessary :(.
+ * Gregorian dates are years with "BC" or "AD"
  *
  * @param {String} s    String to parse into a Date object
  * @return {Date}       Parsed date or null
  */
 TimeMapDataset.gregorianParser = function(s) {
-    d = DT.parseGregorianDateTime(s);
-    // check for invalid dates
-    if (!d.getFullYear()) d = null;
-    return d;
+    if (!s) {
+        return null;
+    } else if (s instanceof Date) {
+        return s;
+    }
+    // look for BC
+    var bc = Boolean(s.match(/b\.?c\.?$/i));
+    // parse - parseInt will stop at non-number characters
+    var year = parseInt(s);
+    // look for success
+    if (!isNaN(year)) {
+        // deal with BC
+        if (bc) year = 1 - year;
+        // make Date and return
+        var d = new Date(0);
+        d.setUTCFullYear(year);
+        return d;
+    }
+    else {
+        return null;
+    }
 };
 
 /**
- * Parse dates with the ISO 8601 parser, then fall back on the Gregorian
- * parser if the first parse fails
+ * Parse dates with, in order:
+ *  - Date.parse() -- so Date.js should work here, if it works with Timeline...
+ *  - Gregorian parser
+ *  - The Timeline ISO 8601 parser
  *
  * @param {String} s    String to parse into a Date object
  * @return {Date}       Parsed date or null
  */
 TimeMapDataset.hybridParser = function(s) {
-    var d = DT.parseIso8601DateTime(s);
-    if (!d) {
-        d = TimeMapDataset.gregorianParser(s);
+    // try native date parse
+    var d = new Date(Date.parse(s));
+    if (isNaN(d)) {
+        // look for Gregorian dates
+        if (s.match(/^-?\d{1,6} ?(a\.?d\.?|b\.?c\.?)?$/i)) {
+            d = TimeMapDataset.gregorianParser(s);
+        }
+        // try ISO 8601 parse
+        else {
+            try {
+                d = DT.parseIso8601DateTime(s);
+            } catch(e) {
+                d = null;
+            }
+        }
     }
+    // d should be a date or null
     return d;
 };
 

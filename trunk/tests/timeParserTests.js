@@ -73,6 +73,16 @@ function subTestGregorian(dsid) {
     testFunc(8, -199);
     // basic gregorian date, negative: "-200"
     testFunc(9, -200);
+    // basic gregorian date, 1000s BC
+    testFunc(13, -4999);
+    // basic gregorian date, 100000s BC
+    testFunc(14, -99999);
+    // basic gregorian date, 100000s AD
+    testFunc(15, 100000);
+    // basic gregorian date, "b.c."
+    testFunc(16, -201);
+    // basic gregorian date, "a.d."
+    testFunc(17, 202);
 }
 
 function subTestError(dsid) {
@@ -152,7 +162,33 @@ var items = [
     // 12: start is invalid string
       "start" : "test",
       "title" : "Test Event"
-    }
+    },
+    // Adding some extras after parser changes
+    {
+    // 13: basic gregorian date, 1000s BC
+      "start" : "5000 BC",
+      "title" : "Test Event"
+    },
+    {
+    // 14: basic gregorian date, 100000s BC
+      "start" : "100000 BC",
+      "title" : "Test Event"
+    },
+    {
+    // 15: basic gregorian date, 100000s AD
+      "start" : "100000 AD",
+      "title" : "Test Event"
+    },
+    {
+    // 16: basic gregorian date, "b.c."
+      "start" : "202 b.c.",
+      "title" : "Test Event"
+    },
+    {
+    // 17: basic gregorian date, "a.d."
+      "start" : "202 a.d.",
+      "title" : "Test Event"
+    },
 ];
 
 var tm = null;
