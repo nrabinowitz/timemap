@@ -83,6 +83,10 @@ function subTestGregorian(dsid) {
     testFunc(16, -201);
     // basic gregorian date, "a.d."
     testFunc(17, 202);
+    // basic gregorian date, "BCE"
+    testFunc(18, -201);
+    // basic gregorian date, "CE"
+    testFunc(19, 202);
 }
 
 function subTestError(dsid) {
@@ -189,7 +193,21 @@ var items = [
       "start" : "202 a.d.",
       "title" : "Test Event"
     },
+    {
+    // 18: basic gregorian date, "BCE"
+      "start" : "202 BCE",
+      "title" : "Test Event"
+    },
+    {
+    // 19: basic gregorian date, "CE"
+      "start" : "202 CE",
+      "title" : "Test Event"
+    }
 ];
+
+// cut gregorian dates out of iso set to avoid stupid SIMILE debug
+var isoItems = items.slice(0, items.length);
+isoItems[7] = isoItems[8] = isoItems[13] = isoItems[14] = isoItems[15] = {"start" : "", "title" : ""};
 
 var tm = null;
 function setUpPage() {
@@ -213,7 +231,7 @@ function setUpPage() {
                 dateParser: "iso8601",
                 type: "basic",
                 options: {
-                    items: items
+                    items: isoItems
                 }
             }, 
             {
