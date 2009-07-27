@@ -771,7 +771,17 @@ function TimeMapDataset(timemap, options) {
     this.opts.dateParser = options.dateParser || TimeMapDataset.hybridParser;
     
     // get functions
-    this.getItems = function() { return this.items; };
+    this.getItems = function(index) {
+        if (index !== undefined) {
+            if (index < this.items.length) {
+                return this.items[index];
+            }
+            else {
+                return null;
+            }
+        }
+        return this.items; 
+    };
     this.getTitle = function() { return this.opts.title; };
 }
 
