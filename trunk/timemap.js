@@ -304,6 +304,7 @@ TimeMap.loadManager = new function() {
      * Function to fire when all loads are complete
      */
     this.complete = function() {
+        var tm = this.tm;
         // custom function including timeline scrolling and layout
         var func = this.opts.dataLoadedFunction;
         if (func) {
