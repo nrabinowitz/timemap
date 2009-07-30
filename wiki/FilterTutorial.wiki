@@ -12,11 +12,12 @@ The filter chain architecture has three basic parts:
   
 = Example =
 
-**Show items based on a custom property**
+*Show items based on a custom property*
 
 Say you have a dataset with a bunch of items, and each item has a set of tags. Above your timemap, you put a dropdown menu with a list of tags, defaulting to "All tags". When the user selects a tag from the dropdown menu, you want to display only items with that tag on your timemap.
 
-  # First, you need to load your items so that they include the tag data. There are various different ways to do this, but for the sake of simplicity let's assume that you're loading data in JSON. Anything you include in the `options` property of the item object you load will be available in the `opts` property of the `TimeMapItem` that is created when your data is loaded. So if a single item, in your JSON data, looks like this, you'll be able to access your tag array as `item.opts.tags`.
+  # First, you need to load your items so that they include the tag data. There are various different ways to do this, but for the sake of simplicity let's assume that you're loading data in JSON. Anything you include in the `options` property of the item object you load will be available in the `opts` property of the `TimeMapItem` that is created when your data is loaded. So if a single item, in your JSON data, looks like this, you'll be able to access your tag array as `item.opts.tags`:
+{{{
 {
     title: "My item",
     start: "2009-01-01",
