@@ -56,7 +56,7 @@ TimeMap.filters.hasSelectedTag = function(item) {
     }
 };
 }}}
-  # You'll need to add this filter to the existing filter chains for the map and timeline (most likely in your onLoad function, after you've called TimeMap.init()):
+  # You'll need to add this filter to the existing filter chains for the map and timeline (most likely in your onLoad function, after you've called `TimeMap.init()`):
 {{{
 // add our new function to the map and timeline filter chains
 tm.addFilter("map", TimeMap.filters.hasSelectedTag); // hide map markers on fail
@@ -77,4 +77,4 @@ function setSelectedTag(select) {
 }}}
   # Add the handler to your dropdown menu and you're done!
 
-See the completed example here:
+[http://code.google.com/p/timemap/source/browse/trunk/examples/filter.html See the completed example here.]
