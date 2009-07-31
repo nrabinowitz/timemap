@@ -78,3 +78,5 @@ function setSelectedTag(select) {
 }
 }}}
   # Add the handler to your dropdown menu and you're done!
+
+Note that if you want the layout of your items to get reset when some of them are hidden, you'll need to use a later version of Timeline, e.g. http://static.simile.mit.edu/timeline/api-2.2.0/timeline-api.js .
