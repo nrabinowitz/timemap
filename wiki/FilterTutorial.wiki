@@ -6,13 +6,15 @@ Timemap.js uses the concept of filter chains for hiding and showing items, but t
 
 The filter chain architecture has three basic parts:
 
-  # *The chain itself.* Each chain has a name, an array of filters, an "on" function, and an "off" function. The "on" function is applied if an item passes the filters (see below), and the "off" function is applied if it doesn't. The basic example here is a hide/show filter chain: In this case, the "on" function shows an item, and the "off" function hides it. Every timemap (as of v.1.5) starts off with two filter chains: "map", which shows and hides items on the map, and "timeline", which shows and hides events on the timeline.
-  # *Filters.* Each filter chain includes an array of one or more filters. Each filter is a function taking one parameter, a `TimeMapItem`, and returning either `true` or `false` based on the current state of the item. For example, the `TimeMap.hidePastFuture` filter looks at a single item and returns `true` or `false` depending on whether the item's event is currently visible in the timeline.
+  # *The chain itself.* Each chain has a name, an array of filters, an "on" function, and an "off" function. The "on" function is applied if an item passes the filters (see below), and the "off" function is applied if it doesn't. The basic example here is a hide/show filter chain: In this case, the "on" function shows an item, and the "off" function hides it. Every timemap (as of v.1.5) starts off with two filter chains: "map", which shows and hides items on the map, and "timeline", which shows and hides events on the timeline.<br><br>
+  # *Filters.* Each filter chain includes an array of one or more filters. Each filter is a function taking one parameter, a `TimeMapItem`, and returning either `true` or `false` based on the current state of the item. For example, the `TimeMap.hidePastFuture` filter looks at a single item and returns `true` or `false` depending on whether the item's event is currently visible in the timeline.<br><br>
   # *A listener or other calling mechanism.* Now that you have a filter chain, you need to determine when the filter runs. For example, timemap.js calls the "map" filter every time the user scrolls the timeline. You could run the filter when the user zoomed the map in or out, moved the center of the map, pressed a button, etc. 
   
 = Example =
 
 *Show items based on a custom property*
+
+[http://code.google.com/p/timemap/source/browse/trunk/examples/filter.html See the completed example here.]
 
 Say you have a dataset with a bunch of items, and each item has a set of tags. Above your timemap, you put a dropdown menu with a list of tags, defaulting to "All tags". When the user selects a tag from the dropdown menu, you want to display only items with that tag on your timemap.
 
@@ -30,8 +32,8 @@ Say you have a dataset with a bunch of items, and each item has a set of tags. A
     }
 }
 }}}
-  # You _don't_ need a new filter chain - you can use the "map" and "timeline" chains built into timemap.js.
-  # You need a way to know what the dropdown menu is set to. Again, there are many ways to do this, but let's make it simple: When the user changes the dropdown, you'll set a global variable - let's attach it to the window and call it `window.selectedTag`.
+  # You _don't_ need a new filter chain - you can use the "map" and "timeline" chains built into timemap.js. If you wanted to do something other than hide and show the items - for example, change their color - you'd need to add a new filter chain using the `tm.addFilterChain()` function.<br><br>
+  # You need a way to know what the dropdown menu is set to. Again, there are many ways to do this, but let's make it simple: When the user changes the dropdown, you'll set a global variable - let's attach it to the window and call it `window.selectedTag`.<br><br>
   # You need to add a new filter, to check the tags against the dropdown menu. It should look at an item and determine whether the `selectedTag` is in the array. You don't need to put this function in `TimeMap.filters`, but it keeps your namespaces nice and tidy:
 {{{
 TimeMap.filters.hasSelectedTag = function(item) {
@@ -76,5 +78,3 @@ function setSelectedTag(select) {
 }
 }}}
   # Add the handler to your dropdown menu and you're done!
-
-[http://code.google.com/p/timemap/source/browse/trunk/examples/filter.html See the completed example here.]
