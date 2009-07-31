@@ -14,7 +14,7 @@ The filter chain architecture has three basic parts:
 
 *Show items based on a custom property*
 
-[http://code.google.com/p/timemap/source/browse/trunk/examples/filter.html See the completed example here.]
+[http://timemap.googlecode.com/svn/trunk/examples/filter.html See the completed example here.]
 
 Say you have a dataset with a bunch of items, and each item has a set of tags. Above your timemap, you put a dropdown menu with a list of tags, defaulting to "All tags". When the user selects a tag from the dropdown menu, you want to display only items with that tag on your timemap.
 
