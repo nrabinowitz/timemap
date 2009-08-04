@@ -6,7 +6,7 @@
 /**---------------------------------------------------------------------------
  * TimeMap Editing Tools
  *
- * @author Nick Rabinowitz (www.nickrabinowitz.com)
+ * NOTE: Haven't tried this lately - may be out of date. Use at your own risk.
  * Functions in this file offer tools for editing a timemap dataset in
  * a browser-based GUI. Call tm.enterEditMode() and tm.closeEditMode() 
  * to turn the tools on and off; set configuration options in 
@@ -21,6 +21,8 @@
  * jqModal: http://dev.iceburg.net/jquery/jqModal/
  * jeditable: http://www.appelsiini.net/projects/jeditable
  * Sorry for all the bloat, but jQuery makes UI development much easier.
+ *
+ * @author Nick Rabinowitz (www.nickrabinowitz.com)
  *---------------------------------------------------------------------------*/
  
  /**

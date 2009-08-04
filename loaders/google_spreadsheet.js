@@ -3,25 +3,35 @@
  * Licensed under the MIT License (see LICENSE.txt)
  */
 
-/*----------------------------------------------------------------------------
- * Google Spreadsheet Loader 
+/**
+ * @fileOverview
+ * Google Spreadsheet Loader
  *
- * This is a loader for data from Google Spreadsheets. Takes an optional map
+ * @author Nick Rabinowitz (www.nickrabinowitz.com)
+ */
+ 
+/**
+ * @class
+ * Google spreadsheet loader factory - inherits from jsonp loader.
+ *
+ * <p>This is a loader for data from Google Spreadsheets. Takes an optional map
  * to indicate which columns contain which data elements; the default column
- * names (case-insensitive) are: title, description, start, end, lat, lon 
+ * names (case-insensitive) are: title, description, start, end, lat, lon</p>
  * 
- * See http://code.google.com/apis/spreadsheets/docs/2.0/reference.html#gsx_reference
+ * <p>See <a href="http://code.google.com/apis/spreadsheets/docs/2.0/reference.html#gsx_reference">http://code.google.com/apis/spreadsheets/docs/2.0/reference.html#gsx_reference</a>
  * for details on how spreadsheet column ids are derived. Note that date fields 
  * must be in yyyy-mm-dd format - you may need to set the cell format as "plain text" 
- * in the spreadsheet (Google's automatic date formatting won't work).
+ * in the spreadsheet (Google's automatic date formatting won't work).</p>
  *
- * The loader takes either a full URL, minus the JSONP callback function, or 
- * just the spreadsheet key. Note that the spreadsheet must be published.
+ * <p>The loader takes either a full URL, minus the JSONP callback function, or 
+ * just the spreadsheet key. Note that the spreadsheet must be published.</p>
  *
- * Depends on:
- * - loaders/jsonp.js
+ * <p>Depends on:</p>
+ * <ul>
+ *  <li>loaders/jsonp.js</li>
+ * </ul>
  *
- * Usage in TimeMap.init():
+ * @example Usage in TimeMap.init():
  
     datasets: [
         {
@@ -39,17 +49,14 @@
             }
         }
     ]
- 
- */
-
-/**
- * Google spreadsheet loader factory - inherits from jsonp loader
  *
- * @param {Object} options          All options for the loader:
+ * @param {Object} options          All options for the loader:<pre>
  *   {String} key                       Key of spreadsheet to load, or
  *   {String} url                       Full JSONP url of spreadsheet to load
  *   {Function} preloadFunction         Function to call on data before loading
  *   {Function} transformFunction       Function to call on individual items before loading
+ * </pre>
+ * @return {TimeMap.loaders.remote} Remote loader configured for Google Spreadsheets
  */
 TimeMap.loaders.gss = function(options) {
     var loader = new TimeMap.loaders.jsonp(options);

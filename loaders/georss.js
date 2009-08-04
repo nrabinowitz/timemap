@@ -3,23 +3,35 @@
  * Licensed under the MIT License (see LICENSE.txt)
  */
  
-/*----------------------------------------------------------------------------
- * GeoRSS Parser
+/**
+ * @fileOverview
+ * GeoRSS Loader
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
- * This is a loader class for GeoRSS feeds. Parsing is complicated by the 
- * diversity of GeoRSS formats; this parser handles:
- * - RSS feeds
- * - Atom feeds
- * and looks for geographic information in the following formats:
- * - GeoRSS-Simple
- * - GML 
- * - W3C Geo
+ */
+
+/*globals GXml, TimeMap, TimeMapDataset */
+
+/**
+ * @class
+ * GeoRSS loader factory - inherits from remote loader.
  *
- * At the moment, this only supports points; polygons, polylines, and boxes
- * will be added at some later point.
+ * <p>This is a loader class for GeoRSS feeds. Parsing is complicated by the 
+ * diversity of GeoRSS formats; this parser handles:</p>
+ * <ul>
+ *  <li>RSS feeds</li>
+ *  <li>Atom feeds</li>
+ * </ul>
+ * <p>and looks for geographic information in the following formats:</p>
+ * <ul>
+ *  <li>GeoRSS-Simple</li>
+ *  <li>GML </li>
+ *  <li>W3C Geo</li>
+ * </ul>
+ * <p>At the moment, this only supports points; polygons, polylines, and boxes
+ * will be added at some later point.</p>
  *
- * Usage in TimeMap.init():
+ * @example Usage in TimeMap.init():
  
     datasets: [
         {
@@ -30,18 +42,13 @@
             }
         }
     ]
- 
- *---------------------------------------------------------------------------*/
-
-/*globals GXml, TimeMap, TimeMapDataset */
-
-/**
- * GeoRSS loader factory - inherits from remote loader
  *
- * @param {Object} options          All options for the loader:
- *   {Array} url                        URL of KML file to load (NB: must be local address)
+ * @param {Object} options          All options for the loader:<pre>
+ *   {Array} url                        URL of GeoRSS file to load (NB: must be local address)
  *   {Function} preloadFunction         Function to call on data before loading
  *   {Function} transformFunction       Function to call on individual items before loading
+ * </pre>
+ * @return {TimeMap.loaders.remote} Remote loader configured for GeoRSS
  */
 TimeMap.loaders.georss = function(options) {
     var loader = new TimeMap.loaders.remote(options);
@@ -49,10 +56,11 @@ TimeMap.loaders.georss = function(options) {
     return loader;
 }
 
-/*
+/**
  * Static function to parse GeoRSS
  *
  * @param {XML text} rss        GeoRSS to be parsed
+ * @return {TimeMapItem Array}  Array of TimeMapItems
  */
 TimeMap.loaders.georss.parse = function(rss) {
     var items = [], data, node, placemarks, pm;
@@ -60,16 +68,19 @@ TimeMap.loaders.georss.parse = function(rss) {
     
     // get TimeMap utilty functions
     // assigning to variables should compress better
-    var getTagValue = TimeMap.getTagValue,
-        getNodeList = TimeMap.getNodeList,
-        makePoint = TimeMap.makePoint,
-        makePoly = TimeMap.makePoly;
+    var util = TimeMap.util;
+    var getTagValue = util.getTagValue,
+        getNodeList = util.getNodeList,
+        makePoint = util.makePoint,
+        makePoly = util.makePoly,
+        formatDate = util.formatDate,
+        nsMap = util.nsMap;
     
     // define namespaces
-    TimeMap.nsMap.georss = 'http://www.georss.org/georss';
-    TimeMap.nsMap.gml = 'http://www.opengis.net/gml';
-    TimeMap.nsMap.geo = 'http://www.w3.org/2003/01/geo/wgs84_pos#';
-    TimeMap.nsMap.kml = 'http://www.opengis.net/kml/2.2';
+    nsMap.georss = 'http://www.georss.org/georss';
+    nsMap.gml = 'http://www.opengis.net/gml';
+    nsMap.geo = 'http://www.w3.org/2003/01/geo/wgs84_pos#';
+    nsMap.kml = 'http://www.opengis.net/kml/2.2';
     
     // determine whether this is an Atom feed or an RSS feed
     var feedType = (node.firstChild.tagName == 'rss') ? 'rss' : 'atom';
@@ -96,7 +107,7 @@ TimeMap.loaders.georss.parse = function(rss) {
                 data.start = getTagValue(nList[0], "begin", "kml");
                 data.end = getTagValue(nList[0], "end", "kml") ||
                     // unbounded spans end at the present time
-                    TimeMap.formatDate(new Date());
+                    formatDate(new Date());
             }
         }
         // otherwise, use pubDate/updated elements
@@ -105,7 +116,7 @@ TimeMap.loaders.georss.parse = function(rss) {
                 // RSS needs date conversion
                 var d = new Date(Date.parse(getTagValue(pm, "pubDate")));
                 // reformat
-                data.start = TimeMap.formatDate(d);
+                data.start = formatDate(d);
             } else {
                 // atom uses ISO 8601
                 data.start = getTagValue(pm, "updated");
@@ -113,7 +124,7 @@ TimeMap.loaders.georss.parse = function(rss) {
         }
         // find placemark - single geometry only for the moment
         PLACEMARK: {
-            var coords, coordArr, latlon, geom;
+            var coords, geom;
             // look for point, GeoRSS-Simple
             coords = getTagValue(pm, "point", 'georss');
             if (coords) {
@@ -121,7 +132,7 @@ TimeMap.loaders.georss.parse = function(rss) {
                 break PLACEMARK;
             }
             // look for point, GML
-            var nList = getNodeList(pm, "Point", 'gml');
+            nList = getNodeList(pm, "Point", 'gml');
             if (nList.length > 0) {
                 // GML <pos>
                 coords = getTagValue(nList[0], "pos", 'gml');

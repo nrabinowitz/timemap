@@ -22,11 +22,14 @@ function onLoad() {
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
         timelineId: "timeline",     // Id of timeline div element (required) 
+        options: {
+            eventIconPath: "../images/"
+        },
         datasets: [
             {
                 title: "Events",
                 id: "events",
-                theme: TimeMapDataset.redTheme({eventIconPath: "../images/"}),
+                theme: "red",
                 type: "gss",
                 options: {
                     // note that your spreadsheet must be published for this to work

@@ -3,18 +3,28 @@
  * Licensed under the MIT License (see LICENSE.txt)
  */
 
-/*----------------------------------------------------------------------------
- * Flickr Laoder 
+/**
+ * @fileOverview
+ * Flickr Loader
  *
- * This is a loader for data from Flickr. You probably want to use it with a
- * URL for the Flickr Geo Feed API: http://www.flickr.com/services/feeds/geo/ 
+ * @author Nick Rabinowitz (www.nickrabinowitz.com)
+ */
+
+/**
+ * @class
+ * Flickr loader factory - inherits from jsonp loader
  *
- * The loader takes a full URL, minus the JSONP callback function.
+ * <p>This is a loader for data from Flickr. You probably want to use it with a
+ * URL for the Flickr Geo Feed API: <a href="http://www.flickr.com/services/feeds/geo/">http://www.flickr.com/services/feeds/geo/</a></p>
  *
- * Depends on:
- * - loaders/jsonp.js
+ * <p>The loader takes a full URL, minus the JSONP callback function.</p>
  *
- * Usage in TimeMap.init():
+ * <p>Depends on:</p>
+ * <ul>
+ *  <li>loaders/jsonp.js</li>
+ * </ul>
+ *
+ * @example Usage in TimeMap.init():
  
     datasets: [
         {
@@ -27,16 +37,13 @@
             }
         }
     ]
- 
- */
-
-/**
- * Flickr loader factory - inherits from jsonp loader
  *
- * @param {Object} options          All options for the loader:
+ * @param {Object} options          All options for the loader:<pre>
  *   {String} url                       Full JSONP url of Flickr feed to load
  *   {Function} preloadFunction         Function to call on data before loading
  *   {Function} transformFunction       Function to call on individual items before loading
+ * </pre>
+ * @return {TimeMap.loaders.remote} Remote loader configured for Flickr
  */
 TimeMap.loaders.flickr = function(options) {
     var loader = new TimeMap.loaders.jsonp(options);

@@ -2,20 +2,35 @@
  * TimeMap Copyright 2008 Nick Rabinowitz.
  * Licensed under the MIT License (see LICENSE.txt)
  */
+ 
+/**
+ * @fileOverview
+ * Metaweb Loader
+ *
+ * @author Nick Rabinowitz (www.nickrabinowitz.com)
+ */
 
 /*----------------------------------------------------------------------------
- * Metaweb Loader 
+ *  Loader 
  *
- * This is a loader for data from the Metaweb service at freebase.com. See
- * the API documentation at http://www.freebase.com/view/en/documentation for
+ */
+
+/**
+ * @class
+ * Metaweb loader factory - inherits from jsonp loader
+ *
+ * <p>This is a loader for data from the Metaweb service at freebase.com. See
+ * the API documentation at <a href="http://www.freebase.com/view/en/documentation">http://www.freebase.com/view/en/documentation</a> for
  * a description of how to write MQL queries. This code is based on code from
- * the API site.
+ * the API site.</p>
  *
- * Depends on:
- * - lib/json2.pack.js
- * - loaders/jsonp.js
+ * <p>Depends on:</p>
+ * <ul>
+ *  <li>lib/json2.pack.js</li>
+ *  <li>loaders/jsonp.js</li>
+ * </ul>
  *
- * Usage in TimeMap.init():
+ * @example Usage in TimeMap.init():
  
     datasets: [
         {
@@ -35,16 +50,13 @@
             }
         }
     ]
- 
- */
-
-/**
- * Metaweb loader factory - inherits from jsonp loader
  *
- * @param {Object} options          All options for the loader:
+ * @param {Object} options          All options for the loader:<pre>
  *   {Object} query                     MQL query to load
  *   {Function} preloadFunction         Function to call on data before loading
  *   {Function} transformFunction       Function to call on individual items before loading
+ * </pre>
+ * @return {TimeMap.loaders.remote} Remote loader configured for MetaWeb
  */
 TimeMap.loaders.metaweb = function(options) {
     var loader = new TimeMap.loaders.jsonp(options);
@@ -59,10 +71,12 @@ TimeMap.loaders.metaweb = function(options) {
         var innerEnvelope = data.qname;
         // Make sure the query was successful
         if (innerEnvelope.code.indexOf("/api/status/ok") != 0) {
+            // uncomment for debugging
+            /*
             // If error, get error message and throw
             var error = innerEnvelope.messages[0];
-            // uncomment for debugging
-            // throw error.code + ": " + error.message;
+            throw error.code + ": " + error.message;
+            */
             return [];
         }
         // Get result from inner envelope

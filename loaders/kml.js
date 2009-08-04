@@ -3,14 +3,23 @@
  * Licensed under the MIT License (see LICENSE.txt)
  */
  
-/*----------------------------------------------------------------------------
+/**
+ * @fileOverview
  * KML Loader
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
- * This is a loader class for KML files. Currently supports all geometry
- * types (point, polyline, polygon, and overlay) and multiple geometries.
+ */
+
+/*globals GXml, TimeMap */
+
+/**
+ * @class
+ * KML loader factory - inherits from remote loader
  *
- * Usage in TimeMap.init():
+ * <p>This is a loader class for KML files. Currently supports all geometry
+ * types (point, polyline, polygon, and overlay) and multiple geometries.</p>
+ *
+ * @example Usage in TimeMap.init():
  
     datasets: [
         {
@@ -21,18 +30,13 @@
             }
         }
     ]
- 
- *---------------------------------------------------------------------------*/
-
-/*globals GXml, TimeMap */
-
-/**
- * KML loader factory - inherits from remote loader
  *
- * @param {Object} options          All options for the loader:
+ * @param {Object} options          All options for the loader:<pre>
  *   {Array} url                        URL of KML file to load (NB: must be local address)
  *   {Function} preloadFunction         Function to call on data before loading
  *   {Function} transformFunction       Function to call on individual items before loading
+ * </pre>
+ * @return {TimeMap.loaders.remote} Remote loader configured for KML
  */
 TimeMap.loaders.kml = function(options) {
     var loader = new TimeMap.loaders.remote(options);
@@ -40,10 +44,11 @@ TimeMap.loaders.kml = function(options) {
     return loader;
 }
 
-/*
- * Static function to parse KML with time data and load it.
+/**
+ * Static function to parse KML with time data.
  *
- * @param {XML string} kml        KML to be parsed
+ * @param {XML string} kml      KML to be parsed
+ * @return {TimeMapItem Array}  Array of TimeMapItems
  */
 TimeMap.loaders.kml.parse = function(kml) {
     var items = [], data, kmlnode, placemarks, pm, i, j;
@@ -51,8 +56,12 @@ TimeMap.loaders.kml.parse = function(kml) {
     
     // get TimeMap utilty functions
     // assigning to variables should compress better
-    var getTagValue = TimeMap.getTagValue,
-        getNodeList = TimeMap.getNodeList;
+    var util = TimeMap.util;
+    var getTagValue = util.getTagValue,
+        getNodeList = util.getNodeList,
+        makePoint = util.makePoint,
+        makePoly = util.makePoly,
+        formatDate = util.formatDate;
     
     // recursive time data search
     var findNodeTime = function(n, data) {
@@ -70,7 +79,7 @@ TimeMap.loaders.kml.parse = function(kml) {
                 data.start = getTagValue(nList[0], "begin");
                 data.end = getTagValue(nList[0], "end") ||
                     // unbounded spans end at the present time
-                    TimeMap.formatDate(new Date());
+                    formatDate(new Date());
                 check = true;
             }
         }
@@ -95,7 +104,7 @@ TimeMap.loaders.kml.parse = function(kml) {
         // get time information
         findNodeTime(pm, data);
         // find placemark(s)
-        var nList, coords, coordArr, latlon, pmobj;
+        var nList, coords, pmobj;
         data.placemarks = [];
         // look for marker
         nList = getNodeList(pm, "Point");
@@ -103,7 +112,7 @@ TimeMap.loaders.kml.parse = function(kml) {
             pmobj = { point: {} };
             // get lat/lon
             coords = getTagValue(nList[j], "coordinates");
-            pmobj.point = TimeMap.makePoint(coords, 1);
+            pmobj.point = makePoint(coords, 1);
             data.placemarks.push(pmobj);
         }
         // look for polylines
@@ -112,7 +121,7 @@ TimeMap.loaders.kml.parse = function(kml) {
             pmobj = { polyline: [] };
             // get lat/lon
             coords = getTagValue(nList[j], "coordinates");
-            pmobj.polyline = TimeMap.makePoly(coords, 1);
+            pmobj.polyline = makePoly(coords, 1);
             data.placemarks.push(pmobj);
         }
         // look for polygons
@@ -121,7 +130,7 @@ TimeMap.loaders.kml.parse = function(kml) {
             pmobj = { polygon: [] };
             // get lat/lon
             coords = getTagValue(nList[j], "coordinates");
-            pmobj.polygon = TimeMap.makePoly(coords, 1);
+            pmobj.polygon = makePoly(coords, 1);
             // XXX: worth closing unclosed polygons?
             data.placemarks.push(pmobj);
         }

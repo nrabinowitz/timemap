@@ -7,11 +7,12 @@ function exposeTestFunctionNames() {
 }
 
 function testThemeCascade() {
-    var tmTheme = TimeMapDataset.blueTheme();
-    var dsThemeA = TimeMapDataset.greenTheme();
-    var dsThemeA2 = TimeMapDataset.orangeTheme();
-    var dsThemeB2 = TimeMapDataset.yellowTheme();
-    var dsThemeC = TimeMapDataset.purpleTheme();
+    var tmTheme = new TimeMap.themes.blue();
+    var dsThemeA = new TimeMap.themes.green();
+    var dsThemeA2 = new TimeMap.themes.orange();
+    var dsThemeB2 = new TimeMap.themes.yellow();
+    var dsThemeC = new TimeMap.themes.purple();
+    var dsThemeC3 = customTheme;
     // go through the items one by one
     var item = tm.datasets["testA"].getItems()[0];
     assertEquals(item.getTitle() + " inherits Dataset A theme", dsThemeA.color, item.event._color);
@@ -20,15 +21,18 @@ function testThemeCascade() {
     var item = tm.datasets["testB"].getItems()[0];
     assertEquals(item.getTitle() + " inherits Timemap theme", tmTheme.color, item.event._color);
     var item = tm.datasets["testB"].getItems()[1];
-    assertEquals(item.getTitle() + " (string) overrides Timemap theme", dsThemeB2.color, item.event._color);
+    assertEquals(item.getTitle() + " overrides Timemap theme", dsThemeB2.color, item.event._color);
     var item = tm.datasets["testC"].getItems()[0];
-    assertEquals(item.getTitle() + " inherits Dataset C theme (string)", dsThemeC.color, item.event._color);
+    assertEquals(item.getTitle() + " inherits Dataset C theme", dsThemeC.color, item.event._color);
+    var item = tm.datasets["testC"].getItems()[2];
+    assertEquals(item.getTitle() + " uses custom theme color", dsThemeC3.color, item.event._color);
 }
 
 function testEventIconPath() {
     var tmPath = '../images/';
     var dsPathA = '../images/dsA/';
     var dsPathA2 = '../images/dsA2/';
+    var dsPathC3 = '../images/dsC3/';
     // go through the items one by one
     var item = tm.datasets["testA"].getItems()[0];
     assertEquals(item.getTitle() + " inherits Dataset A path", dsPathA, item.event._icon.substr(0, 14));
@@ -40,14 +44,17 @@ function testEventIconPath() {
     assertEquals(item.getTitle() + " inherits Timemap path", tmPath, item.event._icon.substr(0, 10));
     var item = tm.datasets["testC"].getItems()[0];
     assertEquals(item.getTitle() + " inherits Timemap path", tmPath, item.event._icon.substr(0, 10));
+    var item = tm.datasets["testC"].getItems()[2];
+    assertEquals(item.getTitle() + " inherits Timemap path", tmPath, item.event._icon.substr(0, 10));
 }
 
 function testMarkerIconPath() {
-    var tmTheme = TimeMapDataset.blueTheme();
-    var dsThemeA = TimeMapDataset.greenTheme();
-    var dsThemeA2 = TimeMapDataset.orangeTheme();
-    var dsThemeB2 = TimeMapDataset.yellowTheme();
-    var dsThemeC = TimeMapDataset.purpleTheme();
+    var tmTheme = new TimeMap.themes.blue();
+    var dsThemeA = new TimeMap.themes.green();
+    var dsThemeA2 = new TimeMap.themes.orange();
+    var dsThemeB2 = new TimeMap.themes.yellow();
+    var dsThemeC = new TimeMap.themes.purple();
+    var dsThemeC3 = customTheme;
     // go through the items one by one
     var item = tm.datasets["testA"].getItems()[0];
     assertEquals(item.getTitle() + " inherits Dataset A marker icon", dsThemeA.icon.image, item.placemark.getIcon().image);
@@ -56,14 +63,16 @@ function testMarkerIconPath() {
     var item = tm.datasets["testB"].getItems()[0];
     assertEquals(item.getTitle() + " inherits Timemap marker icon", tmTheme.icon.image, item.placemark.getIcon().image);
     var item = tm.datasets["testB"].getItems()[1];
-    assertEquals(item.getTitle() + " (string) overrides Timemap marker icon", dsThemeB2.icon.image, item.placemark.getIcon().image);
+    assertEquals(item.getTitle() + " overrides Timemap marker icon", dsThemeB2.icon.image, item.placemark.getIcon().image);
     var item = tm.datasets["testC"].getItems()[0];
-    assertEquals(item.getTitle() + " inherits Dataset C marker icon (string)", dsThemeC.icon.image, item.placemark.getIcon().image);
+    assertEquals(item.getTitle() + " inherits Dataset C marker icon", dsThemeC.icon.image, item.placemark.getIcon().image);
     var item = tm.datasets["testC"].getItems()[1];
     assertEquals(item.getTitle() + " overrides Dataset C marker icon", customIcon.image, item.placemark.getIcon().image);
+    var item = tm.datasets["testC"].getItems()[2];
+    assertEquals(item.getTitle() + " uses custom theme marker icon", dsThemeC3.icon.image, item.placemark.getIcon().image);
 }
 
-var tm = null, customIcon;
+var tm = null, customIcon, customTheme;
 
 function setUpPage() {
     // set up custom icon
@@ -72,19 +81,25 @@ function setUpPage() {
     customIcon.iconSize = new GSize(32, 32);
     customIcon.shadow = "http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png";
     customIcon.shadowSize = new GSize(59, 32);
+    
+    customTheme = new TimeMapTheme({
+        "color": "#0000FF",
+        "icon": customIcon,
+        "eventIconPath": '../images/dsC3/'
+    });
 
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
         timelineId: "timeline",     // Id of timeline div element (required)
         options: {
             eventIconPath: '../images/',
-            theme: TimeMapDataset.blueTheme()
+            theme: "blue"
         },
         datasets: [
             {
                 title: "Test Dataset A",
                 id: "testA",
-                theme: TimeMapDataset.greenTheme(),
+                theme: "green",
                 type: "basic",
                 options: {
                     eventIconPath: '../images/dsA/',
@@ -108,7 +123,7 @@ function setUpPage() {
                           "title" : "Test Event A2",
                           "options": {
                             "eventIconPath": '../images/dsA2/',
-                            "theme": TimeMapDataset.orangeTheme()
+                            "theme": "orange"
                           }
                         }
                     ]
@@ -168,7 +183,21 @@ function setUpPage() {
                               "lon" : 12.345
                            },
                           "title" : "Test Event C2",
-                          "icon": customIcon
+                          "options" : {
+                              "icon": customIcon
+                          }
+                        },
+                        {
+                          "start" : "1980-01-02",
+                          "end" : "1990-01-02",
+                          "point" : {
+                              "lat" : 23.456,
+                              "lon" : 12.345
+                           },
+                          "title" : "Test Event C3",
+                          "options": {
+                            "theme": customTheme
+                          }
                         }
                     ]
                 }

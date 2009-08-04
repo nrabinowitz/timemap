@@ -15,10 +15,13 @@ function onLoad() {
     TimeMap.init({
         mapId: "map",               // Id of map div element (required)
         timelineId: "timeline",     // Id of timeline div element (required) 
+        options: {
+            eventIconPath: "../images/"
+        },
         datasets: [
             {
                 title: "Developer Community Calendar",
-                theme: TimeMapDataset.greenTheme({eventIconPath: "../images/"}),
+                theme: "green",
                 type: "jsonp",    // Data to be loaded in JSON from a remote URL
                 options: {
                     url: "http://www.google.com/calendar/feeds/" +
@@ -31,7 +34,7 @@ function onLoad() {
             },
             {
                 title: "Developer Calendar",
-                theme: TimeMapDataset.blueTheme({eventIconPath: "../images/"}),
+                theme: "blue",
                 type: "jsonp",    // Data to be loaded in JSON from a remote URL
                 options: {
                     url: "http://www.google.com/calendar/feeds/" +

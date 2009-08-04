@@ -16,10 +16,13 @@ function onLoad() {
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
         timelineId: "timeline",     // Id of timeline div element (required) 
+        options: {
+            eventIconPath: "../images/"
+        },
         datasets: [
             {
                 title: "Violence in Kenya",
-                theme: TimeMapDataset.redTheme({eventIconPath: '../images/'}),
+                theme: "red",
                 type: "kml",     // Data to be loaded in KML - must be a local URL
                 options: {
                     url: "kenya.kml" // KML file to load

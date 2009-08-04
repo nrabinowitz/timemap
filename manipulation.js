@@ -3,13 +3,14 @@
  * Licensed under the MIT License (see LICENSE.txt)
  */
 
-/**----------------------------------------------------------------------------
- * TimeMap Manipulation Functions
- *
- * @author Nick Rabinowitz (www.nickrabinowitz.com)
+/**
+ * @fileOverview
+ * Additional TimeMap manipulation functions.
  * Functions in this file are used to manipulate a TimeMap, TimeMapDataset, or
  * TimeMapItem after the initial load process.
- *---------------------------------------------------------------------------*/
+ *
+ * @author Nick Rabinowitz (www.nickrabinowitz.com)
+ */
 
 /*globals TimeMap, TimeMapDataset, TimeMapItem, Timeline */
  
@@ -116,7 +117,7 @@ TimeMap.prototype.changeMapType = function (mapType) {
 TimeMap.prototype.refreshTimeline = function () {
     var topband = this.timeline.getBand(0);
     var centerDate = topband.getCenterVisibleDate();
-    if (TimeMap.TimelineVersion() == "1.2") {
+    if (TimeMap.util.TimelineVersion() == "1.2") {
         topband.getEventPainter().getLayout()._laidout = false;
     }
     this.timeline.layout();
@@ -301,7 +302,6 @@ TimeMapItem.prototype.clear = function() {
  */
 TimeMapItem.prototype.createEvent = function(s, e) {
     var instant = (e === undefined);
-    var eventIcon = this.opts.theme.eventIcon;
     var title = this.getTitle();
     // create event
     var event = new Timeline.DefaultEventSource.Event(s, e, null, null, instant, title, 
@@ -323,7 +323,7 @@ TimeMapItem.prototype.createEvent = function(s, e) {
     if (this.placemark) {
         // internal function - takes type, placemark
         var changePlacemark = function(pm, type, theme) {
-            type = type || TimeMapItem.getPlacemarkType(pm);
+            type = type || TimeMap.util.getPlacemarkType(pm);
             switch (type) {
                 case "marker":
                     pm.setImage(theme.icon.image);
@@ -356,24 +356,7 @@ TimeMapItem.prototype.createEvent = function(s, e) {
         this.event._color = newTheme.eventColor;
         this.event._icon = newTheme.eventIcon;
     }
-};
-
-
-/** 
- * Identify the placemark type. not 100% happy with this.
- *
- * @param {Object} pm       Placemark to identify
- * @return {String}         Type of placemark, or false if none found
- */
-TimeMapItem.getPlacemarkType = function(pm) {
-    if ('getIcon' in pm) {
-        return 'marker';
-    }
-    if ('getVertex' in pm) {
-        return 'setFillStyle' in pm ? 'polygon' : 'polyline';
-    }
-    return false;
-};
+};
 
 /** 
  * Find the next item chronologically
