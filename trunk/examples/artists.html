@@ -78,7 +78,7 @@ function onLoad() {
             {
                 id: "artists",
                 title: "Artists",
-                theme: TimeMapDataset.greenTheme({classicTape: true}),
+                theme: TimeMap.themes.green({classicTape: true}),
                 type: "metaweb", // Data to be loaded from freebase.com
                 data: {    
                     query: artistQuery,
@@ -88,7 +88,7 @@ function onLoad() {
             {
                 id: "authors",
                 title: "Authors",
-                theme: TimeMapDataset.redTheme({classicTape: true}),
+                theme: TimeMap.themes.red({classicTape: true}),
                 type: "metaweb", // Data to be loaded from freebase.com
                 data: {
                     query: authorQuery,

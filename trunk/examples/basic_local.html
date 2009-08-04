@@ -14,13 +14,17 @@ var tm;
 function onLoad() {
 
     tm = TimeMap.init({
-        mapId: "map",               // Id of map div element (required)
-        timelineId: "timeline",     // Id of timeline div element (required) 
+                mapId: "map",               // Id of map div element (required)
+        timelineId: "timeline",     // Id of timeline div element (required)
+        options: {
+            eventIconPath: "../images/"
+        },
         datasets: [
             {
                 id: "artists",
                 title: "Artists",
-                theme: TimeMapDataset.orangeTheme({eventIconPath: "../images/"}),
+                theme: "orange",
+                // note that the lines below are now the preferred syntax
                 type: "basic",
                 options: {
                     items: [
@@ -50,7 +54,7 @@ function onLoad() {
                             // Note that this may break in IE if you're running it with
                             // a local file, due to cross-site scripting restrictions
                             "infoUrl": "ajax_content.html",
-                            "theme": TimeMapDataset.redTheme({eventIconPath: "../images/"})
+                            "theme": "red"
                           }
                         },
                         {
@@ -64,7 +68,7 @@ function onLoad() {
                           "options" : {
                             // use the default title/description info window
                             "description": "Renaissance Man",
-                            "theme": TimeMapDataset.ltblueTheme({eventIconPath: "../images/"})
+                            "theme": "yellow"
                           }
                         }
                     ]

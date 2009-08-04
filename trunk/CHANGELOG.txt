@@ -5,6 +5,7 @@
  
 CHANGELOG (somewhat rough - see the SVN commit log for more detail)
 -------------------------------------------------------------------------------
+
 Version 1.5
 -----------
 - Fairly substantial changes to the loader architecture - should make everything a
@@ -13,6 +14,12 @@ Flickr, etc). IMPORTANT: Loader files have moved to the loaders/ directory.
 - Some changes to TimeMap.init() syntax - the only things not backwards-compatible
 are the preloadFunction and transformFunction params, which should now go in an
 options object within the dataset object.
+- Cleaned up theme namespace: changed TimeMapDatasetTheme to TimeMapTheme and put 
+pre-set theme functions into TimeMap.themes. Setting theme by string (e.g. "blue")
+is fully backwards-compatible, but the syntax for using functions has changed.
+- Cleaned up utility namespace: moved utility functions to TimeMap.util
+- Added documentation via jsdoc-toolkit, and cleaned up the comments to provide
+better documentation
 - Added loaders for JSON strings, Google Spreadsheets, and Flickr
 - Added polyline and polygon support to GeoRSS
 - Added support for multiple geometries in KML

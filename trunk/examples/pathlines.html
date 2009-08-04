@@ -19,11 +19,14 @@ function onLoad() {
     tm = timemapInit({
         mapId: "map",               // Id of map div element (required)
         timelineId: "timeline",     // Id of timeline div element (required) 
+        options: {
+            eventIconPath: "../images/"
+        },
         datasets: [
             {
                 title: "Photos",
                 id: "photos",
-                theme: TimeMapDataset.greenTheme({eventIconPath: "../images/"}),
+                theme: "green",
                 // load JSON data from Flickr - see the Flickr API for more info
                 type: "flickr",
                 options: {

@@ -3,53 +3,41 @@
  * Licensed under the MIT License (see LICENSE.txt)
  */
 
-/*----------------------------------------------------------------------------
- * JSON Loader 
+/**
+ * @fileOverview
+ * JSON Loaders (JSONP, JSON String)
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
- * This includes two loader classes for JSON data. 
+ */
+
+/**
+ * @class
+ * JSONP loader class - expects a service that takes a callback function name as
+ * the last URL parameter.
  *
- * The jsonp loader assumes that the JSON can be loaded from a url to which a 
+ * <p>The jsonp loader assumes that the JSON can be loaded from a url to which a 
  * callback function name can be appended, e.g. "http://www.test.com/getsomejson.php?callback="
  * The loader then appends a nonce function name which the JSON should include.
- * This works for services like Google Spreadsheets, etc., and accepts remote URLs.
+ * This works for services like Google Spreadsheets, etc., and accepts remote URLs.</p>
  *
- * The json_string loader assumes an array of items in plain JSON, with no
- * callback function - this will require a local URL. 
- * json_string depends on lib/json2.pack.js
- *
- * Usage in TimeMap.init():
+ * @example Usage in TimeMap.init():
  
     datasets: [
-        // jsonp
         {
             title: "JSONP Dataset",
             type: "jsonp",
             options: {
                 url: "http://www.test.com/getsomejson.php?callback="
             }
-        },
-        // json string
-        {
-            title: "JSON String Dataset",
-            type: "json_string",
-            options: {
-                url: "mydata.js"    // Must be a local URL
-            }
         }
     ]
- 
- *---------------------------------------------------------------------------*/
-
-
-/**
- * JSONP loader class - expects a service that takes a callback function name as
- * the last URL parameter.
  *
- * @param {Object} options          All options for the loader:
+ * @constructor
+ * @param {Object} options          All options for the loader:<pre>
  *   {Array} url                        URL of JSON service to load, callback name left off
  *   {Function} preloadFunction         Function to call on data before loading
  *   {Function} transformFunction       Function to call on individual items before loading
+ * </pre>
  */
 TimeMap.loaders.jsonp = function(options) {
     // get standard functions
@@ -78,6 +66,7 @@ TimeMap.loaders.jsonp.prototype.load = function(dataset, callback) {
 
 /**
  * Static - for naming anonymous callback functions
+ * @type int
  */
 TimeMap.loaders.jsonp.counter = 0;
 
@@ -107,13 +96,36 @@ TimeMap.loaders.jsonp.read = function(url, f) {
 };
 
 /**
- * JSON string loader factory - expects a plain JSON array. Depends on lib/json2.pack.js.
+ * @class
+ * JSON string loader factory - expects a plain JSON array.
  * Inherits from remote loader.
  *
- * @param {Object} options          All options for the loader:
+ * <p>The json_string loader assumes an array of items in plain JSON, with no
+ * callback function - this will require a local URL.</p>
+ *
+ * <p>Depends on:</p>
+ * <ul>
+ *  <li>lib/json2.pack.js</li>
+ * </ul>
+ *
+ * @example Usage in TimeMap.init():
+ 
+    datasets: [
+        {
+            title: "JSON String Dataset",
+            type: "json_string",
+            options: {
+                url: "mydata.json"    // Must be a local URL
+            }
+        }
+    ]
+ *
+ * @param {Object} options          All options for the loader:<pre>
  *   {Array} url                        URL of JSON service to load, callback name left off
  *   {Function} preloadFunction         Function to call on data before loading
  *   {Function} transformFunction       Function to call on individual items before loading
+ * </pre>
+ * @return {TimeMap.loaders.remote} Remote loader configured for JSON strings
  */
 TimeMap.loaders.json_string = function(options) {
     var loader = new TimeMap.loaders.remote(options);

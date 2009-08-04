@@ -1,7 +1,8 @@
-/**
-* Shown below is the full data format accepted by TimeMap.init(). See the other 
-* example files for specific use cases.
-*/
+/*
+ * Shown below is the full data format accepted by TimeMap.init(). See the other 
+ * example files for specific use cases.
+ * NOTE: I haven't updated this in a while, and plan to move it to the wiki instead.
+ */
 
 
 TimeMap.init({

@@ -32,6 +32,7 @@ Loaders (in loaders/ directory)
 Documentation
 - LICENSE.txt:      The license
 - README.txt        This file
+- docs/             Code documentation produced by jsdoc-toolkit
 
 Other stuff
 - edit/             Semi-experimental editing UI - depends on jQuery
