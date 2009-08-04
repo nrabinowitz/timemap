@@ -1,5 +1,5 @@
 /*! 
- * TimeMap Copyright 2008 Nick Rabinowitz.
+ * Timemap.js Copyright 2008 Nick Rabinowitz.
  * Licensed under the MIT License (see LICENSE.txt)
  */
 
@@ -151,7 +151,7 @@ function TimeMap(tElement, mElement, options) {
  * Current library version.
  * @type String
  */
-TimeMap.version = "1.5pre";
+TimeMap.version = "1.5";
 
 /**
  * Intializes a TimeMap.
