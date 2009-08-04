@@ -151,7 +151,7 @@ function TimeMap(tElement, mElement, options) {
  * Current library version.
  * @type String
  */
-TimeMap.version = "1.5";
+TimeMap.version = "1.6pre";
 
 /**
  * Intializes a TimeMap.
@@ -1000,7 +1000,7 @@ TimeMapDataset.prototype.loadItems = function(data, transform) {
  *      {Object} options            Optional arguments to be passed to the TimeMapItem (@see TimeMapItem)
  * </pre>
  * @param {Function} transform  If data is not in the above format, transformation function to make it so
- * @return {TimeMapItem}        The created item (for convenience, as it's already be added)
+ * @return {TimeMapItem}        The created item (for convenience, as it's already been added)
  * @see TimeMapItem
  */
 TimeMapDataset.prototype.loadItem = function(data, transform) {

@@ -53,8 +53,8 @@ if not runonly or runonly == 'yuic':
 if not runonly or runonly == 'jsdoc':
 
     # make a list of files to parse for docs
-    ignore = ['timemap.pack.js', 'timemap_full.pack.js']
-    files = [f for f in glob.glob('*.js') if not f in ignore]
+    ignore = ['timemap.js', 'timemap.pack.js', 'timemap_full.pack.js']
+    files = ['timemap.js'] + [f for f in glob.glob('*.js') if not f in ignore]
     # append loaders
     files += [f for f in glob.glob(os.path.join('loaders','*.js'))]
     
