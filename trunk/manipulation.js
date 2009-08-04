@@ -31,7 +31,7 @@ TimeMap.prototype.clear = function() {
 /**
  * Delete one dataset, clearing it from map and timeline
  *
- * @param id    Id of dataset to delete
+ * @param {String} id    Id of dataset to delete
  */
 TimeMap.prototype.deleteDataset = function(id) {
     this.datasets[id].clear();
@@ -194,7 +194,7 @@ TimeMapDataset.prototype.clear = function() {
 /**
  * Delete one item, clearing it from map and timeline
  * 
- * @param item      Item to delete
+ * @param {TimeMapItem} item      Item to delete
  */
 TimeMapDataset.prototype.deleteItem = function(item) {
     for (var x=0; x < this.items.length; x++) {
@@ -234,7 +234,7 @@ TimeMapDataset.prototype.hide = function() {
  /**
  * Change the theme for every item in a dataset
  *
- * @param (TimeMapDatasetTheme) theme       New theme settings
+ * @param {TimeMapTheme} theme       New theme settings
  */
  TimeMapDataset.prototype.changeTheme = function(newTheme) {
     this.opts.theme = newTheme;
@@ -297,8 +297,8 @@ TimeMapItem.prototype.clear = function() {
  /**
  * Create a new event for the item.
  * 
- * @param (Date) s      Start date for the event
- * @param (Date) e      (Optional) End date for the event
+ * @param {Date} s      Start date for the event
+ * @param {Date} e      (Optional) End date for the event
  */
 TimeMapItem.prototype.createEvent = function(s, e) {
     var instant = (e === undefined);
@@ -315,7 +315,7 @@ TimeMapItem.prototype.createEvent = function(s, e) {
  /**
  * Change the theme for an item
  *
- * @param theme   New theme settings
+ * @param {TimeMapTheme} theme   New theme settings
  */
  TimeMapItem.prototype.changeTheme = function(newTheme) {
     this.opts.theme = newTheme;

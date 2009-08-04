@@ -84,8 +84,8 @@ TimeMap.prototype.makeOptionData = function() {
 /**
  * Specify additional data for export. Replace this function to change settings.
  *
- * @param data      Initial map of export data
- * @return          Expanded map of export data
+ * @param {Object} data      Initial map of export data
+ * @return {Object}          Expanded map of export data
  */
 TimeMap.prototype.addExportData = function(data) {
     data.options = data.options || {};
@@ -118,8 +118,8 @@ TimeMapDataset.prototype.toJSON = function() {
 /**
  * Specify additional data for export. Replace this function to change settings.
  *
- * @param data      Initial map of export data
- * @return          Expanded map of export data
+ * @param {Object} data      Initial map of export data
+ * @return {Object}          Expanded map of export data
  */
 TimeMapDataset.prototype.addExportData = function(data) {
     data.options = data.options || {};
@@ -186,8 +186,8 @@ TimeMapItem.prototype.toJSON = function() {
 /**
  * Specify additional data for export. Replace this function to change settings.
  *
- * @param data      Initial map of export data
- * @return          Expanded map of export data
+ * @param {Object} data      Initial map of export data
+ * @return {Object}          Expanded map of export data
  */
 TimeMapItem.prototype.addExportData = function(data) {
     data.options = data.options || {};
@@ -197,11 +197,11 @@ TimeMapItem.prototype.addExportData = function(data) {
 };
 
 /**
- * Util function: get the key from the map if the val is found
+ * Util function: get the key from the map if the value is found
  *
- * @param (Object) map      Object to search
- * @param (?) val           Value to look for
- * @return (String)         Key if found, null if not
+ * @param {Object} map      Object to search
+ * @param {?} val           Value to look for
+ * @return {String}         Key if found, null if not
  */
 TimeMap.util.revHash = function(map, val) {
     for (var k in map) {
