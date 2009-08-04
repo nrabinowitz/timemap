@@ -3,7 +3,7 @@
  * Licensed under the MIT License (see LICENSE.txt)
  */
  
-CHANGELOG (somewhat rough - see the SVN commit log for more detail)
+CHANGELOG (see the SVN commit log for more detail)
 -------------------------------------------------------------------------------
 
 Version 1.5
