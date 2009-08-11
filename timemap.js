@@ -718,11 +718,23 @@ TimeMap.prototype.addFilter = function(fid, f) {
  * Remove a function from a filter chain
  *
  * @param {String} fid      Id of the filter chain
- * XXX: Support index here
+ * @param {Function} f      The function to remove
  */
-TimeMap.prototype.removeFilter = function(fid) {
+TimeMap.prototype.removeFilter = function(fid, f) {
     if (this.filters[fid] && this.filters[fid].chain) {
-        this.filters[fid].chain.pop();
+        var chain = this.filters[fid].chain;
+        if (!f) {
+            // just remove the last filter added
+            chain.pop();
+        }
+        else {
+            // look for the specific filter to remove
+            for(var i = 0; i < chain.length; i++){
+			    if(chain[i] == f){
+				    chain.splice(i, 1);
+			    }
+		    }
+        }
     }
 };
 
