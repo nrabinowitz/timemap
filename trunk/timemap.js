@@ -1208,7 +1208,11 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     // add event if it exists
     if (event !== null) {
         event.item = item;
-        this.eventSource.add(event);
+        // allow for custom event loading
+        if (!this.opts.noEventLoad) {
+            // add event to timeline
+            this.eventSource.add(event);
+        }
     }
     // add placemark(s) if any exist
     if (placemark.length > 0) {
@@ -1218,8 +1222,11 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
             GEvent.addListener(placemark[i], "click", function() {
                 item.openInfoWindow();
             });
-            // add placemark and event to map and timeline
-            tm.map.addOverlay(placemark[i]);
+            // allow for custom placemark loading
+            if (!this.opts.noPlacemarkLoad) {
+                // add placemark to map
+                tm.map.addOverlay(placemark[i]);
+            }
             // hide placemarks until the next refresh
             placemark[i].hide();
         }
