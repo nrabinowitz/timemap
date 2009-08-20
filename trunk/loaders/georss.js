@@ -31,6 +31,9 @@
  * <p>At the moment, this only supports points; polygons, polylines, and boxes
  * will be added at some later point.</p>
  *
+ * @augments TimeMap.loaders.remote
+ * @borrows TimeMap.loaders.georss.parse as #parse
+ *
  * @example Usage in TimeMap.init():
  
     datasets: [

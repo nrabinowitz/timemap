@@ -408,10 +408,31 @@ TimeMap.loaders = {};
  * </pre>
  */
 TimeMap.loaders.basic = function(options) {
-    // get standard functions
+    // get standard functions and document
     TimeMap.loaders.mixin(this, options);
-    // allow "value" for backwards compatibility
-    this.data = options.items || options.value || [];
+    /**
+     * Function to call on data object before loading
+     * @name TimeMap.loaders.basic#preload
+     * @function
+     * @parameter {Object} data     Data to preload
+     * @return {Array} data         Array of item data
+     */
+     
+    /**
+     * Function to call on a single item data object before loading
+     * @name TimeMap.loaders.basic#transform
+     * @function
+     * @parameter {Object} data     Data to transform
+     * @return {Object} data        Transformed data for one item
+     */
+    
+    /**
+     * Array of item data to load.
+     * @type Array
+     */
+    this.data = options.items || 
+        // allow "value" for backwards compatibility
+        options.value || [];
 }
 
 /**
@@ -436,15 +457,42 @@ TimeMap.loaders.basic.prototype.load = function(dataset, callback) {
  * @constructor
  * @param {Object} options          All options for the loader:<pre>
  *   {Array} url                        URL of file to load (NB: must be local address)
- *   {Function} parserFunction          Parser function to turn data into JavaScript array
+ *   {Function} parserFunction          Parser function to turn a string into a JavaScript array
  *   {Function} preloadFunction         Function to call on data before loading
  *   {Function} transformFunction       Function to call on individual items before loading
  * </pre>
  */
 TimeMap.loaders.remote = function(options) {
-    // get standard functions
+    // get standard functions and document
     TimeMap.loaders.mixin(this, options);
-    // get URL to load
+    /**
+     * Parser function to turn a string into a JavaScript array
+     * @name TimeMap.loaders.remote#parse
+     * @function
+     * @parameter {String} s    String to parse
+     * @return {Array} data     Array of item data
+     */
+     
+    /**
+     * Function to call on data object before loading
+     * @name TimeMap.loaders.remote#preload
+     * @function
+     * @parameter {Object} data     Data to preload
+     * @return {Array} data         Array of item data
+     */
+     
+    /**
+     * Function to call on a single item data object before loading
+     * @name TimeMap.loaders.remote#transform
+     * @function
+     * @parameter {Object} data     Data to transform
+     * @return {Object} data        Transformed data for one item
+     */
+    
+    /**
+     * URL to load
+     * @type String
+     */
     this.url = options.url;
 }
 

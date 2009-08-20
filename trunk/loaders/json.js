@@ -40,9 +40,30 @@
  * </pre>
  */
 TimeMap.loaders.jsonp = function(options) {
-    // get standard functions
+    // get standard functions and document
     TimeMap.loaders.mixin(this, options);
-    // get URL to load
+     
+    /**
+     * Function to call on data object before loading
+     * @name TimeMap.loaders.jsonp#preload
+     * @function
+     * @parameter {Object} data     Data to preload
+     * @return {Array} data         Array of item data
+     */
+     
+    /**
+     * Function to call on a single item data object before loading
+     * @name TimeMap.loaders.jsonp#transform
+     * @function
+     * @parameter {Object} data     Data to transform
+     * @return {Object} data        Transformed data for one item
+     */
+    
+    /**
+     * URL to load, with missing callback parameter
+     * @example "http://www.example.com/myjsonservice?callback="
+     * @type String
+     */
     this.url = options.url;
 }
 
@@ -98,15 +119,14 @@ TimeMap.loaders.jsonp.read = function(url, f) {
 /**
  * @class
  * JSON string loader factory - expects a plain JSON array.
- * Inherits from remote loader.
  *
  * <p>The json_string loader assumes an array of items in plain JSON, with no
  * callback function - this will require a local URL.</p>
+ * <p>Note that this loader requires lib/json2.pack.js.</p>
  *
- * <p>Depends on:</p>
- * <ul>
- *  <li>lib/json2.pack.js</li>
- * </ul>
+ * @augments TimeMap.loaders.remote
+ *
+ * @requires lib/json2.pack.js
  *
  * @example Usage in TimeMap.init():
  
@@ -129,7 +149,15 @@ TimeMap.loaders.jsonp.read = function(url, f) {
  */
 TimeMap.loaders.json_string = function(options) {
     var loader = new TimeMap.loaders.remote(options);
+    
+    /**
+     * Parse a JSON string into a JavaScript object, using the json2.js library.
+     * @name TimeMap.loaders.json_string#parse
+     * @param {String} json     JSON string to parse
+     * @returns {Object}        Parsed JavaScript object
+     */
     loader.parse = JSON.parse;
+    
     return loader;
 }
 

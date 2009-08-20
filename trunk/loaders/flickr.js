@@ -19,10 +19,8 @@
  *
  * <p>The loader takes a full URL, minus the JSONP callback function.</p>
  *
- * <p>Depends on:</p>
- * <ul>
- *  <li>loaders/jsonp.js</li>
- * </ul>
+ * @augments TimeMap.loaders.jsonp
+ * @requires loaders/json.js
  *
  * @example Usage in TimeMap.init():
  
@@ -48,12 +46,22 @@
 TimeMap.loaders.flickr = function(options) {
     var loader = new TimeMap.loaders.jsonp(options);
     
-    // preload function for Flickr feeds
+    /**
+     * Preload function for Flickr feeds
+     * @name TimeMap.loaders.flickr#preload
+     * @parameter {Object} data     Data to preload
+     * @return {Array} data         Array of item data
+     */
     loader.preload = function(data) {
         return data["items"];
     };
     
-    // transform function for Flickr feeds
+    /**
+     * Transform function for Flickr feeds
+     * @name TimeMap.loaders.flickr#transform
+     * @parameter {Object} data     Data to transform
+     * @return {Object} data        Transformed data for one item
+     */
     loader.transform = function(data) {
         var item = {
             title: data["title"],
