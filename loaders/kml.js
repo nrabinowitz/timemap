@@ -19,6 +19,9 @@
  * <p>This is a loader class for KML files. Currently supports all geometry
  * types (point, polyline, polygon, and overlay) and multiple geometries.</p>
  *
+ * @augments TimeMap.loaders.remote
+ * @borrows TimeMap.loaders.kml.parse as #parse
+ *
  * @example Usage in TimeMap.init():
  
     datasets: [

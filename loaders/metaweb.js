@@ -24,11 +24,9 @@
  * a description of how to write MQL queries. This code is based on code from
  * the API site.</p>
  *
- * <p>Depends on:</p>
- * <ul>
- *  <li>lib/json2.pack.js</li>
- *  <li>loaders/jsonp.js</li>
- * </ul>
+ * @augments TimeMap.loaders.jsonp
+ * @requires lib/json2.pack.js
+ * @requires loaders/jsonp.js
  *
  * @example Usage in TimeMap.init():
  
@@ -61,11 +59,25 @@
 TimeMap.loaders.metaweb = function(options) {
     var loader = new TimeMap.loaders.jsonp(options);
     
-    // Host and service - default to freebase.com
+    /**
+     * Host url - default to freebase.com
+     * @name TimeMap.loaders.metaweb#HOST
+     * @type {String}
+     */
     loader.HOST = options.host || "http://www.freebase.com";
+    /**
+     * Service path - default to freebase.com default
+     * @name TimeMap.loaders.metaweb#QUERY_SERVICE
+     * @type {String}
+     */
     loader.QUERY_SERVICE = options.service || "/api/service/mqlread";
     
-    // Metaweb preload functon
+    /**
+     * Preload function for Metaweb
+     * @name TimeMap.loaders.metaweb#preload
+     * @parameter {Object} data     Data to preload
+     * @return {Array} data         Array of item data
+     */
     loader.preload = function(data) {
         // Open outer envelope
         var innerEnvelope = data.qname;
@@ -88,7 +100,11 @@ TimeMap.loaders.metaweb = function(options) {
     var q = options.query || {};
     var querytext = encodeURIComponent(JSON.stringify({qname: {query: q}}));
 
-    // Build the URL using encoded query text and the callback name
+    /**
+     * URL built using encoded query text and the callback name
+     * @name TimeMap.loaders.metaweb#url
+     * @type {String}
+     */
     loader.url = loader.HOST + loader.QUERY_SERVICE + "?queries=" + querytext + "&callback=";
 
     return loader;

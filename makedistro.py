@@ -1,3 +1,14 @@
+help = """
+Distribution build script: runs YUI Compressor and jsdoc-toolkit.
+
+Arguments:
+
+    --yuic          Path to YUI Compressor .jar file
+    --jsdoc         Path to jsdoc-toolkit directory
+    --runonly       Only run specified program; options are "yuic" or "jsdoc"
+    --verbose, -v   Output verbose messages
+    --help, -h      Print this message
+"""
 # makedistro.py
 # build script for packing the TimeMap library with the YUI Compressor
 #
@@ -28,6 +39,9 @@ if len(sys.argv) > 1:
             runonly = arg[10:]
         elif arg == "--verbose" or arg == "-v":
             verbose = "-v"
+        elif arg == "--help" or arg == "-h":
+            print help
+            exit()
 
 # make packed distro files
 if not runonly or runonly == 'yuic':

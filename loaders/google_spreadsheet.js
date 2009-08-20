@@ -26,10 +26,8 @@
  * <p>The loader takes either a full URL, minus the JSONP callback function, or 
  * just the spreadsheet key. Note that the spreadsheet must be published.</p>
  *
- * <p>Depends on:</p>
- * <ul>
- *  <li>loaders/jsonp.js</li>
- * </ul>
+ * @augments TimeMap.loaders.jsonp
+ * @requires loaders/json.js
  *
  * @example Usage in TimeMap.init():
  
@@ -67,15 +65,29 @@ TimeMap.loaders.gss = function(options) {
             options.key + "/1/public/values?alt=json-in-script&callback=";
     }
         
-    // column map
+    /**
+     * Column map
+     * @name TimeMap.loaders.gss#map
+     * @type Object
+     */
     loader.map = options.map;
     
-    // preload function for spreadsheet data
+    /**
+     * Preload function for spreadsheet data
+     * @name TimeMap.loaders.gss#preload
+     * @parameter {Object} data     Data to preload
+     * @return {Array} data         Array of item data
+     */
     loader.preload = function(data) {
         return data["feed"]["entry"];
     };
     
-    // transform function for spreadsheet data
+    /**
+     * Transform function for spreadsheet data
+     * @name TimeMap.loaders.gss#transform
+     * @parameter {Object} data     Data to transform
+     * @return {Object} data        Transformed data for one item
+     */
     loader.transform = function(data) {
         // map spreadsheet column ids to corresponding TimeMap elements
         var fieldMap = loader.map || TimeMap.loaders.gss.map;
