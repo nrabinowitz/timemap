@@ -12,10 +12,7 @@
  * TimeMap.init(). This allows for a range of server-side options for
  * data persistence and management.</p>
  * 
- * <p>Depends on:</p>
- * <ul>
- *  <li>json2: lib/json2.pack.js</li>
- * </ul>
+ * @requires json2: lib/json2.pack.js
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
  */
@@ -41,8 +38,11 @@ TimeMap.prototype.toJSON = function() {
 TimeMap.prototype.makeOptionData = function() {
     var data = {}, util = TimeMap.util;
     // copy options
-    for (var k in this.opts) {
-        data[k] = this.opts[k];
+    var opts = this.opts;
+    for (var k in opts) {
+        if (opts.hasOwnProperty(k)) {
+            data[k] = opts[k];
+        }
     }
     // clean up: mapCenter
     if (data.mapCenter) {

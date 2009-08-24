@@ -25,16 +25,16 @@ function testItemLoadedInEventSource() {
 
 function testEarliestDate() {
     var ds = tm.datasets["test"];
-    assertEquals("year matches", ds.eventSource.getEarliestDate().getUTCFullYear(), 1980);
-    assertEquals("month matches", ds.eventSource.getEarliestDate().getUTCMonth(), 0);
-    assertEquals("day matches", ds.eventSource.getEarliestDate().getUTCDate(), 2);
+    assertEquals("year matches", 1980, ds.eventSource.getEarliestDate().getUTCFullYear());
+    assertEquals("month matches", 0, ds.eventSource.getEarliestDate().getUTCMonth());
+    assertEquals("day matches", 2, ds.eventSource.getEarliestDate().getUTCDate());
 }
 
 function testLatestDate() {
     var ds = tm.datasets["test"];
-    assertEquals("year matches", ds.eventSource.getLatestDate().getFullYear(), 2000);
-    assertEquals("month matches", ds.eventSource.getEarliestDate().getMonth(), 0);
-    assertEquals("day matches", ds.eventSource.getEarliestDate().getUTCDate(), 2);
+    assertEquals("year matches", 2000, ds.eventSource.getLatestDate().getFullYear());
+    assertEquals("month matches", 0, ds.eventSource.getEarliestDate().getMonth());
+    assertEquals("day matches", 2, ds.eventSource.getEarliestDate().getUTCDate());
 }
 
 function testItemAttributes() {

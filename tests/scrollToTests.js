@@ -10,7 +10,8 @@ function exposeTestFunctionNames() {
 function testScrollTo() {
     loadWithScrollTo('earliest', 1980);
     loadWithScrollTo('latest', 2000);
-    loadWithScrollTo('1990-01-01', 1990);
+    // have to be somewhat loose here because of pixel-to-date conversion
+    loadWithScrollTo('1990-01-03', 1990); 
     loadWithScrollTo(new Date(1980, 1, 1), 1980);
 }
 
