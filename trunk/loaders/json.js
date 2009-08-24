@@ -9,6 +9,9 @@
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
  */
+ 
+// for JSLint
+/*global TimeMap */
 
 /**
  * @class
@@ -65,7 +68,7 @@ TimeMap.loaders.jsonp = function(options) {
      * @type String
      */
     this.url = options.url;
-}
+};
 
 /**
  * JSONP load function.
@@ -78,12 +81,12 @@ TimeMap.loaders.jsonp.prototype.load = function(dataset, callback) {
     // get items
     TimeMap.loaders.jsonp.read(this.url, function(result) {
         // load
-        items = loader.preload(result);
+        var items = loader.preload(result);
         dataset.loadItems(items, loader.transform);
         // callback
         callback();
     });
-}
+};
 
 /**
  * Static - for naming anonymous callback functions
@@ -159,7 +162,7 @@ TimeMap.loaders.json_string = function(options) {
     loader.parse = JSON.parse;
     
     return loader;
-}
+};
 
 // Probably the default json loader should be json_string, not
 // jsonp. I may change this in the future, so I'd encourage you to use

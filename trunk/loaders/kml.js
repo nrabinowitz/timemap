@@ -45,7 +45,7 @@ TimeMap.loaders.kml = function(options) {
     var loader = new TimeMap.loaders.remote(options);
     loader.parse = TimeMap.loaders.kml.parse;
     return loader;
-}
+};
 
 /**
  * Static function to parse KML with time data.

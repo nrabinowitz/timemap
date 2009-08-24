@@ -25,10 +25,10 @@ function testRSSItemLoaded() {
 
 function testRSSEarliestDate() {
     var ds = tm.datasets["rss"];
-    assertEquals("year matches", ds.eventSource.getEarliestDate().getFullYear(), 1980);
-    assertEquals("month matches", ds.eventSource.getEarliestDate().getMonth(), 0);
+    assertEquals("year matches", ds.eventSource.getEarliestDate().getUTCFullYear(), 1980);
+    assertEquals("month matches", ds.eventSource.getEarliestDate().getUTCMonth(), 0);
     // Timeline seems to adjust for the timezone after parsing :(
-    assertEquals("day matches", ds.eventSource.getEarliestDate().getDate(), 1);
+    assertEquals("day matches", ds.eventSource.getEarliestDate().getUTCDate(), 2);
 }
 
 function testRSSItemAttributes() {
@@ -47,10 +47,10 @@ function testAtomItemLoaded() {
 
 function testAtomEarliestDate() {
     var ds = tm.datasets["atom"];
-    assertEquals("year matches", ds.eventSource.getEarliestDate().getFullYear(), 1980);
-    assertEquals("month matches", ds.eventSource.getEarliestDate().getMonth(), 0);
+    assertEquals("year matches", ds.eventSource.getEarliestDate().getUTCFullYear(), 1980);
+    assertEquals("month matches", ds.eventSource.getEarliestDate().getUTCMonth(), 0);
     // Timeline seems to adjust for the timezone after parsing :(
-    assertEquals("day matches", ds.eventSource.getEarliestDate().getDate(), 1);
+    assertEquals("day matches", ds.eventSource.getEarliestDate().getUTCDate(), 2);
 }
 
 function testAtomItemAttributes() {

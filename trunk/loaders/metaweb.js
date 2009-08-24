@@ -9,11 +9,9 @@
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
  */
-
-/*----------------------------------------------------------------------------
- *  Loader 
- *
- */
+ 
+// for JSLint
+/*global TimeMap */
 
 /**
  * @class
@@ -82,7 +80,7 @@ TimeMap.loaders.metaweb = function(options) {
         // Open outer envelope
         var innerEnvelope = data.qname;
         // Make sure the query was successful
-        if (innerEnvelope.code.indexOf("/api/status/ok") != 0) {
+        if (innerEnvelope.code.indexOf("/api/status/ok") !== 0) {
             // uncomment for debugging
             /*
             // If error, get error message and throw
@@ -108,4 +106,4 @@ TimeMap.loaders.metaweb = function(options) {
     loader.url = loader.HOST + loader.QUERY_SERVICE + "?queries=" + querytext + "&callback=";
 
     return loader;
-}
+};

@@ -57,7 +57,7 @@ TimeMap.loaders.georss = function(options) {
     var loader = new TimeMap.loaders.remote(options);
     loader.parse = TimeMap.loaders.georss.parse;
     return loader;
-}
+};
 
 /**
  * Static function to parse GeoRSS
@@ -126,7 +126,8 @@ TimeMap.loaders.georss.parse = function(rss) {
             }
         }
         // find placemark - single geometry only for the moment
-        PLACEMARK: {
+        var done = false;
+        PLACEMARK: while (!done) {
             var coords, geom;
             // look for point, GeoRSS-Simple
             coords = getTagValue(pm, "point", 'georss');
@@ -193,6 +194,8 @@ TimeMap.loaders.georss.parse = function(rss) {
             }
             
             // XXX: deal with boxes
+            
+            done = true;
         }
         items.push(data);
     }

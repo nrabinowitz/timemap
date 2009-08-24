@@ -9,6 +9,9 @@
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
  */
+ 
+// for JSLint
+/*global TimeMap */
 
 /**
  * @class
@@ -64,23 +67,24 @@ TimeMap.loaders.flickr = function(options) {
      */
     loader.transform = function(data) {
         var item = {
-            title: data["title"],
-            start: data["date_taken"],
+            title: data.title,
+            start: data.date_taken,
             point: {
-                lat: data["latitude"],
-                lon: data["longitude"]
+                lat: data.latitude,
+                lon: data.longitude
             },
             options: {
-                description: data["description"]
+                description: data.description
                     .replace(/&gt;/g, ">")
                     .replace(/&lt;/g, "<")
                     .replace(/&quot;/g, '"')
             }
         };
-        if (options.transformFunction) 
+        if (options.transformFunction) {
             item = options.transformFunction(item);
+        }
         return item;
     };
 
     return loader;
-}
+};

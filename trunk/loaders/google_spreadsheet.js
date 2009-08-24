@@ -9,6 +9,9 @@
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
  */
+
+// for JSLint
+/*global TimeMap */
  
 /**
  * @class
@@ -79,7 +82,7 @@ TimeMap.loaders.gss = function(options) {
      * @return {Array} data         Array of item data
      */
     loader.preload = function(data) {
-        return data["feed"]["entry"];
+        return data.feed.entry;
     };
     
     /**
@@ -93,8 +96,11 @@ TimeMap.loaders.gss = function(options) {
         var fieldMap = loader.map || TimeMap.loaders.gss.map;
         var getField = function(f) {
             if (f in fieldMap && fieldMap[f]) {
-                return data['gsx$' + fieldMap[f]]['$t'];
-            } else return false;
+                return data['gsx$' + fieldMap[f]].$t;
+            } 
+            else {
+                return false;
+            }
         };
         var item = {
             title: getField("title"),
@@ -108,22 +114,24 @@ TimeMap.loaders.gss = function(options) {
             }
         };
         // hook for further transformation
-        if (options.transformFunction) 
-            item = options.transformFunction(item);
+        var transform = options.transformFunction;
+        if (transform) {
+            item = transform(item);
+        }
         return item;
     };
 
     return loader;
-}
+};
 
 /**
  * 1:1 map of expected spreadsheet column ids.
  */
 TimeMap.loaders.gss.map = {
-    'title':'title',
-    'description':'description',
-    'start':'start',
-    'end':'end',
-    'lat':'lat',
-    'lon':'lon'
+    title:'title',
+    description:'description',
+    start:'start',
+    end:'end',
+    lat:'lat',
+    lon:'lon'
 };
