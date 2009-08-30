@@ -599,7 +599,7 @@ TimeMap.prototype.createDataset = function(id, options) {
  * Run a function on each dataset in the timemap. This is the preferred
  * iteration method, as it allows for future iterator options.
  *
- * @param {Function} f    The function to run
+ * @param {Function} f    The function to run, taking one dataset as an argument
  */
 TimeMap.prototype.each = function(f) {
     for (var id in this.datasets) {
@@ -607,6 +607,32 @@ TimeMap.prototype.each = function(f) {
             f(this.datasets[id]);
         }
     }
+};
+
+/**
+ * Run a function on each item in each dataset in the timemap.
+ *
+ * @param {Function} f    The function to run, taking one item as an argument
+ */
+TimeMap.prototype.eachItem = function(f) {
+    this.each(function(ds) {
+        ds.each(function(item) {
+            f(item);
+        });
+    });
+};
+
+/**
+ * Get all items from all datasets.
+ *
+ * @return {TimeMapItem[]}  Array of all items
+ */
+TimeMap.prototype.getItems = function(index) {
+    var items = [];
+    this.eachItem(function(item) {
+        items.push(item);
+    });
+    return items;
 };
 
 /**
@@ -923,7 +949,7 @@ function TimeMapDataset(timemap, options) {
      * Return an array of this dataset's items
      *
      * @param {int} [index]     Index of single item to return
-     * @return {TimeMapItem}    Single item, or array of all items if no index was supplied
+     * @return {TimeMapItem[]}  Single item, or array of all items if no index was supplied
      */
     this.getItems = function(index) {
         if (index !== undefined) {

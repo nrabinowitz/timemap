@@ -359,19 +359,26 @@ TimeMapItem.prototype.createEvent = function(s, e) {
 };
 
 /** 
- * Find the next item chronologically
+ * Find the next or previous item chronologically
  *
- * @param {Boolean} inDataset   Whether to only look in this item's dataset
- * @return {TimeMapItem}        Next item, if any
+ * @param {Boolean} [previous=false]    Whether to find previous 
+ * @param {Boolean} [inDataset=false]   Whether to only look in this item's dataset
+ * @return {TimeMapItem}                Next/previous item, if any
  */
-TimeMapItem.prototype.getNext = function(inDataset) {
+TimeMapItem.prototype.getNextPrev = function(backwards, inDataset) {
     if (!this.event) {
         return;
     }
-    var eventsource = this.dataset.timemap.timeline.getBand(0).getEventSource();
+    var eventSource = this.dataset.timemap.timeline.getBand(0).getEventSource();
     // iterator dates are non-inclusive, hence the juggle here
-    var i = eventsource.getEventIterator(this.event.getStart(), 
-        new Date(eventsource.getLatestDate().getTime() + 1));
+    var i = backwards ? 
+        eventSource.getEventReverseIterator(
+            new Date(eventSource.getEarliestDate().getTime() - 1),
+            this.event.getStart()) :
+        eventSource.getEventIterator(
+            this.event.getStart(), 
+            new Date(eventSource.getLatestDate().getTime() + 1)
+        );
     var next = null;
     while (next === null) {
         if (i.hasNext()) {
@@ -385,3 +392,23 @@ TimeMapItem.prototype.getNext = function(inDataset) {
     }
     return next;
 };
+
+/** 
+ * Find the next item chronologically
+ *
+ * @param {Boolean} [inDataset=false]   Whether to only look in this item's dataset
+ * @return {TimeMapItem}                Next item, if any
+ */
+TimeMapItem.prototype.getNext = function(inDataset) {
+    return this.getNextPrev(false, inDataset);
+}
+
+/** 
+ * Find the previous item chronologically
+ *
+ * @param {Boolean} [inDataset=false]   Whether to only look in this item's dataset
+ * @return {TimeMapItem}                Next item, if any
+ */
+TimeMapItem.prototype.getPrev = function(inDataset) {
+    return this.getNextPrev(true, inDataset);
+}
