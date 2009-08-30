@@ -6,7 +6,7 @@
 
   * One problem I've found that can be hard to diagnose is actually the size of the divs, as set by CSS - if they are sized so that they have 0 height, for example, the javascript may throw an error. Try giving them absolute pixel sizes and a visible background first, and see if you can get that working. In some cases, the library may read CSS sizes before it's loaded any remote CSS files, so if this seems to be a problem, size the map and timeline divs using inline styles or style declarations in the same file.
 
-  * If you're having trouble getting events to show up on the timeline, the first thing to check is whether events are being loaded at all. Useful things to check include `tm.datasets['yourdatasetid'].getItems()` (array of all loaded TimeMapItems) and `tm.timeline.getBand(0).getEventSource().getCount()` (count of events loaded on timeline). If there are items, but they aren't showing up, try adding the following line after your data is loaded:
+  * If you're having trouble getting events to show up on the timeline, the first thing to check is whether events are being loaded at all. Useful things to check include `tm.datasets['yourdatasetid'].getItems()` (array of all loaded !TimeMapItems) and `tm.timeline.getBand(0).getEventSource().getCount()` (count of events loaded on timeline). If there are items, but they aren't showing up, try adding the following line after your data is loaded:
 {{{
 tm.timeline.layout();
 }}} 
