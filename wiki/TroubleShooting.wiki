@@ -1,7 +1,5 @@
 #summary Some common troubleshooting issues I've run across.
 
-==Troubleshooting==
-
   * Timemap.js has a lot of independent moving pieces - the timeline, the map, the html and css you're using to lay them out on your page. If you run into trouble, the first thing is to figure out where the problem is - try simplifying things as much as possible until you get something working, and go from there. If you're trying to do something complicated with the map or the timeline, try doing it with just a timeline or just a map first.
 
   * On the same note, loading remote data files (JSON, KML, etc) should be pretty simple, but if you can't get it to work, try loading static inline data first - this will ensure that it's the remote data that's causing problems, not the rest of the code. Also note that most files, including KML, GeoRSS, and JSON strings, must live on the same site as the page with your timemap in order to load - if you want to load external KML, you may need to set up some kind of proxy on your server.
@@ -22,7 +20,6 @@ var test = {
 }}}
 
   needs to be this:
-
 {{{
 var test = {
   title: "Test title",
