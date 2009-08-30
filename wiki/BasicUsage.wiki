@@ -73,10 +73,5 @@ function onLoad() {
 }
 }}}
 
-And that's it! There are a ton of different possible options for the `TimeMap.init()` function - you can find a reference in the [http://code.google.com/p/timemap/source/browse/trunk/examples/timemapinit_usage.js examples/timemapinit_usage.js file] and the various example files. If you find you can't do what you want with `TimeMap.init()`, you can [CustomInitScript write your own initialization script] - but you can probably do a lot of what you want without going that far.
+And that's it! There are a ton of different possible options for the `TimeMap.init()` function - you can find a reference in the [http://code.google.com/p/timemap/source/browse/trunk/examples/timemapinit_usage.js examples/timemapinit_usage.js file] and the various example files. If you find you can't do what you want with `TimeMap.init()`, you can [CustomInitScript write your own initialization script] - but you can probably do a lot of what you want without going that far. If you run into problems, check out some thoughts on [TroubleShooting] or ask on the [http://groups.google.com/group/timemap-development Google Group].
 
-==Troubleshooting==
-
-  * One problem I've found that can be hard to diagnose is actually the size of the divs, as set by CSS - if they are sized so that they have 0 height, for example, the javascript may throw an error. Try giving them absolute pixel sizes and a visible background first, and see if you can get that working. In some cases, the library may read CSS sizes before it's loaded any remote CSS files, so if this seems to be a problem, size the map and timeline divs using inline styles or style declarations in the same file.
-
-  * Loading remote JSON or KML files should be pretty simple, but if you can't get it to work, try loading static inline data first, as shown above - this will ensure that it's the remote data that's causing problems, not the rest of the code. Also note that KML must live on the same site as the page with your timemap in order to load - if you want to load external KML, you may need to set up some kind of proxy on your server.
