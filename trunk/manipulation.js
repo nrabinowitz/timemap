@@ -406,6 +406,8 @@ TimeMapItem.prototype.getNext = function(inDataset) {
 /** 
  * Find the previous item chronologically
  *
+ * @requires Timeline v.2.2.0 or greater
+ *
  * @param {Boolean} [inDataset=false]   Whether to only look in this item's dataset
  * @return {TimeMapItem}                Next item, if any
  */
