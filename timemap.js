@@ -1166,7 +1166,12 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     var createPlacemark = function(pdata) {
         var placemark = null, type = "", point = null;
         // point placemark
-        if ("point" in pdata) {
+        if (pdata.point) {
+            var lat = pdata.point.lat, lon = pdata.point.lon;
+            if (lat === undefined || lon === undefined) {
+                // give up
+                return null;
+            }
             point = new GLatLng(
                 parseFloat(pdata.point.lat), 
                 parseFloat(pdata.point.lon)
@@ -1180,40 +1185,42 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
             point = placemark.getLatLng();
         }
         // polyline and polygon placemarks
-        else if ("polyline" in pdata || "polygon" in pdata) {
+        else if (pdata.polyline || pdata.polygon) {
             var points = [], line;
-            if ("polyline" in pdata) {
+            if (pdata.polyline) {
                 line = pdata.polyline;
             } else {
                 line = pdata.polygon;
             }
-            for (var x=0; x<line.length; x++) {
-                point = new GLatLng(
-                    parseFloat(line[x].lat), 
-                    parseFloat(line[x].lon)
-                );
-                points.push(point);
-                // add point to visible map bounds
-                if (tm.opts.centerOnItems) {
-                    bounds.extend(point);
+            if (line && line.length) {
+                for (var x=0; x<line.length; x++) {
+                    point = new GLatLng(
+                        parseFloat(line[x].lat), 
+                        parseFloat(line[x].lon)
+                    );
+                    points.push(point);
+                    // add point to visible map bounds
+                    if (tm.opts.centerOnItems) {
+                        bounds.extend(point);
+                    }
                 }
-            }
-            if ("polyline" in pdata) {
-                placemark = new GPolyline(points, 
-                                          theme.lineColor, 
-                                          theme.lineWeight,
-                                          theme.lineOpacity);
-                type = "polyline";
-                point = placemark.getVertex(Math.floor(placemark.getVertexCount()/2));
-            } else {
-                placemark = new GPolygon(points, 
-                                         theme.polygonLineColor, 
-                                         theme.polygonLineWeight,
-                                         theme.polygonLineOpacity,
-                                         theme.fillColor,
-                                         theme.fillOpacity);
-                type = "polygon";
-                point = placemark.getBounds().getCenter();
+                if ("polyline" in pdata) {
+                    placemark = new GPolyline(points, 
+                                              theme.lineColor, 
+                                              theme.lineWeight,
+                                              theme.lineOpacity);
+                    type = "polyline";
+                    point = placemark.getVertex(Math.floor(placemark.getVertexCount()/2));
+                } else {
+                    placemark = new GPolygon(points, 
+                                             theme.polygonLineColor, 
+                                             theme.polygonLineWeight,
+                                             theme.polygonLineOpacity,
+                                             theme.fillColor,
+                                             theme.fillOpacity);
+                    type = "polygon";
+                    point = placemark.getBounds().getCenter();
+                }
             }
         } 
         // ground overlay placemark
@@ -1264,10 +1271,13 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
         for (i=0; i<pdataArr.length; i++) {
             // create the placemark
             var p = createPlacemark(pdataArr[i]);
-            // take the first point and type as a default
-            point = point || p.point;
-            type = type || p.type;
-            placemark.push(p.placemark);
+            // check that the placemark was valid
+            if (p && p.placemark) {
+                // take the first point and type as a default
+                point = point || p.point;
+                type = type || p.type;
+                placemark.push(p.placemark);
+            }
         }
     }
     // override type for arrays
