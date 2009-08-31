@@ -7,12 +7,12 @@ function exposeTestFunctionNames() {
 
 function testItemsLoaded() {
     var ds = tm.datasets["test"];
-    assertEquals("three items in item array", ds.getItems().length, 3);
+    assertEquals("All items loaded in item array", 6, ds.getItems().length);
 }
 
 function testItemsLoadedInEventSource() {
     var ds = tm.datasets["test"];
-    assertEquals("two items in eventSource", ds.eventSource.getCount(), 2);
+    assertEquals("All items with events loaded in eventSource", 5, ds.eventSource.getCount());
 }
 
 var tm = null;
@@ -57,6 +57,24 @@ function setUpPage() {
                           "options" : {
                             "description": "Test Description"
                           }
+                        },
+                        { // missing point data
+                          "start" : "1980-01-02",
+                          "end" : "1990-01-02",
+                          "title" : "Test Event 4",
+                          "point" : {}
+                        },
+                        { // missing polygon data
+                          "start" : "1980-01-02",
+                          "end" : "1990-01-02",
+                          "title" : "Test Event 5",
+                          "polygon" : []
+                        },
+                        { // empty placemark array
+                          "start" : "1980-01-02",
+                          "end" : "1990-01-02",
+                          "title" : "Test Event 6",
+                          "placemarks" : []
                         }
                     ]
                 }
