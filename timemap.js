@@ -54,8 +54,9 @@ GIP = "http://www.google.com/intl/en_us/mapfiles/ms/icons/";
  * </pre>
  */
 function TimeMap(tElement, mElement, options) {
-    // save elements
+    var util = TimeMap.util;
     
+    // save DOM elements
     /**
      * Map element
      * @type DOM Element
@@ -84,46 +85,48 @@ function TimeMap(tElement, mElement, options) {
     this.mapBounds = new GLatLngBounds();
     
     // set defaults for options
+    var defaults = {
+        mapCenter:          new GLatLng(0,0),
+        mapZoom:            0,
+        mapType:            G_PHYSICAL_MAP,
+        mapTypes:           [G_NORMAL_MAP, G_SATELLITE_MAP, G_PHYSICAL_MAP],
+        showMapTypeCtrl:    true,
+        showMapCtrl:        true,
+        syncBands:          true,
+        mapFilter:          'hidePastFuture',
+        centerOnItems:      true,
+        theme:              'red'
+    };
     
     /** 
      * Container for optional settings passed in the "options" parameter
      * @type Object
      */
-    this.opts = options || {};   // make sure the options object isn't null
-    // allow map types to be specified by key
-    if (typeof(options.mapType) == 'string') {
-        options.mapType = TimeMap.mapTypes[options.mapType];
-    }
-    // allow map filters to be specified by key
-    if (typeof(options.mapFilter) == 'string') {
-        options.mapFilter = TimeMap.filters[options.mapFilter];
-    }
-    // these options only needed for map initialization
-    var mapCenter =        options.mapCenter || new GLatLng(0,0),
-        mapZoom =          options.mapZoom || 0,
-        mapType =          options.mapType || G_PHYSICAL_MAP,
-        mapTypes =         options.mapTypes || [G_NORMAL_MAP, G_SATELLITE_MAP, G_PHYSICAL_MAP],
-        showMapTypeCtrl =  ('showMapTypeCtrl' in options) ? options.showMapTypeCtrl : true,
-        showMapCtrl =      ('showMapCtrl' in options) ? options.showMapCtrl : true;
+    this.opts = options = util.merge(options, defaults);
     
-    // these options need to be saved for later
-    this.opts.syncBands =        ('syncBands' in options) ? options.syncBands : true;
-    this.opts.mapFilter =        options.mapFilter || TimeMap.filters.hidePastFuture;
-    this.opts.centerOnItems =    ('centerMapOnItems' in options) ? options.centerMapOnItems : true;
-    this.opts.theme =            TimeMapTheme.create(options.theme, options);
+    // only these options will cascade to datasets and items
+    options.mergeOnly = ['mergeOnly', 'theme', 'eventIconPath', 'openInfoWindow', 
+                         'closeInfoWindow', 'noPlacemarkLoad', 'noEventLoad']
+    
+    // allow map types to be specified by key
+    options.mapType = util.lookup(options.mapType, TimeMap.mapTypes);
+    // allow map filters to be specified by key
+    options.mapFilter = util.lookup(options.mapFilter, TimeMap.filters);
+    // allow theme options to be specified in options
+    options.theme = TimeMapTheme.create(options.theme, options);
     
     // initialize map
     if (GBrowserIsCompatible()) {
         /** 
-         * The associated map object 
+         * The associated GMap object 
          * @type GMap2
          */
         this.map = new GMap2(this.mElement);
         var map = this.map;
-        if (showMapCtrl) {
+        if (options.showMapCtrl) {
             map.addControl(new GLargeMapControl());
         }
-        if (showMapTypeCtrl) {
+        if (options.showMapTypeCtrl) {
             map.addControl(new GMapTypeControl());
         }
         // drop all existing types
@@ -132,19 +135,19 @@ function TimeMap(tElement, mElement, options) {
             map.removeMapType(G_DEFAULT_MAP_TYPES[i]);
         }
         // you can't remove the last maptype, so add a new one first
-        map.addMapType(mapTypes[0]);
+        map.addMapType(options.mapTypes[0]);
         map.removeMapType(G_DEFAULT_MAP_TYPES[0]);
         // add the rest of the new types
-        for (i=1; i<mapTypes.length; i++) {
-            map.addMapType(mapTypes[i]);
+        for (i=1; i<options.mapTypes.length; i++) {
+            map.addMapType(options.mapTypes[i]);
         }
         map.enableDoubleClickZoom();
         map.enableScrollWheelZoom();
         map.enableContinuousZoom();
         // initialize map center and zoom
-        map.setCenter(mapCenter, mapZoom);
+        map.setCenter(options.mapCenter, options.mapZoom);
         // must be called after setCenter, for reasons unclear
-        map.setMapType(mapType);
+        map.setMapType(options.mapType);
     }
 }
 
@@ -175,31 +178,32 @@ TimeMap.version = "1.6pre";
  * @return {TimeMap}        The initialized TimeMap object, for future reference
  */
 TimeMap.init = function(config) {
+    var util = TimeMap.util;
     
     // check required elements
+    var err = "TimeMap.init: No id for ";
     if (!('mapId' in config) || !config.mapId) {
-        throw "TimeMap.init: No id for map";
+        throw err + "map";
     }
     if (!('timelineId' in config) || !config.timelineId) {
-        throw "TimeMap.init: No id for timeline";
+        throw err + "timeline";
     }
     
     // set defaults
-    config = config || {}; // make sure the config object isn't null
-    config.options = config.options || {};
-    config.datasets = config.datasets || [];
-    config.bandInfo = config.bandInfo || false;
-    config.scrollTo = config.scrollTo || "earliest";
+    var defaults = {
+        options:        {},
+        datasets:       [],
+        bands:          false,
+        bandInfo:       false,
+        bandIntervals:  "wk",
+        scrollTo:       "earliest"
+    };
+    // merge options and defaults
+    config = util.merge(config, defaults);
+
     if (!config.bandInfo && !config.bands) {
-        var intervals = config.bandIntervals || 
-            config.options.bandIntervals ||
-            [DT.WEEK, DT.MONTH];
         // allow intervals to be specified by key
-        if (typeof(intervals) == 'string') {
-            intervals = TimeMap.intervals[intervals];
-        }
-        // save for later reference
-        config.options.bandIntervals = intervals;
+        var intervals = util.lookup(config.bandIntervals, TimeMap.intervals);
         // make default band info
         config.bandInfo = [
     		{
@@ -212,7 +216,7 @@ TimeMap.init = function(config) {
                 intervalUnit:   intervals[1], 
                 intervalPixels: 100,
                 showEventText:  false,
-                overview: true,
+                overview:       true,
                 trackHeight:    0.4,
                 trackGap:       0.2
             }
@@ -226,13 +230,16 @@ TimeMap.init = function(config) {
 		config.options);
     
     // create the dataset objects
-    var datasets = [], x, ds, dsOptions, dsId;
+    var datasets = [], x, ds, dsOptions, topOptions, dsId;
     for (x=0; x < config.datasets.length; x++) {
         ds = config.datasets[x];
-        dsOptions = ds.options || {};
-        dsOptions.title = ds.title || '';
-        dsOptions.theme = ds.theme;
-        dsOptions.dateParser = ds.dateParser;
+        // put top-level data into options
+        topOptions = {
+            title: ds.title,
+            theme: ds.theme,
+            dateParser: ds.dateParser
+        };
+        dsOptions = util.merge(ds.options, topOptions);
         dsId = ds.id || "ds" + x;
         datasets[x] = tm.createDataset(dsId, dsOptions);
         if (x > 0) {
@@ -271,7 +278,7 @@ TimeMap.init = function(config) {
                 bandInfo.eventSource = null;
             }
             bands[x] = Timeline.createBandInfo(bandInfo);
-            if (x > 0 && TimeMap.util.TimelineVersion() == "1.2") {
+            if (x > 0 && util.TimelineVersion() == "1.2") {
                 // set all to the same layout
                 bands[x].eventPainter.setLayout(bands[0].eventPainter.getLayout()); 
             }
@@ -289,7 +296,7 @@ TimeMap.init = function(config) {
         (function(x) { // deal with closure issues
             var data = config.datasets[x], options, type, callback, loaderClass, loader;
             // support some older syntax
-            options = data.options || data.data || {};
+            options = data.data || data.options || {};
             type = data.type || options.type;
             callback = function() { loadManager.increment(); };
             // get loader class
@@ -418,7 +425,7 @@ TimeMap.loaders.basic = function(options) {
      * @name TimeMap.loaders.basic#preload
      * @function
      * @parameter {Object} data     Data to preload
-     * @return {Array} data         Array of item data
+     * @return {Object[]} data      Array of item data
      */
      
     /**
@@ -431,7 +438,7 @@ TimeMap.loaders.basic = function(options) {
     
     /**
      * Array of item data to load.
-     * @type Array
+     * @type Object[]
      */
     this.data = options.items || 
         // allow "value" for backwards compatibility
@@ -481,7 +488,7 @@ TimeMap.loaders.remote = function(options) {
      * @name TimeMap.loaders.remote#preload
      * @function
      * @parameter {Object} data     Data to preload
-     * @return {Array} data         Array of item data
+     * @return {Object[]} data      Array of item data
      */
      
     /**
@@ -575,10 +582,6 @@ TimeMap.mapTypes = {
  * @return {TimeMapDataset}     The new dataset object    
  */
 TimeMap.prototype.createDataset = function(id, options) {
-    options = options || {}; // make sure the options object isn't null
-    if (!("title" in options)) {
-        options.title = id;
-    }
     var dataset = new TimeMapDataset(this, options);
     this.datasets[id] = dataset;
     // add event listener
@@ -901,6 +904,8 @@ TimeMap.filters.showMomentOnly = function(item) {
  * </pre>
  */
 function TimeMapDataset(timemap, options) {
+    var util = TimeMap.util;
+
     /** 
      * Reference to parent TimeMap
      * @type TimeMap
@@ -923,27 +928,21 @@ function TimeMapDataset(timemap, options) {
     this.visible = true;
     
     // set defaults for options
-    
+    var defaults = {
+        title:          'Untitled',
+        dateParser:     TimeMapDataset.hybridParser
+    };
+        
     /** 
      * Container for optional settings passed in the "options" parameter
      * @type Object
      */
-    this.opts = options || {}; // make sure the options object isn't null
-    this.opts.title = options.title || "";
+    this.opts = options = util.merge(options, defaults, timemap.opts);
     
-    // get theme
-    var tmtheme = this.timemap.opts.theme,
-        theme = options.theme || tmtheme;
-    // event icon path overrides custom themes
-    options.eventIconPath = options.eventIconPath || tmtheme.eventIconPath;
-    // configure theme
-    this.opts.theme = TimeMapTheme.create(theme, options);
-    
-    // allow for other data parsers (e.g. Gregorgian) by key or function
-    if (typeof(options.dateParser) == "string") { 
-        options.dateParser = TimeMapDataset.dateParsers[options.dateParser];
-    }
-    this.opts.dateParser = options.dateParser || TimeMapDataset.hybridParser;
+    // allow date parser to be specified by key
+    options.dateParser = util.lookup(options.dateParser, TimeMapDataset.dateParsers);
+    // allow theme options to be specified in options
+    options.theme = TimeMapTheme.create(options.theme, options);
     
     /**
      * Return an array of this dataset's items
@@ -960,7 +959,7 @@ function TimeMapDataset(timemap, options) {
                 return null;
             }
         }
-        return this.items; 
+        return this.items;
     };
     
     /**
@@ -1101,6 +1100,8 @@ TimeMapDataset.prototype.loadItems = function(data, transform) {
  * @see TimeMapItem
  */
 TimeMapDataset.prototype.loadItem = function(data, transform) {
+    var util = TimeMap.util;
+
     // apply transformation, if any
     if (transform !== undefined) {
         data = transform(data);
@@ -1110,15 +1111,10 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
         return;
     }
     
-    var options = data.options || {},
-        tm = this.timemap,
-        dstheme = this.opts.theme,
-        theme = options.theme || dstheme;
-    
-    // event icon path overrides custom themes
-    options.eventIconPath = options.eventIconPath || dstheme.eventIconPath;
-    // get configured theme
-    theme = TimeMapTheme.create(theme, options);
+    // set defaults for options
+    options = util.merge(data.options, this.opts);
+    // allow theme options to be specified in options
+    var theme = options.theme = TimeMapTheme.create(options.theme, options);
     
     // create timeline event
     var parser = this.opts.dateParser, start = data.start, end = data.end, instant;
@@ -1129,9 +1125,9 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
         title = data.title,
         // allow event-less placemarks - these will be always present on map
         event = null;
-    if (start !== null) {
+    if (start !== null) { 
         var eventClass = Timeline.DefaultEventSource.Event;
-        if (TimeMap.util.TimelineVersion() == "1.2") {
+        if (util.TimelineVersion() == "1.2") {
             // attributes by parameter
             event = new eventClass(start, end, null, null,
                 instant, title, null, null, null, eventIcon, theme.eventColor, 
@@ -1144,21 +1140,21 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
             }
             // attributes in object
             event = new eventClass({
-                "start": start,
-                "end": end,
-                "instant": instant,
-                "text": title,
-                "icon": eventIcon,
-                "color": theme.eventColor,
-                "textColor": textColor
+                start: start,
+                end: end,
+                instant: instant,
+                text: title,
+                icon: eventIcon,
+                color: theme.eventColor,
+                textColor: textColor
             });
         }
     }
     
     // set the icon, if any, outside the closure
     var markerIcon = theme.icon,
-        bounds = tm.mapBounds; // save some bytes
-    
+        tm = this.timemap,
+        bounds = tm.mapBounds;
     
     // internal function: create map placemark
     // takes a data object (could be full data, could be just placemark)
@@ -1286,8 +1282,7 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     }
     
     options.title = title;
-    options.type = type || "none";
-    options.theme = theme;
+    options.type = type;
     // check for custom infoPoint and convert to GLatLng
     if (options.infoPoint) {
         options.infoPoint = new GLatLng(
@@ -1360,39 +1355,54 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
  * </pre>
  */
 function TimeMapTheme(options) {
+    var util = TimeMap.util;
+
     // work out various defaults - the default theme is Google's reddish color
-    options = options || {};
+    var defaults = {
+        color:          "#FE766A",
+        lineOpacity:    1,
+        lineWeight:     2,
+        fillOpacity:    0.25,
+        eventTextColor: null,
+        eventIconPath:  "timemap/images/",
+        eventIconImage: "red-circle.png",
+        classicTape:    false,
+        iconImage:      GIP + "red-dot.png"
+    };
     
-    if (!options.icon) {
+    // merge defaults with options
+    var settings = util.merge(options, defaults);
+    
+    // kill mergeOnly if necessary
+    delete settings.mergeOnly;
+    
+    // make default map icon if not supplied
+    if (!settings.icon) {
         // make new red icon
         var markerIcon = new GIcon(G_DEFAULT_ICON);
-        this.iconImage = options.iconImage || GIP + "red-dot.png";
-        markerIcon.image = this.iconImage;
+        markerIcon.image = settings.iconImage;
         markerIcon.iconSize = new GSize(32, 32);
         markerIcon.shadow = GIP + "msmarker.shadow.png";
         markerIcon.shadowSize = new GSize(59, 32);
         markerIcon.iconAnchor = new GPoint(16, 33);
         markerIcon.infoWindowAnchor = new GPoint(18, 3);
-    }
+        settings.icon = markerIcon;
+    } 
     
-    this.icon =              options.icon || markerIcon;
-    this.color =             options.color || "#FE766A";
-    this.lineColor =         options.lineColor || this.color;
-    this.polygonLineColor =  options.polygonLineColor || this.lineColor;
-    this.lineOpacity =       options.lineOpacity || 1;
-    this.polgonLineOpacity = options.polgonLineOpacity || this.lineOpacity;
-    this.lineWeight =        options.lineWeight || 2;
-    this.polygonLineWeight = options.polygonLineWeight || this.lineWeight;
-    this.fillColor =         options.fillColor || this.color;
-    this.fillOpacity =       options.fillOpacity || 0.25;
-    this.eventColor =        options.eventColor || this.color;
-    this.eventTextColor =    options.eventTextColor || null;
-    this.eventIconPath =     options.eventIconPath || "timemap/images/";
-    this.eventIconImage =    options.eventIconImage || "red-circle.png";
-    this.eventIcon =         options.eventIcon || this.eventIconPath + this.eventIconImage;
+    // cascade some settings as defaults
+    defaults = {
+        lineColor:          settings.color,
+        polygonLineColor:   settings.color,
+        polgonLineOpacity:  settings.lineOpacity,
+        polygonLineWeight:  settings.lineWeight,
+        fillColor:          settings.color,
+        eventColor:         settings.color,
+        eventIcon:          settings.eventIconPath + settings.eventIconImage
+    };
+    settings = util.merge(settings, defaults);
     
-    // whether to use the older "tape" event style for the newer Timeline versions
-    this.classicTape = ("classicTape" in options) ? options.classicTape : false;
+    // return configured options as theme
+    return settings;
 }
 
 /**
@@ -1417,6 +1427,9 @@ TimeMapTheme.create = function(theme, options) {
     if (!theme) {
         return new TimeMapTheme(options);
     }
+    // update existing theme with options
+    // return TimeMap.util.merge(options, theme);
+    
     // theme supplied - clone, overriding with options as necessary
     var clone = new TimeMapTheme(), prop;
     for (prop in theme) {
@@ -1567,6 +1580,8 @@ TimeMap.themes = {
  * </pre>
  */
 function TimeMapItem(placemark, event, dataset, options) {
+    var util = TimeMap.util;
+
     /**
      * This item's timeline event
      * @type Timeline.Event
@@ -1586,7 +1601,7 @@ function TimeMapItem(placemark, event, dataset, options) {
     this.map = dataset.timemap.map;
     
     // initialize placemark(s) with some type juggling
-    if (placemark && TimeMap.util.isArray(placemark) && placemark.length === 0) {
+    if (placemark && util.isArray(placemark) && placemark.length === 0) {
         placemark = null;
     }
     if (placemark && placemark.length == 1) {
@@ -1599,15 +1614,29 @@ function TimeMapItem(placemark, event, dataset, options) {
     this.placemark = placemark;
     
     // set defaults for options
-    this.opts = options || {};
-    this.opts.type =        options.type || '';
-    this.opts.title =       options.title || '';
-    this.opts.description = options.description || '';
-    this.opts.infoPoint =   options.infoPoint || null;
-    this.opts.infoHtml =    options.infoHtml || '';
-    this.opts.infoUrl =     options.infoUrl || '';
+    var defaults = {
+        type: 'none',
+        title: 'Untitled',
+        description: '',
+        infoPoint: null,
+        infoHtml: '',
+        infoUrl: '',
+        closeInfoWindow: TimeMapItem.closeInfoWindowBasic
+    };
+    this.opts = options = util.merge(options, defaults, dataset.opts);
     
-    // get functions
+    // select default open function
+    if (!options.openInfoWindow) {
+        if (options.infoUrl !== "") {
+            // load via AJAX if URL is provided
+            options.openInfoWindow = TimeMapItem.openInfoWindowAjax;
+        } else {
+            // otherwise default to basic window
+            options.openInfoWindow = TimeMapItem.openInfoWindowBasic;
+        }
+    }
+    
+    // getter functions
     
     /**
      * Return the placemark type for this item
@@ -1651,31 +1680,13 @@ function TimeMapItem(placemark, event, dataset, options) {
      */
     this.eventVisible = true;
     
-    // allow for custom open/close functions, set at item, dataset, or timemap level
-    var openFunction, dopts = dataset.opts,
-        tmopts = dataset.timemap.opts;
-    // set open function
-    openFunction = options.openInfoWindow ||
-        dopts.openInfoWindow ||
-        tmopts.openInfoWindow ||
-        false;
-    if (!openFunction) {
-        if (this.opts.infoUrl !== "") {
-            // load via AJAX if URL is provided
-            openFunction = TimeMapItem.openInfoWindowAjax;
-        } else {
-            // otherwise default to basic window
-            openFunction = TimeMapItem.openInfoWindowBasic;
-        }
-    }
-    
     /**
      * Open the info window for this item.
      * By default this is the map infoWindow, but you can set custom functions
      * for whatever behavior you want when the event or placemark is clicked
      * @function
      */
-    this.openInfoWindow = openFunction;
+    this.openInfoWindow = options.openInfoWindow;
     
     /**
      * Close the info window for this item.
@@ -1683,10 +1694,7 @@ function TimeMapItem(placemark, event, dataset, options) {
      * for whatever behavior you want.
      * @function
      */
-    this.closeInfoWindow = options.closeInfoWindow ||
-        dopts.closeInfoWindow ||
-        tmopts.closeInfoWindow ||
-        TimeMapItem.closeInfoWindowBasic;
+    this.closeInfoWindow = options.closeInfoWindow;
 }
 
 /** 
@@ -2056,4 +2064,60 @@ TimeMap.util.getPlacemarkType = function(pm) {
         return 'setFillStyle' in pm ? 'polygon' : 'polyline';
     }
     return false;
+};
+
+/**
+ * Merge two or more objects, giving precendence to those
+ * first in the list (i.e. don't overwrite existing keys).
+ * Original objects will not be modified.
+ *
+ * @param {Object} obj1     Base object
+ * @param {Object} [objN]   Objects to merge into base
+ * @return {Object}         Merged object
+ */
+TimeMap.util.merge = function() {
+    var opts = {}, args = arguments, obj, key, x, y;
+    // must... make... subroutine...
+    var mergeKey = function(o1, o2, key) {
+        // note: existing keys w/undefined values will be overwritten
+        if (o1.hasOwnProperty(key) && o2[key] === undefined) {
+            o2[key] = o1[key];
+        }
+    };
+    for (x=0; x<args.length; x++) {
+        obj = args[x];
+        if (obj) {
+            // allow non-base objects to constrain what will be merged
+            if (x > 0 && 'mergeOnly' in obj) {
+                for (y=0; y<obj.mergeOnly.length; y++) {
+                    key = obj.mergeOnly[y];
+                    mergeKey(obj, opts, key);
+                }
+            }
+            // otherwise, just merge everything
+            else {
+                for (key in obj) {
+                    mergeKey(obj, opts, key);
+                }
+            }
+        }
+    }
+    return opts;
+};
+
+/**
+ * Attempt look up a key in an object, returning either the value,
+ * undefined if the key is a string but not found, or the key if not a string 
+ *
+ * @param {String|Object} key   Key to look up
+ * @param {Object} map          Object in which to look
+ * @return {Object}             Value, undefined, or key
+ */
+TimeMap.util.lookup = function(key, map) {
+    if (typeof(key) == 'string') {
+        return map[key];
+    }
+    else {
+        return key;
+    }
 };
