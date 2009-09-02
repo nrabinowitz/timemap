@@ -1308,7 +1308,9 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
  *      {String} fillColor              Color for polygon fill, defaults to options.color
  *      {String} fillOpacity            Opacity for polygon fill
  *      {String} eventColor             Background color for duration events
- *      {URL} eventIcon                 Icon URL for instant events
+ *      {String} eventIconPath          Path to instant event icon directory
+ *      {String} eventIconImage         Filename of instant event icon image
+ *      {URL} eventIcon                 URL for instant event icons (overrides path + image)
  *      {Boolean} classicTape           Whether to use the "classic" style timeline event tape
  *                                      (NB: this needs additional css to work - see examples/artists.html)
  * </pre>
