@@ -7,11 +7,11 @@ function exposeTestFunctionNames() {
 }
 
 function testThemeCascade() {
-    var tmTheme = new TimeMap.themes.blue();
-    var dsThemeA = new TimeMap.themes.green();
-    var dsThemeA2 = new TimeMap.themes.orange();
-    var dsThemeB2 = new TimeMap.themes.yellow();
-    var dsThemeC = new TimeMap.themes.purple();
+    var tmTheme = TimeMap.themes.blue;
+    var dsThemeA = TimeMap.themes.green;
+    var dsThemeA2 = TimeMap.themes.orange;
+    var dsThemeB2 = TimeMap.themes.yellow;
+    var dsThemeC = TimeMap.themes.purple;
     var dsThemeC3 = customTheme;
     // go through the items one by one
     var item = tm.datasets["testA"].getItems()[0];
@@ -49,11 +49,11 @@ function testEventIconPath() {
 }
 
 function testMarkerIconPath() {
-    var tmTheme = new TimeMap.themes.blue();
-    var dsThemeA = new TimeMap.themes.green();
-    var dsThemeA2 = new TimeMap.themes.orange();
-    var dsThemeB2 = new TimeMap.themes.yellow();
-    var dsThemeC = new TimeMap.themes.purple();
+    var tmTheme = TimeMap.themes.blue;
+    var dsThemeA = TimeMap.themes.green;
+    var dsThemeA2 = TimeMap.themes.orange;
+    var dsThemeB2 = TimeMap.themes.yellow;
+    var dsThemeC = TimeMap.themes.purple;
     var dsThemeC3 = customTheme;
     // go through the items one by one
     var item = tm.datasets["testA"].getItems()[0];

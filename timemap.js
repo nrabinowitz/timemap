@@ -385,9 +385,9 @@ TimeMap.loadManager = new function() {
                             d = scrollTo;
                         }
                 }
-                this.tm.timeline.getBand(0).setCenterVisibleDate(d);
+                tm.timeline.getBand(0).setCenterVisibleDate(d);
             }
-            this.tm.timeline.layout();
+            tm.timeline.layout();
             // custom function to be called when data is loaded
             func = this.opts.dataDisplayedFunction;
             if (func) {
@@ -542,36 +542,6 @@ TimeMap.loaders.mixin = function(loader, options) {
     loader.parse = options.parserFunction || dummy;
     loader.preload = options.preloadFunction || dummy;
     loader.transform = options.transformFunction || dummy;
-}; 
-
-/**
- * Map of common timeline intervals. Add custom intervals here if you
- * want to refer to them by key rather than as literals.
- * @type Object
- */
-TimeMap.intervals = {
-    'sec': [DT.SECOND, DT.MINUTE],
-    'min': [DT.MINUTE, DT.HOUR],
-    'hr': [DT.HOUR, DT.DAY],
-    'day': [DT.DAY, DT.WEEK],
-    'wk': [DT.WEEK, DT.MONTH],
-    'mon': [DT.MONTH, DT.YEAR],
-    'yr': [DT.YEAR, DT.DECADE],
-    'dec': [DT.DECADE, DT.CENTURY]
-};
-
-/**
- * Map of Google map types. Using keys rather than literals allows
- * for serialization of the map type.
- * @type Object
- */
-TimeMap.mapTypes = {
-    'normal':G_NORMAL_MAP, 
-    'satellite':G_SATELLITE_MAP, 
-    'hybrid':G_HYBRID_MAP, 
-    'physical':G_PHYSICAL_MAP, 
-    'moon':G_MOON_VISIBLE_MAP, 
-    'sky':G_SKY_VISIBLE_MAP
 };
 
 /**
@@ -940,7 +910,7 @@ function TimeMapDataset(timemap, options) {
     this.opts = options = util.merge(options, defaults, timemap.opts);
     
     // allow date parser to be specified by key
-    options.dateParser = util.lookup(options.dateParser, TimeMapDataset.dateParsers);
+    options.dateParser = util.lookup(options.dateParser, TimeMap.dateParsers);
     // allow theme options to be specified in options
     options.theme = TimeMapTheme.create(options.theme, options);
     
@@ -1034,17 +1004,6 @@ TimeMapDataset.hybridParser = function(s) {
     }
     // d should be a date or null
     return d;
-};
-
-/**
- * Map of supported date parser functions. Add custom date parsers here if you
- * want to refer to them by key rather than as a function name.
- * @type Object
- */
-TimeMapDataset.dateParsers = {
-    'hybrid': TimeMapDataset.hybridParser,
-    'iso8601': DT.parseIso8601DateTime,
-    'gregorian': TimeMapDataset.gregorianParser
 };
 
 /**
@@ -1413,144 +1372,21 @@ function TimeMapTheme(options) {
  * @return {TimeMapTheme}           Configured theme
  */
 TimeMapTheme.create = function(theme, options) {
-    // test for string matches
-    if (typeof(theme) == "string") {
-        if (theme in TimeMap.themes) {
-            // get theme by key
-            return new TimeMap.themes[theme](options);
-        }
-        else {
-            theme = null;
-        }
-    }
-    // no theme supplied, or bad string
-    if (!theme) {
-        return new TimeMapTheme(options);
-    }
-    // update existing theme with options
-    // return TimeMap.util.merge(options, theme);
+    // test for string matches and missing themes
+    theme = TimeMap.util.lookup(theme, TimeMap.themes) || new TimeMapTheme();
     
-    // theme supplied - clone, overriding with options as necessary
-    var clone = new TimeMapTheme(), prop;
-    for (prop in theme) {
-        if (theme.hasOwnProperty(prop)) {
-            clone[prop] = options[prop] || theme[prop];
-            // special case for event icon path
-            if (prop == "eventIconPath") {
-                clone.eventIconImage = clone[prop] + theme.eventIconImage;
-            }
+    // clone, overriding with options as necessary
+    var clone = {}, key;
+    for (key in theme) {
+        if (theme.hasOwnProperty(key)) {
+            clone[key] = options[key] || theme[key];
         }
     }
+    // fix event icon path, allowing full image path in options
+    clone.eventIcon = options.eventIcon || 
+        clone.eventIconPath + clone.eventIconImage;
+    
     return clone;
-};
-
-/**
- * @namespace
- * Pre-set event/placemark themes in a variety of colors.
- */
-TimeMap.themes = {
-
-    /** 
-     * Red theme: #FE766A
-     * This is the default.
-     *
-     * @param {Object} [options]    Container for optional settings
-     * @return {TimeMapTheme}       Pre-set theme
-     * @see TimeMapTheme
-     */
-    red: function(options) {
-        return new TimeMapTheme(options);
-    },
-    
-    /** 
-     * Blue theme: #5A7ACF
-     *
-     * @param {Object} [options]    Container for optional settings
-     * @return {TimeMapTheme}   Pre-set theme
-     * @see TimeMapTheme
-     */
-    blue: function(options) {
-        options = options || {};
-        options.iconImage = GIP + "blue-dot.png";
-        options.color = "#5A7ACF";
-        options.eventIconImage = "blue-circle.png";
-        return new TimeMapTheme(options);
-    },
-
-    /** 
-     * Green theme: #19CF54
-     *
-     * @param {Object} [options]    Container for optional settings
-     * @return {TimeMapTheme}   Pre-set theme
-     * @see TimeMapTheme
-     */
-    green: function(options) {
-        options = options || {};
-        options.iconImage = GIP + "green-dot.png";
-        options.color = "#19CF54";
-        options.eventIconImage = "green-circle.png";
-        return new TimeMapTheme(options);
-    },
-
-    /** 
-     * Light blue theme: #5ACFCF
-     *
-     * @param {Object} [options]    Container for optional settings
-     * @return {TimeMapTheme}   Pre-set theme
-     * @see TimeMapTheme
-     */
-    ltblue: function(options) {
-        options = options || {};
-        options.iconImage = GIP + "ltblue-dot.png";
-        options.color = "#5ACFCF";
-        options.eventIconImage = "ltblue-circle.png";
-        return new TimeMapTheme(options);
-    },
-
-    /** 
-     * Purple theme: #8E67FD
-     *
-     * @param {Object} [options]    Container for optional settings
-     * @return {TimeMapTheme}   Pre-set theme
-     * @see TimeMapTheme
-     */
-    purple: function(options) {
-        options = options || {};
-        options.iconImage = GIP + "purple-dot.png";
-        options.color = "#8E67FD";
-        options.eventIconImage = "purple-circle.png";
-        return new TimeMapTheme(options);
-    },
-
-    /** 
-     * Orange theme: #FF9900
-     *
-     * @param {Object} [options]    Container for optional settings
-     * @return {TimeMapTheme}   Pre-set theme
-     * @see TimeMapTheme
-     */
-    orange: function(options) {
-        options = options || {};
-        options.iconImage = GIP + "orange-dot.png";
-        options.color = "#FF9900";
-        options.eventIconImage = "orange-circle.png";
-        return new TimeMapTheme(options);
-    },
-
-    /** 
-     * Yellow theme: #ECE64A
-     *
-     * @param {Object} [options]    Container for optional settings
-     * @return {TimeMapTheme}   Pre-set theme
-     * @see TimeMapTheme
-     */
-    yellow: function(options) {
-        options = options || {};
-        options.iconImage = GIP + "yellow-dot.png";
-        options.color = "#ECE64A";
-        options.eventIconImage = "yellow-circle.png";
-        return new TimeMapTheme(options);
-    }
 };
 
 
@@ -1954,7 +1790,6 @@ TimeMap.util.makePoint = function(coords, reversed) {
 /**
  * Make TimeMap.init()-style polyline/polygons from a whitespace-delimited
  * string of coordinates (such as those in GeoRSS and KML).
- * XXX: Any reason for this to take arrays of GLatLngs as well?
  *
  * @param {Object} coords       String to convert
  * @param {Boolean} [reversed]  Whether the points are KML-style lon/lat, rather than lat/lon
@@ -2120,4 +1955,135 @@ TimeMap.util.lookup = function(key, map) {
     else {
         return key;
     }
+};
+
+
+/*----------------------------------------------------------------------------
+ * Lookup maps
+ * (need to be at end because some call util functions on initialization)
+ *---------------------------------------------------------------------------*/
+
+/**
+ * Lookup map of common timeline intervals.  
+ * Add custom intervals here if you want to refer to them by key rather 
+ * than as a function name.
+ * @type Object
+ */
+TimeMap.intervals = {
+    sec: [DT.SECOND, DT.MINUTE],
+    min: [DT.MINUTE, DT.HOUR],
+    hr: [DT.HOUR, DT.DAY],
+    day: [DT.DAY, DT.WEEK],
+    wk: [DT.WEEK, DT.MONTH],
+    mon: [DT.MONTH, DT.YEAR],
+    yr: [DT.YEAR, DT.DECADE],
+    dec: [DT.DECADE, DT.CENTURY]
+};
+
+/**
+ * Lookup map of Google map types.
+ * @type Object
+ */
+TimeMap.mapTypes = {
+    normal: G_NORMAL_MAP, 
+    satellite: G_SATELLITE_MAP, 
+    hybrid: G_HYBRID_MAP, 
+    physical: G_PHYSICAL_MAP, 
+    moon: G_MOON_VISIBLE_MAP, 
+    sky: G_SKY_VISIBLE_MAP
+};
+
+/**
+ * Lookup map of supported date parser functions. 
+ * Add custom date parsers here if you want to refer to them by key rather 
+ * than as a function name.
+ * @type Object
+ */
+TimeMap.dateParsers = {
+    hybrid: TimeMapDataset.hybridParser,
+    iso8601: DT.parseIso8601DateTime,
+    gregorian: TimeMapDataset.gregorianParser
+};
+ 
+/**
+ * @namespace
+ * Pre-set event/placemark themes in a variety of colors. 
+ * Add custom themes here if you want to refer to them by key rather 
+ * than as a function name.
+ */
+TimeMap.themes = {
+
+    /** 
+     * Red theme: #FE766A
+     * This is the default.
+     *
+     * @type TimeMapTheme
+     */
+    red: new TimeMapTheme(),
+    
+    /** 
+     * Blue theme: #5A7ACF
+     *
+     * @type TimeMapTheme
+     */
+    blue: new TimeMapTheme({
+        iconImage: GIP + "blue-dot.png",
+        color: "#5A7ACF",
+        eventIconImage: "blue-circle.png"
+    }),
+
+    /** 
+     * Green theme: #19CF54
+     *
+     * @type TimeMapTheme
+     */
+    green: new TimeMapTheme({
+        iconImage: GIP + "green-dot.png",
+        color: "#19CF54",
+        eventIconImage: "green-circle.png"
+    }),
+
+    /** 
+     * Light blue theme: #5ACFCF
+     *
+     * @type TimeMapTheme
+     */
+    ltblue: new TimeMapTheme({
+        iconImage: GIP + "ltblue-dot.png",
+        color: "#5ACFCF",
+        eventIconImage: "ltblue-circle.png"
+    }),
+
+    /** 
+     * Purple theme: #8E67FD
+     *
+     * @type TimeMapTheme
+     */
+    purple: new TimeMapTheme({
+        iconImage: GIP + "purple-dot.png",
+        color: "#8E67FD",
+        eventIconImage: "purple-circle.png"
+    }),
+
+    /** 
+     * Orange theme: #FF9900
+     *
+     * @type TimeMapTheme
+     */
+    orange: new TimeMapTheme({
+        iconImage: GIP + "orange-dot.png",
+        color: "#FF9900",
+        eventIconImage: "orange-circle.png"
+    }),
+
+    /** 
+     * Yellow theme: #ECE64A
+     *
+     * @type TimeMapTheme
+     */
+    yellow: new TimeMapTheme({
+        iconImage: GIP + "yellow-dot.png",
+        color: "#ECE64A",
+        eventIconImage: "yellow-circle.png"
+    })
 };
