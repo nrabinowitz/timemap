@@ -98,7 +98,9 @@ function subTestError(dsid) {
         assertNull(prefix + "event is null", items[i].event);
     }
     for (i=10; i<13; i++)
-        testFunc(i, false);
+        testFunc(i);
+    for (i=20; i<23; i++)
+        testFunc(i);
 }
 
 // set up items
@@ -202,12 +204,32 @@ var items = [
     // 19: basic gregorian date, "CE"
       "start" : "202 CE",
       "title" : "Test Event"
+    },
+    {
+    // 20: start is integer
+      "start" : 2002,
+      "title" : "Test Event"
+    },
+    {
+    // 21: start is object
+      "start" : {},
+      "title" : "Test Event"
+    },
+    {
+    // 22: start is array
+      "start" : [],
+      "title" : "Test Event"
     }
 ];
 
+// cut non-string tests from gregorian and iso
+var gregorianItems = items.slice(0, items.length);
+gregorianItems[20] = gregorianItems[21] = gregorianItems[22] = {"start" : "", "title" : ""};
+
 // cut gregorian dates out of iso set to avoid stupid SIMILE debug
-var isoItems = items.slice(0, items.length);
+var isoItems = gregorianItems.slice(0, items.length);
 isoItems[7] = isoItems[8] = isoItems[13] = isoItems[14] = isoItems[15] = {"start" : "", "title" : ""};
+
 
 var tm = null;
 function setUpPage() {
@@ -240,7 +262,7 @@ function setUpPage() {
                 dateParser: "gregorian",
                 type: "basic",
                 options: {
-                    items: items
+                    items: gregorianItems
                 }
             }
         ]
