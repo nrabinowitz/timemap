@@ -1077,9 +1077,9 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     
     // create timeline event
     var parser = this.opts.dateParser, start = data.start, end = data.end, instant;
-    start = (start === undefined||start === "") ? null : parser(start);
-    end = (end === undefined||end === "") ? null : parser(end);
-    instant = (end === undefined);
+    start = start ? parser(start) : null;
+    end = end ? parser(end) : null;
+    instant = !end;
     var eventIcon = theme.eventIcon,
         title = data.title,
         // allow event-less placemarks - these will be always present on map

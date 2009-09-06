@@ -105,6 +105,7 @@ TimeMap.loaders.gss = function(options) {
         var item = {
             title: getField("title"),
             start: getField("start"),
+            end: getField("end"),
             point: {
                 lat: getField("lat"),
                 lon: getField("lon")
