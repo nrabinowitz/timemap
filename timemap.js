@@ -989,17 +989,22 @@ TimeMapDataset.hybridParser = function(s) {
     // try native date parse
     var d = new Date(Date.parse(s));
     if (isNaN(d)) {
-        // look for Gregorian dates
-        if (s.match(/^-?\d{1,6} ?(a\.?d\.?|b\.?c\.?e?\.?|c\.?e\.?)?$/i)) {
-            d = TimeMapDataset.gregorianParser(s);
-        }
-        // try ISO 8601 parse
-        else {
-            try {
-                d = DT.parseIso8601DateTime(s);
-            } catch(e) {
-                d = null;
+        if (typeof(s) == "string") {
+            // look for Gregorian dates
+            if (s.match(/^-?\d{1,6} ?(a\.?d\.?|b\.?c\.?e?\.?|c\.?e\.?)?$/i)) {
+                d = TimeMapDataset.gregorianParser(s);
             }
+            // try ISO 8601 parse
+            else {
+                try {
+                    d = DT.parseIso8601DateTime(s);
+                } catch(e) {
+                    d = null;
+                }
+            }
+        }
+        else {
+            return null;
         }
     }
     // d should be a date or null
