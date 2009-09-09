@@ -21,16 +21,25 @@
 /*global G_DEFAULT_MAP_TYPES, G_NORMAL_MAP, G_PHYSICAL_MAP, G_HYBRID_MAP    */
 /*global G_MOON_VISIBLE_MAP, G_SKY_VISIBLE_MAP, G_SATELLITE_MAP, Timeline   */
 
-// A couple of aliases to save a few bytes
-var DT = Timeline.DateTime, 
-// Google icon path
-GIP = "http://www.google.com/intl/en_us/mapfiles/ms/icons/";
+(function(){
+
+// borrowing some space-saving devices from jquery
+var 
+	// Will speed up references to window, and allows munging its name.
+	window = this,
+	// Will speed up references to undefined, and allows munging its name.
+	undefined,
+    // A couple of aliases
+    DateTime = Timeline.DateTime, 
+    // Google icon path
+    GIP = "http://www.google.com/intl/en_us/mapfiles/ms/icons/";
 
 /*----------------------------------------------------------------------------
  * TimeMap Class
  *---------------------------------------------------------------------------*/
  
 /**
+ * @name TimeMap
  * @class
  * The TimeMap object holds references to timeline, map, and datasets.
  * This will create the visible map, but not the timeline, which must be initialized separately.
@@ -858,6 +867,7 @@ TimeMap.filters.showMomentOnly = function(item) {
  *---------------------------------------------------------------------------*/
 
 /**
+ * @name TimeMapDataset
  * @class 
  * The TimeMapDataset object holds an array of items and dataset-level
  * options and settings, including visual themes.
@@ -997,7 +1007,7 @@ TimeMapDataset.hybridParser = function(s) {
             // try ISO 8601 parse
             else {
                 try {
-                    d = DT.parseIso8601DateTime(s);
+                    d = DateTime.parseIso8601DateTime(s);
                 } catch(e) {
                     d = null;
                 }
@@ -1296,6 +1306,7 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
  *---------------------------------------------------------------------------*/
 
 /**
+ * @name TimeMapTheme
  * @class 
  * Predefined visual themes for datasets, defining colors and images for
  * map markers and timeline events.
@@ -1402,6 +1413,7 @@ TimeMapTheme.create = function(theme, options) {
  *---------------------------------------------------------------------------*/
 
 /**
+ * @name TimeMapItem
  * @class
  * The TimeMapItem object holds references to one or more map placemarks and 
  * an associated timeline event.
@@ -1977,14 +1989,14 @@ TimeMap.util.lookup = function(key, map) {
  * @type Object
  */
 TimeMap.intervals = {
-    sec: [DT.SECOND, DT.MINUTE],
-    min: [DT.MINUTE, DT.HOUR],
-    hr: [DT.HOUR, DT.DAY],
-    day: [DT.DAY, DT.WEEK],
-    wk: [DT.WEEK, DT.MONTH],
-    mon: [DT.MONTH, DT.YEAR],
-    yr: [DT.YEAR, DT.DECADE],
-    dec: [DT.DECADE, DT.CENTURY]
+    sec: [DateTime.SECOND, DateTime.MINUTE],
+    min: [DateTime.MINUTE, DateTime.HOUR],
+    hr: [DateTime.HOUR, DateTime.DAY],
+    day: [DateTime.DAY, DateTime.WEEK],
+    wk: [DateTime.WEEK, DateTime.MONTH],
+    mon: [DateTime.MONTH, DateTime.YEAR],
+    yr: [DateTime.YEAR, DateTime.DECADE],
+    dec: [DateTime.DECADE, DateTime.CENTURY]
 };
 
 /**
@@ -2008,7 +2020,7 @@ TimeMap.mapTypes = {
  */
 TimeMap.dateParsers = {
     hybrid: TimeMapDataset.hybridParser,
-    iso8601: DT.parseIso8601DateTime,
+    iso8601: DateTime.parseIso8601DateTime,
     gregorian: TimeMapDataset.gregorianParser
 };
  
@@ -2094,3 +2106,11 @@ TimeMap.themes = {
         eventIconImage: "yellow-circle.png"
     })
 };
+
+// save to window
+window.TimeMap = TimeMap;
+window.TimeMapDataset = TimeMapDataset;
+window.TimeMapTheme = TimeMapTheme;
+window.TimeMapItem = TimeMapItem;
+
+})();
