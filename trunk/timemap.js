@@ -29,17 +29,18 @@ var
 	window = this,
 	// Will speed up references to undefined, and allows munging its name.
 	undefined,
-    // A couple of aliases
-    DateTime = Timeline.DateTime, 
+    // aliases for Timeline objects
+    Timeline = window.Timeline, DateTime = Timeline.DateTime, 
     // Google icon path
-    GIP = "http://www.google.com/intl/en_us/mapfiles/ms/icons/";
+    GIP = "http://www.google.com/intl/en_us/mapfiles/ms/icons/",
+    // aliases for class names, allowing munging
+    TimeMap, TimeMapDataset, TimeMapTheme, TimeMapItem;
 
 /*----------------------------------------------------------------------------
  * TimeMap Class
  *---------------------------------------------------------------------------*/
  
 /**
- * @name TimeMap
  * @class
  * The TimeMap object holds references to timeline, map, and datasets.
  * This will create the visible map, but not the timeline, which must be initialized separately.
@@ -62,8 +63,7 @@ var
  *   {Function} closeInfoWindow     Function redefining how info window closes
  * </pre>
  */
-function TimeMap(tElement, mElement, options) {
-    var util = TimeMap.util;
+TimeMap = function(tElement, mElement, options) {
     
     // save DOM elements
     /**
@@ -158,13 +158,20 @@ function TimeMap(tElement, mElement, options) {
         // must be called after setCenter, for reasons unclear
         map.setMapType(options.mapType);
     }
-}
+};
 
 /**
  * Current library version.
  * @type String
  */
 TimeMap.version = "1.6pre";
+
+/**
+ * @name TimeMap.util
+ * @namespace
+ * Namespace for TimeMap utility functions.
+ */
+var util = TimeMap.util = {};
 
 /**
  * Intializes a TimeMap.
@@ -187,7 +194,6 @@ TimeMap.version = "1.6pre";
  * @return {TimeMap}        The initialized TimeMap object, for future reference
  */
 TimeMap.init = function(config) {
-    var util = TimeMap.util;
     
     // check required elements
     var err = "TimeMap.init: No id for ";
@@ -867,7 +873,6 @@ TimeMap.filters.showMomentOnly = function(item) {
  *---------------------------------------------------------------------------*/
 
 /**
- * @name TimeMapDataset
  * @class 
  * The TimeMapDataset object holds an array of items and dataset-level
  * options and settings, including visual themes.
@@ -883,8 +888,7 @@ TimeMap.filters.showMomentOnly = function(item) {
  *   {Function} closeInfoWindow         Function redefining how info window closes
  * </pre>
  */
-function TimeMapDataset(timemap, options) {
-    var util = TimeMap.util;
+TimeMapDataset = function(timemap, options) {
 
     /** 
      * Reference to parent TimeMap
@@ -948,7 +952,7 @@ function TimeMapDataset(timemap, options) {
      * @return {String}     Dataset title
      */
     this.getTitle = function() { return this.opts.title; };
-}
+};
 
 /**
  * Better Timeline Gregorian parser... shouldn't be necessary :(.
@@ -1074,7 +1078,6 @@ TimeMapDataset.prototype.loadItems = function(data, transform) {
  * @see TimeMapItem
  */
 TimeMapDataset.prototype.loadItem = function(data, transform) {
-    var util = TimeMap.util;
 
     // apply transformation, if any
     if (transform !== undefined) {
@@ -1306,7 +1309,6 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
  *---------------------------------------------------------------------------*/
 
 /**
- * @name TimeMapTheme
  * @class 
  * Predefined visual themes for datasets, defining colors and images for
  * map markers and timeline events.
@@ -1331,8 +1333,7 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
  *                                      (NB: this needs additional css to work - see examples/artists.html)
  * </pre>
  */
-function TimeMapTheme(options) {
-    var util = TimeMap.util;
+TimeMapTheme = function(options) {
 
     // work out various defaults - the default theme is Google's reddish color
     var defaults = {
@@ -1380,7 +1381,7 @@ function TimeMapTheme(options) {
     
     // return configured options as theme
     return settings;
-}
+};
 
 /**
  * Create a theme, based on an optional new or pre-set theme
@@ -1413,7 +1414,6 @@ TimeMapTheme.create = function(theme, options) {
  *---------------------------------------------------------------------------*/
 
 /**
- * @name TimeMapItem
  * @class
  * The TimeMapItem object holds references to one or more map placemarks and 
  * an associated timeline event.
@@ -1434,8 +1434,7 @@ TimeMapTheme.create = function(theme, options) {
  *   {String/TimeMapTheme} theme        Theme applying to this item, overriding dataset theme
  * </pre>
  */
-function TimeMapItem(placemark, event, dataset, options) {
-    var util = TimeMap.util;
+TimeMapItem = function(placemark, event, dataset, options) {
 
     /**
      * This item's timeline event
@@ -1550,7 +1549,7 @@ function TimeMapItem(placemark, event, dataset, options) {
      * @function
      */
     this.closeInfoWindow = options.closeInfoWindow;
-}
+};
 
 /** 
  * Show the map placemark(s)
@@ -1681,12 +1680,6 @@ TimeMapItem.closeInfoWindowBasic = function() {
 /*----------------------------------------------------------------------------
  * Utility functions
  *---------------------------------------------------------------------------*/
-
-/**
- * @namespace
- * Namespace for TimeMap utility functions.
- */
-TimeMap.util = {};
 
 /**
  * Convenience trim function
