@@ -15,11 +15,10 @@
  */
 
 // globals - for JSLint
-/*global GBrowserIsCompatible, GLargeMapControl, GLatLngBounds, GMap2       */ 
-/*global GMapTypeControl, GDownloadUrl, GEvent, GGroundOverlay, GIcon       */
-/*global GMarker, GPolygon, GPolyline, GSize, GLatLng, G_DEFAULT_ICON       */
-/*global G_DEFAULT_MAP_TYPES, G_NORMAL_MAP, G_PHYSICAL_MAP, G_HYBRID_MAP    */
-/*global G_MOON_VISIBLE_MAP, G_SKY_VISIBLE_MAP, G_SATELLITE_MAP, Timeline   */
+/*global GBrowserIsCompatible, GLargeMapControl, GMap2, GIcon       */ 
+/*global GMapTypeControl, GDownloadUrl, GGroundOverlay              */
+/*global GMarker, GPolygon, GPolyline, GSize, G_DEFAULT_ICON        */
+/*global G_HYBRID_MAP, G_MOON_VISIBLE_MAP, G_SKY_VISIBLE_MAP        */
 
 (function(){
 
@@ -31,6 +30,14 @@ var
 	undefined,
     // aliases for Timeline objects
     Timeline = window.Timeline, DateTime = Timeline.DateTime, 
+    // aliases for Google variables (anything that gets used more than once)
+    G_DEFAULT_MAP_TYPES = window.G_DEFAULT_MAP_TYPES, 
+    G_NORMAL_MAP = window.G_NORMAL_MAP, 
+    G_PHYSICAL_MAP = window.G_PHYSICAL_MAP, 
+    G_SATELLITE_MAP = window.G_SATELLITE_MAP, 
+    GLatLng = window.GLatLng, 
+    GLatLngBounds = window.GLatLngBounds, 
+    GEvent = window.GEvent,
     // Google icon path
     GIP = "http://www.google.com/intl/en_us/mapfiles/ms/icons/",
     // aliases for class names, allowing munging

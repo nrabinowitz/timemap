@@ -63,6 +63,57 @@ if not runonly or runonly == 'yuic':
         os.system("java -jar %s %s %s >> timemap_full.pack.js" % (yuic, verbose, f))
         print "Packed and added %s" % f
 
+# make packed distro files, wrapping everything in an anonymous function
+if runonly == 'yuictest':
+    # set up template
+    codehead = "(function(){\n"
+    codefoot = "\n})();"
+    
+    # create and pack stand-alone core lib
+    tmp = open('tmp.js', 'w')
+    tmp.write(codehead)
+    js = open('timemap.js')
+    tmp.write(js.read())
+    js.close()
+    print "Added timemap.js"
+    tmp.write(codefoot)
+    tmp.close()
+    # pack core lib
+    os.system("java -jar %s %s tmp.js > timemap.pack.js" % (yuic, verbose))
+    print "Packed timemap.pack.js"
+    os.remove('tmp.js')
+    
+    # create and pack full lib
+    tmp = open('tmp.js', 'w')
+    
+    tmp.write(codehead)
+    # make list of files to pack
+    ignore = ['timemap.js', 'timemap.pack.js', 'timemap_full.pack.js', 'tmp.js']
+    files = ['timemap.js'] + [f for f in glob.glob('*.js') if not f in ignore]
+    
+    # append loaders
+    files += [f for f in glob.glob(os.path.join('loaders','*.js'))]
+
+    # add files
+    for f in files:
+        js = open(f)
+        tmp.write(js.read() + "\n")
+        js.close()
+        print "Added %s" % f
+    
+    # close tmp file
+    tmp.write(codefoot)
+    tmp.close()
+        
+    # prepend libraries - might need more work here to prepend multiple
+    shutil.copy(os.path.join('lib', 'json2.pack.js'), "timemap_full.pack.js")
+    
+    # pack full lib
+    os.system("java -jar %s %s tmp.js >> timemap_full.pack.js" % (yuic, verbose))
+    print "Packed timemap_full.pack.js"
+    os.remove('tmp.js')
+    
+
 # make documentation
 if not runonly or runonly == 'jsdoc':
 
