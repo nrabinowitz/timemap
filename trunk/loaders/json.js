@@ -89,7 +89,7 @@ TimeMap.loaders.jsonp.prototype.load = function(dataset, callback) {
 };
 
 /**
- * Static - for naming anonymous callback functions
+ * Static - for naming callback functions
  * @type int
  */
 TimeMap.loaders.jsonp.counter = 0;
@@ -117,6 +117,22 @@ TimeMap.loaders.jsonp.read = function(url, f) {
     var script = document.createElement("script");
     script.src = url + "TimeMap.loaders.jsonp." + callbackName;
     document.body.appendChild(script);
+};
+
+/**
+ * Static - cancel all current JSONP requests
+ * (note that this doesn't cancel the load, just the callback)
+ */
+TimeMap.loaders.jsonp.cancelAll = function() {
+    var namespace = TimeMap.loaders.jsonp;
+    for (var i in namespace){
+        // XXX: this is too cludgy - callback functions need their own namespace
+		if (i.substr(0,1) == '_'){
+			namespace[i] = function(){
+				delete namespace[i];
+			};
+		}
+	}
 };
 
 /**
