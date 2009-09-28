@@ -536,6 +536,10 @@ TimeMap.loaders.remote = function(options) {
  */
 TimeMap.loaders.remote.prototype.load = function(dataset, callback) {
     var loader = this;
+    
+    // XXX: It would be nice to save the callback function here,
+    // and be able to cancel it (or cancel all) if needed
+    
     // get items
     GDownloadUrl(this.url, function(result) {
         // parse
