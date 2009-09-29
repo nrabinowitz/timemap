@@ -1403,20 +1403,35 @@ TimeMapTheme = function(options) {
  */
 TimeMapTheme.create = function(theme, options) {
     // test for string matches and missing themes
-    theme = TimeMap.util.lookup(theme, TimeMap.themes) || new TimeMapTheme();
+    if (theme) {
+        theme = TimeMap.util.lookup(theme, TimeMap.themes);
+    } else {
+        return new TimeMapTheme(options);
+    }
     
-    // clone, overriding with options as necessary
-    var clone = {}, key;
-    for (key in theme) {
+    // see if we need to clone - guessing fewer keys in options
+    var clone = false, key;
+    for (key in options) {
         if (theme.hasOwnProperty(key)) {
-            clone[key] = options[key] || theme[key];
+            clone = {};
+            break;
         }
     }
-    // fix event icon path, allowing full image path in options
-    clone.eventIcon = options.eventIcon || 
-        clone.eventIconPath + clone.eventIconImage;
-    
-    return clone;
+    // clone if necessary
+    if (clone) {
+        for (key in theme) {
+            if (theme.hasOwnProperty(key)) {
+                clone[key] = options[key] || theme[key];
+            }
+        }
+        // fix event icon path, allowing full image path in options
+        clone.eventIcon = options.eventIcon || 
+            clone.eventIconPath + clone.eventIconImage;
+        return clone;
+    }
+    else {
+        return theme;
+    }
 };
 
 
