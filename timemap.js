@@ -132,21 +132,31 @@ TimeMap = function(tElement, mElement, options) {
     options.theme = TimeMapTheme.create(options.theme, options);
     
     // initialize map
+    this.initMap();
+};
+
+/**
+ * Initialize the map.
+ */
+TimeMap.prototype.initMap = function() {
+    var options = this.opts, map, i;
     if (GBrowserIsCompatible()) {
+    
         /** 
          * The associated GMap object 
          * @type GMap2
          */
-        this.map = new GMap2(this.mElement);
-        var map = this.map;
+        this.map = map = new GMap2(this.mElement);
+        
+        // set controls
         if (options.showMapCtrl) {
             map.addControl(new GLargeMapControl());
         }
         if (options.showMapTypeCtrl) {
             map.addControl(new GMapTypeControl());
         }
+        
         // drop all existing types
-        var i;
         for (i=G_DEFAULT_MAP_TYPES.length-1; i>0; i--) {
             map.removeMapType(G_DEFAULT_MAP_TYPES[i]);
         }
@@ -157,6 +167,7 @@ TimeMap = function(tElement, mElement, options) {
         for (i=1; i<options.mapTypes.length; i++) {
             map.addMapType(options.mapTypes[i]);
         }
+        // set basic parameters
         map.enableDoubleClickZoom();
         map.enableScrollWheelZoom();
         map.enableContinuousZoom();
