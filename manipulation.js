@@ -19,12 +19,15 @@
  *---------------------------------------------------------------------------*/
  
 /**
- * Delete all datasets, clearing them from map and timeline
+ * Delete all datasets, clearing them from map and timeline. Note
+ * that this is more efficient than calling clear() on each dataset.
  */
 TimeMap.prototype.clear = function() {
-    this.each(function(ds) {
-        ds.clear();
+    this.eachItem(function(item) {
+        item.event = item.placemark = null;
     });
+    this.map.clearOverlays();
+    this.eventSource.clear();
     this.datasets = [];
 };
 
