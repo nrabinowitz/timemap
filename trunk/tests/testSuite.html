@@ -62,11 +62,22 @@ function loadSuite_local() {
     return result;
 }
 
+function loadSuite_local_tl230() {
+    var result = new top.jsUnitTestSuite();
+    result.addTestPage("../timemap/tests/basicLoadTests_local_tl230.html");
+    result.addTestPage("../timemap/tests/kmlLoadTests_local_tl230.html");
+    result.addTestPage("../timemap/tests/jsonLoadTests_local_tl230.html");
+    result.addTestPage("../timemap/tests/jsonStringLoadTests_local_tl230.html");
+    result.addTestPage("../timemap/tests/geoRSSLoadTests_local_tl230.html");
+    return result;
+}
+
 function suite() {
     var newsuite = new top.jsUnitTestSuite();
     newsuite.addTestSuite(loadSuite_tl12());
     newsuite.addTestSuite(loadSuite_tl220());
     newsuite.addTestSuite(loadSuite_local());
+    newsuite.addTestSuite(loadSuite_local_tl230());
     return newsuite;
 }
 
