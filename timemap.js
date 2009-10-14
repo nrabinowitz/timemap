@@ -593,13 +593,13 @@ TimeMap.prototype.createDataset = function(id, options) {
     this.datasets[id] = dataset;
     // add event listener
     if (this.opts.centerOnItems) {
-        var tm = this;
+        var map = this.map, bounds = this.mapBounds;
         GEvent.addListener(dataset, 'itemsloaded', function() {
-            var map = tm.map, bounds = tm.mapBounds;
-            // determine the zoom level from the bounds
-            map.setZoom(map.getBoundsZoomLevel(bounds));
-            // determine the center from the bounds
-            map.setCenter(bounds.getCenter());
+            // determine the center and zoom level from the bounds
+            map.setCenter(
+                bounds.getCenter(),
+                map.getBoundsZoomLevel(bounds)
+            );
         });
     }
     return dataset;
