@@ -1888,7 +1888,7 @@ TimeMap.util.formatDate = function(d, precision) {
     var str = "";
     if (d) {
         // check for date.js support
-        if (d.toISOString) {
+        if (d.toISOString && precision == 3) {
             return d.toISOString();
         }
         // otherwise, build ISO 8601 string
