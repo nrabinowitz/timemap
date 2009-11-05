@@ -1175,7 +1175,12 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
             if (tm.opts.centerOnItems) {
                 bounds.extend(point);
             }
-            placemark = new GMarker(point, { icon: markerIcon });
+            // create marker
+            placemark = new GMarker(point, {
+                icon: markerIcon,
+                title: pdata.title,
+                hide: true
+            });
             type = "marker";
             point = placemark.getLatLng();
         }
@@ -1256,7 +1261,8 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
         var types = ["point", "polyline", "polygon", "overlay"];
         for (i=0; i<types.length; i++) {
             if (types[i] in data) {
-                pdata = {};
+                // put in title (only used for markers)
+                pdata = {title: title};
                 pdata[types[i]] = data[types[i]];
                 pdataArr.push(pdata);
             }

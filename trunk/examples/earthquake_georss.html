@@ -14,11 +14,12 @@ var tm;
 function onLoad() {
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
-        timelineId: "timeline",     // Id of timeline div element (required) 
+        timelineId: "timeline",     // Id of timeline div element (required)
+        options: {eventIconPath: '../images/'},
         datasets: [
             {
                 title: "Recent Earthquakes",
-                theme: TimeMap.themes.red({eventIconPath: '../images/'}),
+                theme: "red",
                 type: "georss", // Data to be loaded in GeoRSS - must be a local URL
                 options: {
                     url: "earthquakes.rss" // GeoRSS file to load
