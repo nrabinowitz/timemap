@@ -1178,8 +1178,7 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
             // create marker
             placemark = new GMarker(point, {
                 icon: markerIcon,
-                title: pdata.title,
-                hide: true
+                title: pdata.title
             });
             type = "marker";
             point = placemark.getLatLng();
