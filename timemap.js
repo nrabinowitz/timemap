@@ -704,11 +704,20 @@ TimeMap.prototype.initTimeline = function(bands) {
     
     // filter chain for timeline events
     this.addFilterChain("timeline", 
+        // on
         function(item) {
             item.showEvent();
         },
+        // off
         function(item) {
             item.hideEvent();
+        },
+        // pre
+        null,
+        // post
+        function(tm) {
+            tm.eventSource._events._index();
+            tm.timeline.layout();
         }
     );
     
@@ -749,6 +758,10 @@ TimeMap.prototype.filter = function(fid) {
     if (!chain || chain.length === 0) {
         return;
     }
+    // pre-filter function
+    if (filterChain.pre) {
+        filterChain.pre(this);
+    }
     // run items through filter
     this.each(function(ds) {
         ds.each(function(item) {
@@ -767,6 +780,10 @@ TimeMap.prototype.filter = function(fid) {
             }
         });
     });
+    // post-filter function
+    if (filterChain.post) {
+        filterChain.post(this);
+    }
 };
 
 /**
@@ -775,12 +792,16 @@ TimeMap.prototype.filter = function(fid) {
  * @param {String} fid      Id of the filter chain
  * @param {Function} fon    Function to run on an item if filter is true
  * @param {Function} foff   Function to run on an item if filter is false
+ * @param {Function} [pre]  Function to run before the filter runs
+ * @param {Function} [post] Function to run after the filter runs
  */
-TimeMap.prototype.addFilterChain = function(fid, fon, foff) {
+TimeMap.prototype.addFilterChain = function(fid, fon, foff, pre, post) {
     this.chains[fid] = {
         chain:[],
         on: fon,
-        off: foff
+        off: foff,
+        pre: pre,
+        post: post
     };
 };
 
@@ -1642,7 +1663,8 @@ TimeMapItem.prototype.showEvent = function() {
 
 /** 
  * Hide the timeline event.
- * NB: Will likely require calling timeline.layout()
+ * NB: Will likely require calling timeline.layout(),
+ * AND calling eventSource._events._index()  (ugh)
  */
 TimeMapItem.prototype.hideEvent = function() {
     if (this.event) {
