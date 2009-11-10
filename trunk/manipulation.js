@@ -61,7 +61,6 @@ TimeMap.prototype.hideDatasets = function(){
 	});
     this.filter("map");
     this.filter("timeline");
-    this.timeline.layout();
 };
 
 /**
@@ -84,7 +83,6 @@ TimeMap.prototype.showDatasets = function() {
 	});
     this.filter("map");
     this.filter("timeline");
-    this.timeline.layout();
 };
  
 /**
@@ -230,7 +228,6 @@ TimeMapDataset.prototype.hide = function() {
         this.visible = false;
         this.timemap.filter("map");
         this.timemap.filter("timeline");
-        this.timemap.timeline.layout();
     }
 };
 
