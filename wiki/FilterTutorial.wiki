@@ -73,7 +73,7 @@ function setSelectedTag(select) {
     // run filters
     tm.filter('map');
     tm.filter('timeline');
-    // you'll need this to make the timeline update
+    // you'll need this to make the timeline update if you're using v.1.5 or lower
     tm.timeline.layout();
 }
 }}}
