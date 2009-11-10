@@ -121,8 +121,11 @@ TimeMap.loaders.progressive = function(options) {
                 callback = function() {
                     dataset.timemap.timeline.layout();
                 };
+            
             // is the current block loaded?
-            if (!loaded[currBlock]) {
+            if ((!dataMaxDate || currBlockTime < dataMaxDate.getTime()) &&
+                (!dataMinDate || currBlockTime > dataMinDate.getTime()) &&
+                !loaded[currBlock]) {
                 // load it
                 // console.log("loading current block (" + currBlock + ")");
                 loader.load(dataset, callback, new Date(currBlockTime), currBlock);
@@ -164,6 +167,7 @@ TimeMap.loaders.progressive = function(options) {
         
         // put dates into URL
         loader.url = formatUrl(baseUrl, start, end);
+        // console.log(loader.url);
         
         // load data
         baseLoadFunction.call(loader, dataset, function() {
