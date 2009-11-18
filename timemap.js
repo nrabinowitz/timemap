@@ -866,12 +866,12 @@ TimeMap.filters = {};
  * @return {Boolean}            Whether to show the item
  */
 TimeMap.filters.hidePastFuture = function(item) {
-    var topband = item.dataset.timemap.timeline.getBand(0);
-    var maxVisibleDate = topband.getMaxVisibleDate().getTime();
-    var minVisibleDate = topband.getMinVisibleDate().getTime();
+    var topband = item.dataset.timemap.timeline.getBand(0),
+        maxVisibleDate = topband.getMaxVisibleDate().getTime(),
+        minVisibleDate = topband.getMinVisibleDate().getTime();
     if (item.event) {
-        var itemStart = item.event.getStart().getTime();
-        var itemEnd = item.event.getEnd().getTime();
+        var itemStart = item.event.getStart().getTime(),
+            itemEnd = item.event.getEnd().getTime();
         // hide items in the future
         if (itemStart > maxVisibleDate) {
             return false;
@@ -893,11 +893,11 @@ TimeMap.filters.hidePastFuture = function(item) {
  * @return {Boolean}            Whether to show the item
  */
 TimeMap.filters.showMomentOnly = function(item) {
-    var topband = item.dataset.timemap.timeline.getBand(0);
-    var momentDate = topband.getCenterVisibleDate().getTime();
+    var topband = item.dataset.timemap.timeline.getBand(0),
+        momentDate = topband.getCenterVisibleDate().getTime();
     if (item.event) {
-        var itemStart = item.event.getStart().getTime();
-        var itemEnd = item.event.getEnd().getTime();
+        var itemStart = item.event.getStart().getTime(),
+            itemEnd = item.event.getEnd().getTime();
         // hide items in the future
         if (itemStart > momentDate) {
             return false;
