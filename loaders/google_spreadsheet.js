@@ -95,9 +95,10 @@ TimeMap.loaders.gss = function(options) {
         // map spreadsheet column ids to corresponding TimeMap elements
         var fieldMap = loader.map || TimeMap.loaders.gss.map;
         var getField = function(f) {
-            if (f in fieldMap && fieldMap[f]) {
-                return data['gsx$' + fieldMap[f]].$t;
-            } 
+            var el = data['gsx$' + fieldMap[f]];
+            if (el) {
+                return el.$t;
+            }
             else {
                 return false;
             }
@@ -126,7 +127,8 @@ TimeMap.loaders.gss = function(options) {
 };
 
 /**
- * 1:1 map of expected spreadsheet column ids.
+ * 1:1 map of expected spreadsheet column ids. Modify this map
+ * before loading data if you want different names for your columns.
  */
 TimeMap.loaders.gss.map = {
     title:'title',
