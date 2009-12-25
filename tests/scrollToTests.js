@@ -12,10 +12,12 @@ function exposeTestFunctionNames() {
 
 function testScrollToEarliest() {
     loadWithScrollTo('earliest', 1980);
+    loadWithScrollTo('first', 1980);
 }
 
 function testScrollToLatest() {
     loadWithScrollTo('latest', 2000);
+    loadWithScrollTo('last', 2000);
 }
 
 function testScrollToStringDate() {

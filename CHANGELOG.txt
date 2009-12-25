@@ -6,6 +6,12 @@
 CHANGELOG (see the SVN commit log for more detail)
 -------------------------------------------------------------------------------
 
+Version 1.6
+-----------
+- Added progressive loader to easily load large datasets a little bit at a
+time, based on timeline location.
+- Some tweaks for improved performance
+
 Version 1.5
 -----------
 - Fairly substantial changes to the loader architecture - should make everything a
