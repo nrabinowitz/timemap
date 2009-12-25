@@ -394,33 +394,7 @@ TimeMap.loadManager = new function() {
         if (func) {
             func(tm);
         } else {
-            var d = new Date();
-            var eventSource = this.tm.eventSource;
-            var scrollTo = this.opts.scrollTo;
-            // make sure there are events to scroll to
-            if (scrollTo && eventSource.getCount() > 0) {
-                switch (scrollTo) {
-                    case "now":
-                        break;
-                    case "earliest":
-                        d = eventSource.getEarliestDate();
-                        break;
-                    case "latest":
-                        d = eventSource.getLatestDate();
-                        break;
-                    default:
-                        // assume it's a date, try to parse
-                        if (typeof(scrollTo) == 'string') {
-                            scrollTo = TimeMapDataset.hybridParser(scrollTo);
-                        }
-                        // either the parse worked, or it was a date to begin with
-                        if (scrollTo.constructor == Date) {
-                            d = scrollTo;
-                        }
-                }
-                tm.timeline.getBand(0).setCenterVisibleDate(d);
-            }
-            tm.timeline.layout();
+            tm.scrollToDate(this.opts.scrollTo, true);
             // custom function to be called when data is loaded
             func = this.opts.dataDisplayedFunction;
             if (func) {
@@ -429,6 +403,71 @@ TimeMap.loadManager = new function() {
         }
     };
 };
+
+/**
+ * Parse a date in the context of the timeline. Uses the standard parser
+ * (@see TimeMapDataset.hybridParser) but accepts "now", "earliest", "latest",
+ * "first", and "last" (referring to loaded events)
+ *
+ * @param {String/Date} s   String (or date) to parse
+ * @return {Date}           Parsed date
+ */
+TimeMap.prototype.parseDate = function(s) {
+    var d = new Date(),
+        eventSource = this.eventSource,
+        parser = TimeMapDataset.hybridParser,
+        // make sure there are events to scroll to
+        hasEvents = eventSource.getCount() > 0 ? true : false;
+    switch (s) {
+        case "now":
+            break;
+        case "earliest":
+        case "first":
+            if (hasEvents) {
+                d = eventSource.getEarliestDate();
+            }
+            break;
+        case "latest":
+        case "last":
+            if (hasEvents) {
+                d = eventSource.getLatestDate();
+            }
+            break;
+        default:
+            // assume it's a date, try to parse
+            d = parser(s);
+    }
+    return d;
+}
+
+/**
+ * Scroll the timeline to a given date. If lazyLayout is specified, this function
+ * will also call timeline.layout(), but only if it won't be called by the 
+ * onScroll listener. This involves a certain amount of reverse engineering,
+ * and may not be future-proof.
+ *
+ * @param {String/Date} d           Date to scroll to (either a date object, a 
+ *                                  date string, or one of the strings accepted 
+ *                                  by TimeMap#parseDate)
+ * @param {Boolean} [lazyLayout]    Whether to call timeline.layout() even if not
+ *                                  required by the scroll.
+ */
+TimeMap.prototype.scrollToDate = function(d, lazyLayout) {
+    var d = this.parseDate(d), 
+        timeline = this.timeline,
+        needsLayout;
+    if (d) {
+        var topband = timeline.getBand(0),
+            minTime = topband.getMinDate().getTime(),
+            maxTime = topband.getMaxDate().getTime();
+        needsLayout = (lazyLayout && d.getTime() > minTime && d.getTime() < maxTime);
+        timeline.getBand(0).setCenterVisibleDate(d);
+    }
+    // lay out the timeline if needed
+    if (needsLayout || (lazyLayout && !d)) {
+        timeline.layout();
+    }
+}
 
 /**
  * @namespace
@@ -1007,8 +1046,6 @@ TimeMapDataset = function(timemap, options) {
 TimeMapDataset.gregorianParser = function(s) {
     if (!s) {
         return null;
-    } else if (s instanceof Date) {
-        return s;
     }
     // look for BC
     var bc = Boolean(s.match(/b\.?c\.?/i));
@@ -1043,6 +1080,10 @@ TimeMapDataset.gregorianParser = function(s) {
  * @return {Date}       Parsed date or null
  */
 TimeMapDataset.hybridParser = function(s) {
+    // in case we don't know if this is a string or a date
+    if (s instanceof Date) {
+        return s;
+    }
     // try native date parse
     var d = new Date(Date.parse(s));
     if (isNaN(d)) {
@@ -1689,9 +1730,8 @@ TimeMapItem.openInfoWindowBasic = function() {
         }
     }
     // scroll timeline if necessary
-    if (this.placemark && !this.visible && this.event) {
-        var topband = this.dataset.timemap.timeline.getBand(0);
-        topband.setCenterVisibleDate(this.event.getStart());
+    if (this.placemark && !this.placemarkVisible && this.event) {
+        this.dataset.timemap.scrollToDate(this.event.getStart());
     }
     // open window
     if (this.getType() == "marker") {

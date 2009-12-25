@@ -46,11 +46,10 @@
         }
     ]
  *
- * @param {Object} options          All options for the loader:<pre>
- *   {Array} url                        URL of GeoRSS file to load (NB: must be local address)
- *   {Function} preloadFunction         Function to call on data before loading
- *   {Function} transformFunction       Function to call on individual items before loading
- * </pre>
+ * @param {Object} options          All options for the loader:
+ *   @param {String} options.url                    URL of GeoRSS file to load (NB: must be local address)
+ *   @param {Function} [options.preloadFunction]    Function to call on data before loading
+ *   @param {Function} [options.transformFunction]  Function to call on individual items before loading
  * @return {TimeMap.loaders.remote} Remote loader configured for GeoRSS
  */
 TimeMap.loaders.georss = function(options) {
@@ -62,8 +61,8 @@ TimeMap.loaders.georss = function(options) {
 /**
  * Static function to parse GeoRSS
  *
- * @param {XML text} rss        GeoRSS to be parsed
- * @return {TimeMapItem Array}  Array of TimeMapItems
+ * @param {String} rss      GeoRSS string to be parsed
+ * @return {TimeMapItem[]}  Array of TimeMapItems
  */
 TimeMap.loaders.georss.parse = function(rss) {
     var items = [], data, node, placemarks, pm;
