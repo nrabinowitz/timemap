@@ -41,7 +41,7 @@ var
     // Google icon path
     GIP = "http://www.google.com/intl/en_us/mapfiles/ms/icons/",
     // aliases for class names, allowing munging
-    TimeMap, TimeMapDataset, TimeMapTheme, TimeMapItem;
+    TimeMap, TimeMapFilterChain, TimeMapDataset, TimeMapTheme, TimeMapItem;
 
 /*----------------------------------------------------------------------------
  * TimeMap Class
@@ -148,14 +148,6 @@ TimeMap.prototype.initMap = function() {
          */
         this.map = map = new GMap2(this.mElement);
         
-        // set controls
-        if (options.showMapCtrl) {
-            map.addControl(new GLargeMapControl());
-        }
-        if (options.showMapTypeCtrl) {
-            map.addControl(new GMapTypeControl());
-        }
-        
         // drop all existing types
         for (i=G_DEFAULT_MAP_TYPES.length-1; i>0; i--) {
             map.removeMapType(G_DEFAULT_MAP_TYPES[i]);
@@ -167,14 +159,22 @@ TimeMap.prototype.initMap = function() {
         for (i=1; i<options.mapTypes.length; i++) {
             map.addMapType(options.mapTypes[i]);
         }
+        
+        // initialize map center, zoom, and map type
+        map.setCenter(options.mapCenter, options.mapZoom, options.mapType);
+        
         // set basic parameters
         map.enableDoubleClickZoom();
         map.enableScrollWheelZoom();
         map.enableContinuousZoom();
-        // initialize map center and zoom
-        map.setCenter(options.mapCenter, options.mapZoom);
-        // must be called after setCenter, for reasons unclear
-        map.setMapType(options.mapType);
+        
+        // set controls
+        if (options.showMapCtrl) {
+            map.addControl(new GLargeMapControl());
+        }
+        if (options.showMapTypeCtrl) {
+            map.addControl(new GMapTypeControl());
+        }
     }
 };
 
@@ -754,7 +754,8 @@ TimeMap.prototype.initTimeline = function(bands) {
         // pre
         null,
         // post
-        function(tm) {
+        function() {
+            var tm = this.timemap;
             tm.eventSource._events._index();
             tm.timeline.layout();
         }
@@ -788,41 +789,11 @@ TimeMap.prototype.initTimeline = function(bands) {
  * @param {String} fid      Filter chain to update on
  */
 TimeMap.prototype.filter = function(fid) {
-    var filterChain = this.chains[fid], chain;
-    // if no filters exist, forget it
-    if (!filterChain) {
-        return;
+    var filterChain = this.chains[fid];
+    if (filterChain) {
+        filterChain.run();
     }
-    chain = filterChain.chain;
-    if (!chain || chain.length === 0) {
-        return;
-    }
-    // pre-filter function
-    if (filterChain.pre) {
-        filterChain.pre(this);
-    }
-    // run items through filter
-    this.each(function(ds) {
-        ds.each(function(item) {
-            var done = false;
-            F_LOOP: while (!done) { 
-                for (var i = chain.length - 1; i >= 0; i--) {
-                    if (!chain[i](item)) {
-                        // false condition
-                        filterChain.off(item);
-                        break F_LOOP;
-                    }
-                }
-                // true condition
-                filterChain.on(item);
-                done = true;
-            }
-        });
-    });
-    // post-filter function
-    if (filterChain.post) {
-        filterChain.post(this);
-    }
+    
 };
 
 /**
@@ -835,13 +806,7 @@ TimeMap.prototype.filter = function(fid) {
  * @param {Function} [post] Function to run after the filter runs
  */
 TimeMap.prototype.addFilterChain = function(fid, fon, foff, pre, post) {
-    this.chains[fid] = {
-        chain:[],
-        on: fon,
-        off: foff,
-        pre: pre,
-        post: post
-    };
+    this.chains[fid] = new TimeMapFilterChain(this, fon, foff, pre, post);
 };
 
 /**
@@ -861,8 +826,8 @@ TimeMap.prototype.removeFilterChain = function(fid) {
  */
 TimeMap.prototype.addFilter = function(fid, f) {
     var filterChain = this.chains[fid];
-    if (filterChain && filterChain.chain) {
-        filterChain.chain.push(f);
+    if (filterChain) {
+        filterChain.add(f);
     }
 };
 
@@ -874,22 +839,128 @@ TimeMap.prototype.addFilter = function(fid, f) {
  */
 TimeMap.prototype.removeFilter = function(fid, f) {
     var filterChain = this.chains[fid];
-    if (filterChain && filterChain.chain) {
-        var chain = filterChain.chain;
-        if (!f) {
-            // just remove the last filter added
-            chain.pop();
-        }
-        else {
-            // look for the specific filter to remove
-            for(var i = 0; i < chain.length; i++){
-			    if(chain[i] == f){
-				    chain.splice(i, 1);
-			    }
-		    }
-        }
+    if (filterChain) {
+        filterChain.remove(f);
     }
 };
+
+/*----------------------------------------------------------------------------
+ * TimeMapFilterChain Class
+ *---------------------------------------------------------------------------*/
+ 
+/**
+ * @class
+ * TimeMapFilterChains hold a set of filters to apply to the map or timeline.
+ *
+ * @constructor
+ * @param {TimeMap} timemap Reference to the timemap object
+ * @param {Function} fon    Function to run on an item if filter is true
+ * @param {Function} foff   Function to run on an item if filter is false
+ * @param {Function} [pre]  Function to run before the filter runs
+ * @param {Function} [post] Function to run after the filter runs
+ */
+TimeMapFilterChain = function(timemap, fon, foff, pre, post) {
+    /** 
+     * Reference to parent TimeMap
+     * @type TimeMap
+     */
+    this.timemap = timemap;
+    
+    /** 
+     * Chain of filter functions, each taking an item and returning a boolean
+     * @type Function[]
+     */
+    this.chain = [];
+    
+    var dummy = function(item) {};
+    
+    /** 
+     * Function to run on an item if filter is true
+     * @function
+     */
+    this.on = fon || dummy;
+    
+    /** 
+     * Function to run on an item if filter is false
+     * @function
+     */
+    this.off = foff || dummy;
+    
+    /** 
+     * Function to run before the filter runs
+     * @function
+     */
+    this.pre = pre || dummy;
+    
+    /** 
+     * Function to run after the filter runs
+     * @function
+     */
+    this.post = post || dummy;
+}
+
+/**
+ * Add a filter to the filter chain.
+ *
+ * @param {Function} f      Function to add
+ */
+TimeMapFilterChain.prototype.add = function(f) {
+    this.chain.push(f);
+}
+
+/**
+ * Remove a filter from the filter chain
+ *
+ * @param {Function} [f]    Function to remove; if not supplied, the last filter 
+ *                          added is removed
+ */
+TimeMapFilterChain.prototype.remove = function(f) {
+    var chain = this.chain;
+    if (!f) {
+        // just remove the last filter added
+        chain.pop();
+    }
+    else {
+        // look for the specific filter to remove
+        for(var i = 0; i < chain.length; i++){
+		    if(chain[i] == f){
+			    chain.splice(i, 1);
+		    }
+	    }
+    }
+}
+
+/**
+ * Run filters on all items
+ */
+TimeMapFilterChain.prototype.run = function() {
+    var filterChain = this,
+        chain = filterChain.chain;
+    // early exit
+    if (!chain.length) {
+        return;
+    }
+    // pre-filter function
+    filterChain.pre();
+    // run items through filter
+    filterChain.timemap.eachItem(function(item) {
+        var done = false;
+        F_LOOP: while (!done) { 
+            for (var i = chain.length - 1; i >= 0; i--) {
+                if (!chain[i](item)) {
+                    // false condition
+                    filterChain.off(item);
+                    break F_LOOP;
+                }
+            }
+            // true condition
+            filterChain.on(item);
+            done = true;
+        }
+    });
+    // post-filter function
+    filterChain.post();
+}
 
 /**
  * @namespace
@@ -949,6 +1020,7 @@ TimeMap.filters.showMomentOnly = function(item) {
     }
     return true;
 };
+
 
 /*----------------------------------------------------------------------------
  * TimeMapDataset Class
@@ -2201,11 +2273,23 @@ TimeMap.themes = {
         iconImage: GIP + "yellow-dot.png",
         color: "#ECE64A",
         eventIconImage: "yellow-circle.png"
+    }),
+
+    /** 
+     * Pink theme: #E14E9D
+     *
+     * @type TimeMapTheme
+     */
+    pink: new TimeMapTheme({
+        iconImage: GIP + "pink-dot.png",
+        color: "#E14E9D",
+        eventIconImage: "pink-circle.png"
     })
 };
 
 // save to window
 window.TimeMap = TimeMap;
+window.TimeMapFilterChain = TimeMapFilterChain;
 window.TimeMapDataset = TimeMapDataset;
 window.TimeMapTheme = TimeMapTheme;
 window.TimeMapItem = TimeMapItem;
