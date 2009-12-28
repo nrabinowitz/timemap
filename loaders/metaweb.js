@@ -55,7 +55,10 @@
  * @return {TimeMap.loaders.remote} Remote loader configured for MetaWeb
  */
 TimeMap.loaders.metaweb = function(options) {
-    var loader = new TimeMap.loaders.jsonp(options);
+    var loader = new TimeMap.loaders.jsonp(options),
+        q = options.query || {},
+        // format the query URL for Metaweb
+        querytext = encodeURIComponent(JSON.stringify({qname: {query: q}}));
     
     /**
      * Host url - default to freebase.com
@@ -69,6 +72,13 @@ TimeMap.loaders.metaweb = function(options) {
      * @type {String}
      */
     loader.QUERY_SERVICE = options.service || "/api/service/mqlread";
+
+    /**
+     * URL built using encoded query text and the callback name
+     * @name TimeMap.loaders.metaweb#url
+     * @type {String}
+     */
+    loader.url = loader.HOST + loader.QUERY_SERVICE + "?queries=" + querytext + "&callback=";
     
     /**
      * Preload function for Metaweb
@@ -90,20 +100,8 @@ TimeMap.loaders.metaweb = function(options) {
             return [];
         }
         // Get result from inner envelope
-        var result = innerEnvelope.result;
-        return result;
+        return innerEnvelope.result;
     };
-    
-    // format the query URL for Metaweb
-    var q = options.query || {};
-    var querytext = encodeURIComponent(JSON.stringify({qname: {query: q}}));
-
-    /**
-     * URL built using encoded query text and the callback name
-     * @name TimeMap.loaders.metaweb#url
-     * @type {String}
-     */
-    loader.url = loader.HOST + loader.QUERY_SERVICE + "?queries=" + querytext + "&callback=";
 
     return loader;
 };

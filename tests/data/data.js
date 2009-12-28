@@ -1,4 +1,4 @@
-TimeMap.loaders.jsonp._0([
+TimeMap.loaders.cb._0([
     {
       "start" : "1980-01-02",
       "end" : "2000-01-02",

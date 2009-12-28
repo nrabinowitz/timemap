@@ -470,157 +470,6 @@ TimeMap.prototype.scrollToDate = function(d, lazyLayout) {
 }
 
 /**
- * @namespace
- * Namespace for different data loader functions.
- * New loaders should add their factories or constructors to this object; loader
- * functions are passed an object with parameters in TimeMap.init().
- */
-TimeMap.loaders = {};
-
-/**
- * @class
- * Basic loader class, for pre-loaded data. 
- * Other types of loaders should take the same parameter.
- *
- * @constructor
- * @param {Object} options          All options for the loader:<pre>
- *   {Array} data                       Array of items to load
- *   {Function} preloadFunction         Function to call on data before loading
- *   {Function} transformFunction       Function to call on individual items before loading
- * </pre>
- */
-TimeMap.loaders.basic = function(options) {
-    // get standard functions and document
-    TimeMap.loaders.mixin(this, options);
-    /**
-     * Function to call on data object before loading
-     * @name TimeMap.loaders.basic#preload
-     * @function
-     * @parameter {Object} data     Data to preload
-     * @return {Object[]} data      Array of item data
-     */
-     
-    /**
-     * Function to call on a single item data object before loading
-     * @name TimeMap.loaders.basic#transform
-     * @function
-     * @parameter {Object} data     Data to transform
-     * @return {Object} data        Transformed data for one item
-     */
-    
-    /**
-     * Array of item data to load.
-     * @type Object[]
-     */
-    this.data = options.items || 
-        // allow "value" for backwards compatibility
-        options.value || [];
-};
-
-/**
- * New loaders should implement a load function with the same parameters.
- *
- * @param {TimeMapDataset} dataset  Dataset to load data into
- * @param {Function} callback       Function to call once data is loaded
- */
-TimeMap.loaders.basic.prototype.load = function(dataset, callback) {
-    // preload
-    var items = this.preload(this.data);
-    // load
-    dataset.loadItems(items, this.transform);
-    // run callback
-    callback();
-};
-
-/**
- * @class
- * Generic class for loading remote data with a custom parser function
- *
- * @constructor
- * @param {Object} options          All options for the loader:<pre>
- *   {Array} url                        URL of file to load (NB: must be local address)
- *   {Function} parserFunction          Parser function to turn a string into a JavaScript array
- *   {Function} preloadFunction         Function to call on data before loading
- *   {Function} transformFunction       Function to call on individual items before loading
- * </pre>
- */
-TimeMap.loaders.remote = function(options) {
-    // get standard functions and document
-    TimeMap.loaders.mixin(this, options);
-    /**
-     * Parser function to turn a string into a JavaScript array
-     * @name TimeMap.loaders.remote#parse
-     * @function
-     * @parameter {String} s    String to parse
-     * @return {Array} data     Array of item data
-     */
-     
-    /**
-     * Function to call on data object before loading
-     * @name TimeMap.loaders.remote#preload
-     * @function
-     * @parameter {Object} data     Data to preload
-     * @return {Object[]} data      Array of item data
-     */
-     
-    /**
-     * Function to call on a single item data object before loading
-     * @name TimeMap.loaders.remote#transform
-     * @function
-     * @parameter {Object} data     Data to transform
-     * @return {Object} data        Transformed data for one item
-     */
-    
-    /**
-     * URL to load
-     * @type String
-     */
-    this.url = options.url;
-};
-
-/**
- * Remote load function.
- *
- * @param {TimeMapDataset} dataset  Dataset to load data into
- * @param {Function} callback       Function to call once data is loaded
- */
-TimeMap.loaders.remote.prototype.load = function(dataset, callback) {
-    var loader = this;
-    
-    // XXX: It would be nice to save the callback function here,
-    // and be able to cancel it (or cancel all) if needed
-    
-    // get items
-    GDownloadUrl(this.url, function(result) {
-        // parse
-        var items = loader.parse(result);
-        // load
-        items = loader.preload(items);
-        dataset.loadItems(items, loader.transform);
-        // callback
-        callback();
-    });
-};
-
-/**
- * Save a few lines of code by adding standard functions
- *
- * @param {Function} loader         Loader to add functions to
- * @param {Object} options          Options for the loader:<pre>
- *   {Function} parserFunction          Parser function to turn data into JavaScript array
- *   {Function} preloadFunction         Function to call on data before loading
- *   {Function} transformFunction       Function to call on individual items before loading
- * </pre>
- */
-TimeMap.loaders.mixin = function(loader, options) {
-    // set preload and transform functions
-    var dummy = function(data) { return data; };
-    loader.parse = options.parserFunction || dummy;
-    loader.preload = options.preloadFunction || dummy;
-    loader.transform = options.transformFunction || dummy;
-};
-
-/**
  * Create an empty dataset object and add it to the timemap
  *
  * @param {String} id           The id of the dataset
@@ -642,46 +491,6 @@ TimeMap.prototype.createDataset = function(id, options) {
         });
     }
     return dataset;
-};
-
-/**
- * Run a function on each dataset in the timemap. This is the preferred
- * iteration method, as it allows for future iterator options.
- *
- * @param {Function} f    The function to run, taking one dataset as an argument
- */
-TimeMap.prototype.each = function(f) {
-    for (var id in this.datasets) {
-        if (this.datasets.hasOwnProperty(id)) {
-            f(this.datasets[id]);
-        }
-    }
-};
-
-/**
- * Run a function on each item in each dataset in the timemap.
- *
- * @param {Function} f    The function to run, taking one item as an argument
- */
-TimeMap.prototype.eachItem = function(f) {
-    this.each(function(ds) {
-        ds.each(function(item) {
-            f(item);
-        });
-    });
-};
-
-/**
- * Get all items from all datasets.
- *
- * @return {TimeMapItem[]}  Array of all items
- */
-TimeMap.prototype.getItems = function(index) {
-    var items = [];
-    this.eachItem(function(item) {
-        items.push(item);
-    });
-    return items;
 };
 
 /**
@@ -784,64 +593,266 @@ TimeMap.prototype.initTimeline = function(bands) {
 };
 
 /**
- * Update items, hiding or showing according to filters
+ * Run a function on each dataset in the timemap. This is the preferred
+ * iteration method, as it allows for future iterator options.
  *
- * @param {String} fid      Filter chain to update on
+ * @param {Function} f    The function to run, taking one dataset as an argument
  */
-TimeMap.prototype.filter = function(fid) {
-    var filterChain = this.chains[fid];
-    if (filterChain) {
-        filterChain.run();
+TimeMap.prototype.each = function(f) {
+    for (var id in this.datasets) {
+        if (this.datasets.hasOwnProperty(id)) {
+            f(this.datasets[id]);
+        }
     }
+};
+
+/**
+ * Run a function on each item in each dataset in the timemap.
+ *
+ * @param {Function} f    The function to run, taking one item as an argument
+ */
+TimeMap.prototype.eachItem = function(f) {
+    this.each(function(ds) {
+        ds.each(function(item) {
+            f(item);
+        });
+    });
+};
+
+/**
+ * Get all items from all datasets.
+ *
+ * @return {TimeMapItem[]}  Array of all items
+ */
+TimeMap.prototype.getItems = function(index) {
+    var items = [];
+    this.eachItem(function(item) {
+        items.push(item);
+    });
+    return items;
+};
+
+
+/*----------------------------------------------------------------------------
+ * Loader namespace and base classes
+ *---------------------------------------------------------------------------*/
+ 
+/**
+ * @namespace
+ * Namespace for different data loader functions.
+ * New loaders can add their factories or constructors to this object; loader
+ * functions are passed an object with parameters in TimeMap.init().
+ */
+TimeMap.loaders = {};
+
+/**
+ * @namespace
+ * Namespace for storing callback functions
+ */
+TimeMap.loaders.cb = {};
+
+/**
+ * Cancel all current load requests. In practice, this is really only
+ * applicable to remote asynchronous loads. Note that this doesn't cancel 
+ * the download of data, just the callback that loads it.
+ */
+TimeMap.loaders.cancelAll = function() {
+    var namespace = TimeMap.loaders.cb;
+    for (var callbackName in namespace) {
+        if (namespace.hasOwnProperty(callbackName)) {
+            // replace with self-cancellation function
+            namespace[callbackName] = function() {
+			    delete namespace[callbackName];
+		    };
+		}
+	}
+};
+
+/**
+ * Static counter for naming callback functions
+ * @type int
+ */
+TimeMap.loaders.counter = 0;
+
+
+/**
+ * @class
+ * Abstract loader class. All loaders should inherit from this class.
+ *
+ * @constructor
+ * @param {Object} [options]        All options for the loader:<pre>
+ *   {Function} parserFunction          Parser function to turn a string into a JavaScript array
+ *   {Function} preloadFunction         Function to call on data before loading
+ *   {Function} transformFunction       Function to call on individual items before loading
+ *   {String/Date} scrollTo             Date to scroll the timeline to in the default callback 
+ *                                      (@see TimeMap.parseDate for accepted syntax)
+ * </pre>
+ */
+TimeMap.loaders.base = function(options) {
+    var dummy = function(data) { return data; };
+     
+    /**
+     * Parser function to turn a string into a JavaScript array
+     * @function
+     * @parameter {String} s        String to parse
+     * @return {Object[]}           Array of item data
+     */
+    this.parse = options.parserFunction || dummy;
     
+    /**
+     * Function to call on data object before loading
+     * @function
+     * @parameter {Object} data     Data to preload
+     * @return {Object[]}           Array of item data
+     */
+    this.preload = options.preloadFunction || dummy;
+    
+    /**
+     * Function to call on a single item data object before loading
+     * @function
+     * @parameter {Object} data     Data to transform
+     * @return {Object}             Transformed data for one item
+     */
+    this.transform = options.transformFunction || dummy;
+    
+    /**
+     * Date to scroll the timeline to on load
+     * @type String/Date
+     */
+    this.scrollTo = options.scrollTo || "earliest";
+    
+    /**
+     * Get the name of a callback function that can be cancelled. This callback applies the parser,
+     * preload, and transform functions, loads the data, then calls the user callback
+     *
+     * @param {TimeMapDataset} dataset  Dataset to load data into
+     * @param {Function} callback       User-supplied callback function. If no function 
+     *                                  is supplied, the default callback will be used
+     * @return {String}                 The name of the callback function in TimeMap.loaders.cb
+     */
+    this.getCallbackName = function(dataset, callback) {
+        var loader = this,
+            callbacks = TimeMap.loaders.cb,
+            // Define a unique function name
+            callbackName = "_" + TimeMap.loaders.counter++,
+            // Define default callback
+            callback = callback || function() {
+                dataset.timemap.scrollToDate(loader.scrollTo, true);
+            };
+        
+        // create callback
+        callbacks[callbackName] = function(result) {
+            // parse
+            var items = loader.parse(result);
+            // preload
+            items = loader.preload(items);
+            // load
+            dataset.loadItems(items, loader.transform);
+            // callback
+            callback(); 
+            // delete the callback function
+            delete callbacks[callbackName];
+        };
+        
+        return callbackName;
+    };
+    
+    /**
+     * Get a callback function that can be cancelled. This is a convenience function
+     * to be used if the callback name itself is not needed. 
+     * @see TimeMap.loaders.base#getCallbackName
+     *
+     * @param {TimeMapDataset} dataset  Dataset to load data into
+     * @param {Function} callback       User-supplied callback function
+     * @return {Function}               The configured callback function
+     */
+    this.getCallback = function(dataset, callback) {
+        // get loader callback name
+        var callbackName = this.getCallbackName(dataset, callback);
+        // return the function
+        return TimeMap.loaders.cb[callbackName];
+    };
 };
 
 /**
- * Add a new filter chain
+ * @class
+ * Basic loader class, for pre-loaded data. 
+ * Other types of loaders should take the same parameter.
  *
- * @param {String} fid      Id of the filter chain
- * @param {Function} fon    Function to run on an item if filter is true
- * @param {Function} foff   Function to run on an item if filter is false
- * @param {Function} [pre]  Function to run before the filter runs
- * @param {Function} [post] Function to run after the filter runs
+ * @augments TimeMap.loaders.base
+ *
+ * @constructor
+ * @param {Object} options          All options for the loader:<pre>
+ *   {Array} data                       Array of items to load
+ *   {Function} preloadFunction         Function to call on data before loading
+ *   {Function} transformFunction       Function to call on individual items before loading
+ * </pre>
  */
-TimeMap.prototype.addFilterChain = function(fid, fon, foff, pre, post) {
-    this.chains[fid] = new TimeMapFilterChain(this, fon, foff, pre, post);
+TimeMap.loaders.basic = function(options) {
+    var loader = new TimeMap.loaders.base(options);
+    
+    /**
+     * Array of item data to load.
+     * @name TimeMap.loaders.basic#data
+     * @type Object[]
+     */
+    loader.data = options.items || 
+        // allow "value" for backwards compatibility
+        options.value || [];
+
+    /**
+     * Load javascript literal data.
+     * New loaders should implement a load function with the same signature.
+     * @name TimeMap.loaders.basic#load
+     *
+     * @param {TimeMapDataset} dataset  Dataset to load data into
+     * @param {Function} callback       Function to call once data is loaded
+     */
+    loader.load = function(dataset, callback) {
+        // get callback function and call immediately on data
+        (this.getCallback(dataset, callback))(this.data);
+    };
+    
+    return loader;
 };
 
 /**
- * Remove a filter chain
+ * @class
+ * Generic class for loading remote data with a custom parser function
  *
- * @param {String} fid      Id of the filter chain
- */
-TimeMap.prototype.removeFilterChain = function(fid) {
-    this.chains[fid] = null;
-};
-
-/**
- * Add a function to a filter chain
+ * @augments TimeMap.loaders.base
  *
- * @param {String} fid      Id of the filter chain
- * @param {Function} f      Function to add
+ * @constructor
+ * @param {Object} options          All options for the loader:<pre>
+ *   {Array} url                        URL of file to load (NB: must be local address)
+ *   {Function} parserFunction          Parser function to turn a string into a JavaScript array
+ *   {Function} preloadFunction         Function to call on data before loading
+ *   {Function} transformFunction       Function to call on individual items before loading
+ * </pre>
  */
-TimeMap.prototype.addFilter = function(fid, f) {
-    var filterChain = this.chains[fid];
-    if (filterChain) {
-        filterChain.add(f);
-    }
-};
-
-/**
- * Remove a function from a filter chain
- *
- * @param {String} fid      Id of the filter chain
- * @param {Function} [f]    The function to remove
- */
-TimeMap.prototype.removeFilter = function(fid, f) {
-    var filterChain = this.chains[fid];
-    if (filterChain) {
-        filterChain.remove(f);
-    }
+TimeMap.loaders.remote = function(options) {
+    var loader = new TimeMap.loaders.base(options);
+    
+    /**
+     * URL to load
+     * @name TimeMap.loaders.remote#url
+     * @type String
+     */
+    loader.url = options.url;
+    
+    /**
+     * Load function for remote files.
+     * @name TimeMap.loaders.remote#load
+     *
+     * @param {TimeMapDataset} dataset  Dataset to load data into
+     * @param {Function} callback       Function to call once data is loaded
+     */
+    loader.load = function(dataset, callback) {
+        // download remote data and pass to callback
+        GDownloadUrl(this.url, this.getCallback(dataset, callback));
+    };
+    
+    return loader;
 };
 
 /*----------------------------------------------------------------------------
@@ -961,6 +972,69 @@ TimeMapFilterChain.prototype.run = function() {
     // post-filter function
     filterChain.post();
 }
+
+// TimeMap helper functions for dealing with filters
+
+/**
+ * Update items, hiding or showing according to filters
+ *
+ * @param {String} fid      Filter chain to update on
+ */
+TimeMap.prototype.filter = function(fid) {
+    var filterChain = this.chains[fid];
+    if (filterChain) {
+        filterChain.run();
+    }
+    
+};
+
+/**
+ * Add a new filter chain
+ *
+ * @param {String} fid      Id of the filter chain
+ * @param {Function} fon    Function to run on an item if filter is true
+ * @param {Function} foff   Function to run on an item if filter is false
+ * @param {Function} [pre]  Function to run before the filter runs
+ * @param {Function} [post] Function to run after the filter runs
+ */
+TimeMap.prototype.addFilterChain = function(fid, fon, foff, pre, post) {
+    this.chains[fid] = new TimeMapFilterChain(this, fon, foff, pre, post);
+};
+
+/**
+ * Remove a filter chain
+ *
+ * @param {String} fid      Id of the filter chain
+ */
+TimeMap.prototype.removeFilterChain = function(fid) {
+    this.chains[fid] = null;
+};
+
+/**
+ * Add a function to a filter chain
+ *
+ * @param {String} fid      Id of the filter chain
+ * @param {Function} f      Function to add
+ */
+TimeMap.prototype.addFilter = function(fid, f) {
+    var filterChain = this.chains[fid];
+    if (filterChain) {
+        filterChain.add(f);
+    }
+};
+
+/**
+ * Remove a function from a filter chain
+ *
+ * @param {String} fid      Id of the filter chain
+ * @param {Function} [f]    The function to remove
+ */
+TimeMap.prototype.removeFilter = function(fid, f) {
+    var filterChain = this.chains[fid];
+    if (filterChain) {
+        filterChain.remove(f);
+    }
+};
 
 /**
  * @namespace
