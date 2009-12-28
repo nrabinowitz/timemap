@@ -69,11 +69,11 @@ TimeMap.loaders.gss = function(options) {
     }
         
     /**
-     * Column map
+     * Column map - defaults to TimeMap.loaders.gss.map
      * @name TimeMap.loaders.gss#map
      * @type Object
      */
-    loader.map = options.map;
+    loader.map = options.map || TimeMap.loaders.gss.map;
     
     /**
      * Preload function for spreadsheet data
@@ -93,7 +93,7 @@ TimeMap.loaders.gss = function(options) {
      */
     loader.transform = function(data) {
         // map spreadsheet column ids to corresponding TimeMap elements
-        var fieldMap = loader.map || TimeMap.loaders.gss.map;
+        var fieldMap = loader.map;
         var getField = function(f) {
             var el = data['gsx$' + fieldMap[f]];
             if (el) {

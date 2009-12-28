@@ -23,6 +23,8 @@
  * The loader then appends a nonce function name which the JSON should include.
  * This works for services like Google Spreadsheets, etc., and accepts remote URLs.</p>
  *
+ * @augments TimeMap.loaders.remote
+ *
  * @example Usage in TimeMap.init():
  
     datasets: [
@@ -30,7 +32,7 @@
             title: "JSONP Dataset",
             type: "jsonp",
             options: {
-                url: "http://www.test.com/getsomejson.php?callback="
+                url: "http://www.example.com/getsomejson.php?callback="
             }
         }
     ]
@@ -43,96 +45,26 @@
  * </pre>
  */
 TimeMap.loaders.jsonp = function(options) {
-    // get standard functions and document
-    TimeMap.loaders.mixin(this, options);
-     
-    /**
-     * Function to call on data object before loading
-     * @name TimeMap.loaders.jsonp#preload
-     * @function
-     * @parameter {Object} data     Data to preload
-     * @return {Array} data         Array of item data
-     */
-     
-    /**
-     * Function to call on a single item data object before loading
-     * @name TimeMap.loaders.jsonp#transform
-     * @function
-     * @parameter {Object} data     Data to transform
-     * @return {Object} data        Transformed data for one item
-     */
+    var loader = new TimeMap.loaders.remote(options);
     
     /**
-     * URL to load, with missing callback parameter
-     * @example "http://www.example.com/myjsonservice?callback="
-     * @type String
+     * JSONP load function. Creates a callback function and adds a script tag
+     * with the appropriate URL to the document, triggering the HTTP request.
+     *
+     * @param {TimeMapDataset} dataset  Dataset to load data into
+     * @param {Function} callback       Function to call once data is loaded
      */
-    this.url = options.url;
-};
-
-/**
- * JSONP load function.
- *
- * @param {TimeMapDataset} dataset  Dataset to load data into
- * @param {Function} callback       Function to call once data is loaded
- */
-TimeMap.loaders.jsonp.prototype.load = function(dataset, callback) {
-    var loader = this;
-    // get items
-    TimeMap.loaders.jsonp.read(this.url, function(result) {
-        // load
-        var items = loader.preload(result);
-        dataset.loadItems(items, loader.transform);
-        // callback
-        callback();
-    });
-};
-
-/**
- * Static - for naming callback functions
- * @type int
- */
-TimeMap.loaders.jsonp.counter = 0;
-
-/**
- * Static - reads JSON from a URL, assuming that the service is set up to apply
- * a callback function specified in the URL parameters.
- *
- * @param {String}      jsonUrl     URL to load, missing the callback function name
- * @param {function}    f           Callback function to apply to returned data
- */
-TimeMap.loaders.jsonp.read = function(url, f) {
-    // Define a unique function name
-    var callbackName = "_" + TimeMap.loaders.jsonp.counter++;
-
-    TimeMap.loaders.jsonp[callbackName] = function(result) {
-        // Pass result to user function
-        f(result);
-        // Delete the callback function
-        delete TimeMap.loaders.jsonp[callbackName];
+     loader.load = function(dataset, callback) {
+        // get loader callback name
+        var callbackName = this.getCallbackName(dataset, callback),
+            // create a script tag
+            script = document.createElement("script");
+        // set the src attribute and add to the document
+        script.src = this.url + "TimeMap.loaders.cb." + callbackName;
+        document.body.appendChild(script);
     };
-
-    // Create a script tag, set its src attribute and add it to the document
-    // This triggers the HTTP request and submits the query
-    var script = document.createElement("script");
-    script.src = url + "TimeMap.loaders.jsonp." + callbackName;
-    document.body.appendChild(script);
-};
-
-/**
- * Static - cancel all current JSONP requests
- * (note that this doesn't cancel the load, just the callback)
- */
-TimeMap.loaders.jsonp.cancelAll = function() {
-    var namespace = TimeMap.loaders.jsonp;
-    for (var i in namespace){
-        // XXX: this is too cludgy - callback functions need their own namespace
-		if (i.substr(0,1) == '_'){
-			namespace[i] = function(){
-				delete namespace[i];
-			};
-		}
-	}
+    
+    return loader;
 };
 
 /**

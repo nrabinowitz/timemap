@@ -11,6 +11,8 @@ Version 1.6
 - Added progressive loader to easily load large datasets a little bit at a
 time, based on timeline location.
 - Some tweaks for improved performance
+- More changes to the loader architecture, allowing asynchronous loads to be 
+cancelled, a default loader to be used, and even easier creation of new loaders
 
 Version 1.5
 -----------
