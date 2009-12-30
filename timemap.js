@@ -68,6 +68,9 @@ var
  *   {Boolean} centerMapOnItems     Whether to center and zoom the map based on loaded item positions
  *   {Function} openInfoWindow      Function redefining how info window opens
  *   {Function} closeInfoWindow     Function redefining how info window closes
+ *   {mixed} ...                    Any of the options for {@link TimeMapTheme} may be set here,
+ *                                  to cascade to the entire TimeMap, though they can be overridden
+ *                                  at lower levels
  * </pre>
  */
 TimeMap = function(tElement, mElement, options) {
@@ -208,8 +211,28 @@ var util = TimeMap.util = {};
  * for usage.</p>
  *
  * @param {Object} config   Full set of configuration options.
- *                          See examples/timemapinit_usage.js for format.
- * @return {TimeMap}        The initialized TimeMap object, for future reference
+ * @param {String} config.mapId                     DOM id of the element to contain the map
+ * @param {String} config.timelineId                DOM id of the element to contain the timeline
+ * @param {Object} config.options                   Options for the TimeMap object (see the {@link TimeMap} constructor)
+ * @param {Object[]} config.datasets                Array of datasets to load
+ * @param {Object} config.datasets[x]               Configuration options for a particular dataset
+ * @param {String/Class} config.datasets[x].type    Loader type for this dataset (generally a sub-class 
+ *                                                  of {@link TimeMap.loaders.base})
+ * @param {Object} config.datasets[x].options       Options for the loader. See the {@link TimeMap.loaders.base}
+ *                                                  constructor and the constructors for the various loaders for 
+ *                                                  more details.
+ * @param {String} [config.datasets[x].id]          Optional id for the dataset in the {@link TimeMap#datasets}
+ *                                                  object, for future reference; otherwise "ds"+x is used
+ * @param {String} [config.datasets[x] ...]         Other options for the TimeMapDataset object 
+ *                                                  (see the {@link TimeMapDataset} constructor)
+ * @param {Function} [config.dataLoadedFunction]    Function to be run as soon as all datasets are loaded, but
+ *                                                  before they've been displayed on the map and timeline
+ *                                                  (this will override dataDisplayedFunction and scrollTo)
+ * @param {Function} [config.dataDisplayedFunction] Function to be run as soon as all datasets are loaded and 
+ *                                                  displayed on the map and timeline
+ * @param {String/Date} [config.scrollTo]           Date to scroll to once data is loaded - see 
+ *                                                  {@link TimeMap.parseDate} for options; default is "earliest"
+ * @return {TimeMap}        The initialized TimeMap object
  */
 TimeMap.init = function(config) {
     
@@ -238,8 +261,7 @@ TimeMap.init = function(config) {
         // allow intervals to be specified by key
         var intervals = util.lookup(config.bandIntervals, TimeMap.intervals);
         // make default band info
-        config.bandInfo = [
-    		{
+        config.bandInfo = [    		{
                 width:          "80%", 
                 intervalUnit:   intervals[0], 
                 intervalPixels: 70
@@ -406,8 +428,8 @@ TimeMap.loadManager = new function() {
 
 /**
  * Parse a date in the context of the timeline. Uses the standard parser
- * (@see TimeMapDataset.hybridParser) but accepts "now", "earliest", "latest",
- * "first", and "last" (referring to loaded events)
+ * ({@link TimeMapDataset.hybridParser}) but accepts "now", "earliest", 
+ * "latest", "first", and "last" (referring to loaded events)
  *
  * @param {String/Date} s   String (or date) to parse
  * @return {Date}           Parsed date
@@ -473,7 +495,8 @@ TimeMap.prototype.scrollToDate = function(d, lazyLayout) {
  * Create an empty dataset object and add it to the timemap
  *
  * @param {String} id           The id of the dataset
- * @param {Object} options      A container for optional arguments for dataset constructor
+ * @param {Object} options      A container for optional arguments for dataset constructor -
+ *                              see the options passed to {@link TimeMapDataset}
  * @return {TimeMapDataset}     The new dataset object    
  */
 TimeMap.prototype.createDataset = function(id, options) {
@@ -685,7 +708,7 @@ TimeMap.loaders.counter = 0;
  *   {Function} preloadFunction         Function to call on data before loading
  *   {Function} transformFunction       Function to call on individual items before loading
  *   {String/Date} scrollTo             Date to scroll the timeline to in the default callback 
- *                                      (@see TimeMap.parseDate for accepted syntax)
+ *                                      (see {@link TimeMap#parseDate} for accepted syntax)
  * </pre>
  */
 TimeMap.loaders.base = function(options) {
@@ -717,6 +740,7 @@ TimeMap.loaders.base = function(options) {
     
     /**
      * Date to scroll the timeline to on load
+     * @default "earliest"
      * @type String/Date
      */
     this.scrollTo = options.scrollTo || "earliest";
@@ -794,6 +818,7 @@ TimeMap.loaders.basic = function(options) {
     /**
      * Array of item data to load.
      * @name TimeMap.loaders.basic#data
+     * @default []
      * @type Object[]
      */
     loader.data = options.items || 
@@ -1110,10 +1135,13 @@ TimeMap.filters.showMomentOnly = function(item) {
  * @param {Object} [options]        Object holding optional arguments:<pre>
  *   {String} id                        Key for this dataset in the datasets map
  *   {String} title                     Title of the dataset (for the legend)
- *   {String or theme object} theme     Theme settings.
- *   {String or Function} dateParser    Function to replace default date parser.
+ *   {String/TimeMapTheme} theme        Theme settings.
+ *   {String/Function} dateParser       Function to replace default date parser.
  *   {Function} openInfoWindow          Function redefining how info window opens
  *   {Function} closeInfoWindow         Function redefining how info window closes
+ *   {mixed} ...                        Any of the options for {@link TimeMapTheme} may be set here,
+ *                                      to cascade to the dataset's objects, though they can be 
+ *                                      overridden at the TimeMapItem level
  * </pre>
  */
 TimeMapDataset = function(timemap, options) {
@@ -1301,7 +1329,7 @@ TimeMapDataset.prototype.loadItems = function(data, transform) {
  *          {Float} south               Southern latitude of the overlay
  *          {Float} east                Eastern longitude of the overlay
  *          {Float} west                Western longitude of the overlay
- *      {Object} options            Optional arguments to be passed to the TimeMapItem (@see TimeMapItem)
+ *      {Object} options            Optional arguments to be passed to the TimeMapItem ({@link TimeMapItem})
  * </pre>
  * @param {Function} [transform]    If data is not in the above format, transformation function to make it so
  * @return {TimeMapItem}            The created item (for convenience, as it's already been added)
@@ -1622,7 +1650,7 @@ TimeMapTheme = function(options) {
  * Create a theme, based on an optional new or pre-set theme
  *
  * @param {TimeMapTheme} [theme]    Existing theme to clone
- * @param {Object} [options]        Container for optional arguments - @see TimeMapTheme()
+ * @param {Object} [options]        Container for optional arguments - see {@link TimeMapTheme}
  * @return {TimeMapTheme}           Configured theme
  */
 TimeMapTheme.create = function(theme, options) {
@@ -1682,6 +1710,7 @@ TimeMapTheme.create = function(theme, options) {
  *   {Function} openInfoWindow          Function redefining how info window opens
  *   {Function} closeInfoWindow         Function redefining how info window closes
  *   {String/TimeMapTheme} theme        Theme applying to this item, overriding dataset theme
+ *   {mixed} ...                        Any of the options for {@link TimeMapTheme} may be set here
  * </pre>
  */
 TimeMapItem = function(placemark, event, dataset, options) {

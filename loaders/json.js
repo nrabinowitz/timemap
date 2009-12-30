@@ -50,6 +50,7 @@ TimeMap.loaders.jsonp = function(options) {
     /**
      * JSONP load function. Creates a callback function and adds a script tag
      * with the appropriate URL to the document, triggering the HTTP request.
+     * @name TimeMap.loaders.jsonp#load
      *
      * @param {TimeMapDataset} dataset  Dataset to load data into
      * @param {Function} callback       Function to call once data is loaded
