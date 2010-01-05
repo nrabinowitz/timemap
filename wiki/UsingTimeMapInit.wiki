@@ -1,3 +1,46 @@
 #summary How to use the TimeMap.init() function.
 
 The `TimeMap.init()` function is in many ways the basic API of the timemap.js library - if all you need to do is display a timemap with some data, this function should be all you need, even for fairly complicated configurations.
+
+= Basics =
+
+Assuming you want the timemap to be initialized when the page is first loaded, you'll want to call `TimeMap.init()` within an `onload` or (if you're using jQuery) `$(document).ready()` function. The `TimeMap.init()` function only takes one parameter, an object literal with all of the configuration options for the timemap.
+
+Note that you can only call `TimeMap.init()` _once_ for a given timemap - as far as I know, calling it again on the same DOM elements will throw an error. There are other ways to dynamically load more data or change the timemap after it's initialized.
+
+= The Configuration Object =
+
+The configuration object is multi-level, in that it generally contains several other configuration objects for the different parts of the timemap. The structure of the configuration object looks like this:
+
+{{{
+
+TimeMap.init({
+
+    mapId: "< id >",        // DOM id for the map element, always required
+    timelineId: "< id >",   // DOM id for the timeline element, ditto
+    
+    options: {
+        // Options passed to the TimeMap object itself
+    },
+    
+    datasets: [
+        // Array of dataset configuration options, one for each dataset
+        {
+            // Configuration options for one dataset.
+            
+            // String (or class) specifying a type of loader in TimeMap.loaders
+            type: "< type of loader >", 
+            
+            options: {
+                // Configuration options to be passed to the loader
+            }
+        }
+    ],
+    
+    // Timeline band configuration
+    
+    // Post-initialization options
+
+});
+
+}}}
