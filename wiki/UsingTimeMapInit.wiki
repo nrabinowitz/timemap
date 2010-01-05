@@ -1,0 +1,3 @@
+#summary How to use the TimeMap.init() function.
+
+The `TimeMap.init()` function is in many ways the basic API of the timemap.js library - if all you need to do is display a timemap with some data, this function should be all you need, even for fairly complicated configurations.
