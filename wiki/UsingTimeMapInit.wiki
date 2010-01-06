@@ -68,3 +68,5 @@ The top-level `options` object is used to initialize the `TimeMap` object itself
 Each dataset you want to load should have its own configuration object in the `datasets` array. Loading multiple datasets is a good idea if you are loading data from different sources or want to apply different themes to different datasets.
 
 The only required element in a dataset configuration object is the `type` attribute. This is the string name of the desired loader, usually one of the classes in `TimeMap.loaders`. Each loader has its own set of required options.
+
+_more coming soon_
