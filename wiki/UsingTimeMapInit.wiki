@@ -2,13 +2,13 @@
 
 The `TimeMap.init()` function is in many ways the basic API of the timemap.js library - if all you need to do is display a timemap with some data, this function should be all you need, even for fairly complicated configurations.
 
-= Basics =
+== Basics ==
 
 Assuming you want the timemap to be initialized when the page is first loaded, you'll want to call `TimeMap.init()` within an `onload` or (if you're using jQuery) `$(document).ready()` function. The `TimeMap.init()` function only takes one parameter, an object literal with all of the configuration options for the timemap.
 
 Note that you can only call `TimeMap.init()` _once_ for a given timemap - as far as I know, calling it again on the same DOM elements will throw an error. There are other ways to dynamically load more data or change the timemap after it's initialized.
 
-= The Configuration Object =
+== The Configuration Object ==
 
 The configuration object is multi-level, in that it generally contains several other configuration objects for the different parts of the timemap. The structure of the configuration object looks like this:
 
@@ -44,3 +44,27 @@ TimeMap.init({
 });
 
 }}}
+
+=== !TimeMap Options ===
+
+The top-level `options` object is used to initialize the `TimeMap` object itself. This object is not required, but you can use it to set configuration options for the map and global theme settings for the timemap. You can check out the `options` parameter in the `TimeMap` constructor for the full details (link to the documentation coming once I've figured out the best way to post it); some of the most pertinent options below:
+
+{{{
+    options: {
+        // map type (road, terrain, satellite image, etc) to use
+        mapType: < Google Maps maptype >,
+        // theme to apply to items on the timemap
+        theme: < TimeMapTheme >,
+        // unlike other theme settings, setting the eventIconPath here
+        // will override this setting in dataset- and item-level themes
+        eventIconPath: "< path to event icon images >",
+
+        // ... other settings; see the code docs.
+    },
+}}}
+
+=== Dataset Options ===
+
+Each dataset you want to load should have its own configuration object in the `datasets` array. Loading multiple datasets is a good idea if you are loading data from different sources or want to apply different themes to different datasets.
+
+The only required element in a dataset configuration object is the `type` attribute. This is the string name of the desired loader, usually one of the classes in `TimeMap.loaders`. Each loader has its own set of required options.
