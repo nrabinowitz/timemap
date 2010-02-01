@@ -50,9 +50,10 @@ var
 /**
  * @class
  * The TimeMap object holds references to timeline, map, and datasets.
- * This will create the visible map, but not the timeline, which must be initialized separately.
  *
  * @constructor
+ * This will create the visible map, but not the timeline, which must be initialized separately.
+ *
  * @param {element} tElement     The timeline element.
  * @param {element} mElement     The map element.
  * @param {Object} [options]       A container for optional arguments:<pre>
@@ -197,23 +198,18 @@ var util = TimeMap.util = {};
 /**
  * Intializes a TimeMap.
  *
- * <p>This is an attempt to create a general initialization script that will
- * work in most cases. If you need a more complex initialization, write your
- * own script instead of using this one.</p>
- *
  * <p>The idea here is to throw all of the standard intialization settings into
  * a large object and then pass it to the TimeMap.init() function. The full
- * data format is outlined below, but if you leave elements off the script 
+ * data format is outlined below, but if you leave elements out the script 
  * will use default settings instead.</p>
  *
- * <p>Call TimeMap.init() inside of an onLoad() function (or a jQuery 
- * $.(document).ready() function, or whatever you prefer). See the examples 
- * for usage.</p>
+ * <p>See the examples and the wiki page
+ * ({@link http://code.google.com/p/timemap/wiki/UsingTimeMapInit}) for usage.</p>
  *
- * @param {Object} config   Full set of configuration options.
+ * @param {Object} config                           Full set of configuration options.
  * @param {String} config.mapId                     DOM id of the element to contain the map
  * @param {String} config.timelineId                DOM id of the element to contain the timeline
- * @param {Object} config.options                   Options for the TimeMap object (see the {@link TimeMap} constructor)
+ * @param {Object} [config.options]                 Options for the TimeMap object (see the {@link TimeMap} constructor)
  * @param {Object[]} config.datasets                Array of datasets to load
  * @param {Object} config.datasets[x]               Configuration options for a particular dataset
  * @param {String/Class} config.datasets[x].type    Loader type for this dataset (generally a sub-class 
@@ -225,6 +221,13 @@ var util = TimeMap.util = {};
  *                                                  object, for future reference; otherwise "ds"+x is used
  * @param {String} [config.datasets[x] ...]         Other options for the TimeMapDataset object 
  *                                                  (see the {@link TimeMapDataset} constructor)
+ * @param {String/Array} [config.bandIntervals]     Intervals for the two default timeline bands. Can either be an 
+ *                                                  array of interval constants or a key in {@link TimeMap.intervals}
+ * @param {Object[]} [config.bandInfo]              Array of configuration objects for Timeline bands, to be passed to
+ *                                                  Timeline.createBandInfo (see {@link http://code.google.com/p/simile-widgets/wiki/Timeline_GettingStarted}).
+ *                                                  This will override config.bandIntervals, if provided.
+ * @param {Timeline.Band[]} [config.bands]          Array of instantiated Timeline Band objects. This will override
+ *                                                  config.bandIntervals and config.bandInfo, if provided.
  * @param {Function} [config.dataLoadedFunction]    Function to be run as soon as all datasets are loaded, but
  *                                                  before they've been displayed on the map and timeline
  *                                                  (this will override dataDisplayedFunction and scrollTo)
@@ -232,7 +235,7 @@ var util = TimeMap.util = {};
  *                                                  displayed on the map and timeline
  * @param {String/Date} [config.scrollTo]           Date to scroll to once data is loaded - see 
  *                                                  {@link TimeMap.parseDate} for options; default is "earliest"
- * @return {TimeMap}        The initialized TimeMap object
+ * @return {TimeMap}                                The initialized TimeMap object
  */
 TimeMap.init = function(config) {
     
@@ -647,7 +650,7 @@ TimeMap.prototype.eachItem = function(f) {
  *
  * @return {TimeMapItem[]}  Array of all items
  */
-TimeMap.prototype.getItems = function(index) {
+TimeMap.prototype.getItems = function() {
     var items = [];
     this.eachItem(function(item) {
         items.push(item);
@@ -1819,7 +1822,10 @@ TimeMapItem = function(placemark, event, dataset, options) {
      * for whatever behavior you want when the event or placemark is clicked
      * @function
      */
-    this.openInfoWindow = options.openInfoWindow;
+    this.openInfoWindow = function() {
+        options.openInfoWindow.call(this);
+        this.selected = true;
+    };
     
     /**
      * Close the info window for this item.
@@ -1827,7 +1833,10 @@ TimeMapItem = function(placemark, event, dataset, options) {
      * for whatever behavior you want.
      * @function
      */
-    this.closeInfoWindow = options.closeInfoWindow;
+    this.closeInfoWindow = function() {
+        options.closeInfoWindow.call(this);
+        this.selected = false;
+    };
 };
 
 /** 
@@ -1914,8 +1923,6 @@ TimeMapItem.openInfoWindowBasic = function() {
     } else {
         this.map.openInfoWindowHtml(this.getInfoPoint(), html);
     }
-    // custom functions will need to set this as well
-    this.selected = true;
 };
 
 /**
@@ -1952,8 +1959,6 @@ TimeMapItem.closeInfoWindowBasic = function() {
             this.map.closeInfoWindow();
         }
     }
-    // custom functions will need to set this as well
-    this.selected = false;
 };
 
 /*----------------------------------------------------------------------------
