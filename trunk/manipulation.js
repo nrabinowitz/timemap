@@ -361,7 +361,7 @@ TimeMapItem.prototype.createEvent = function(s, e) {
 /** 
  * Find the next or previous item chronologically
  *
- * @param {Boolean} [previous=false]    Whether to find previous 
+ * @param {Boolean} [backwards=false]   Whether to look backwards (i.e. find previous) 
  * @param {Boolean} [inDataset=false]   Whether to only look in this item's dataset
  * @return {TimeMapItem}                Next/previous item, if any
  */
