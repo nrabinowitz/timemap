@@ -9,17 +9,10 @@
  * either in a script or from the url hash.
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
- 
-
-
-then a function to get the state config from the URL (probably the hash, right?)
-
-
-
  */
 
 /*----------------------------------------------------------------------------
- * Core TimeMap state methods
+ * TimeMap object methods
  *---------------------------------------------------------------------------*/
 
 /**
@@ -28,14 +21,14 @@ then a function to get the state config from the URL (probably the hash, right?)
  * @param {Object} state    Object with state config settings
  */
 TimeMap.prototype.setState = function(state) {
-    var setters = TimeMap.state.setters,
+    var params = TimeMap.state.params,
         key;
     // go through each key in state
     for (key in state) {
         if (state.hasOwnProperty(key)) {
-            if (key in setters) {
+            if (key in params) {
                 // run setter function with config value
-                setters[key](this, state[key]);
+                params[key].set(this, state[key]);
             }
         }
     }
@@ -48,13 +41,13 @@ TimeMap.prototype.setState = function(state) {
  */
 TimeMap.prototype.getState = function() {
     var state = {},
-        serializers = TimeMap.state.serializers,
+        params = TimeMap.state.params,
         key;
-    // run through serializers, adding values to state
-    for (key in serializers) {
-        if (serializers.hasOwnProperty(key)) {
-            // run serializer to get state value
-            state[key] = serializers[key](this);
+    // run through params, adding values to state
+    for (key in params) {
+        if (params.hasOwnProperty(key)) {
+            // get state value
+            state[key] = params[key].get(this);
         }
     }
     return state;
@@ -64,7 +57,16 @@ TimeMap.prototype.getState = function() {
  * Set the timemap state with parameters in the URL
  */
 TimeMap.prototype.setStateFromUrl = function() {
-    this.setState(TimeMap.state.getFromUrl());
+    this.setState(TimeMap.state.fromUrl());
+};
+
+/**
+ * Get current state parameters serialized as a hash string
+ *
+ * @return {String}     State parameters serialized as a hash string
+ */
+TimeMap.prototype.getStateParamString = function() {
+    return TimeMap.state.toParamString(this.getState());
 };
 
 /**
@@ -73,7 +75,7 @@ TimeMap.prototype.setStateFromUrl = function() {
  * @return {String}     URL with state parameters
  */
 TimeMap.prototype.getStateUrl = function() {
-    // XXX
+    return TimeMap.state.toUrl(this.getState());
 };
 
 /*----------------------------------------------------------------------------
@@ -85,124 +87,82 @@ TimeMap.prototype.getStateUrl = function() {
  * Namespace for static state functions
  */
 TimeMap.state = {
-
+    
     /**
-     * @namespace
-     * Map of setter functions, each taking a TimeMap object and a value.
-     * Add your own functions to this object to set additional state variables.
+     * @class
+     * A state parameter, with methods to get, set, and serialize the current value.
+     *
+     * @constructor
+     * @param {Function} get            Function to get the current state value
+     * @param {Function} set            Function to set the state to a new value
+     * @param {Function} [setConfig]    Function to set a new value in a config object
+     * @param {Function} [fromStr]      Function to parse the value from a string
+     * @param {Function} [toStr]        Function to serialize the current value to a string
      */
-    setters: {
+    Param: function(get, set, setConfig, fromStr, toStr) {
         /**
-         * Set the map zoom level
-         * 
-         * @param {TimeMap} tm      TimeMap object
-         * @param {String} value    Zoom level
+         * @function
+         * Get the current state value from a TimeMap object
+         *
+         * @param {TimeMap} tm      TimeMap object to inspect
+         * @return {mixed}          Current state value
          */
-        zoom: function(tm, value) {
-            tm.map.setZoom(parseInt(value));
-        },
+        this.get = get;
         
         /**
-         * Set the map center
-         * 
-         * @param {TimeMap} tm      TimeMap object
-         * @param {String} value    Map center ("lat,lon" or "lat,lon,zoom")
+         * @function
+         * Set the current state value on a TimeMap object
+         *
+         * @param {TimeMap} tm      TimeMap object to modify
+         * @param {mixed} value     Value to set
          */
-        center: function(tm, value) {
-            var params = value.split(","),
-                point, zoom;
-            if (params.length < 2) {
-                // give up
-                return;
-            }
-            point = new GLatLng(
-                parseFloat(params[0]),
-                parseFloat(params[1])
-            );
-            if (params[3]) {
-                zoom = parseInt(params[3]);
-            }
-            tm.map.setCenter(point, zoom);
-        },
+        this.set = set;
         
         /**
-         * Set the timeline center date
-         * 
-         * @param {TimeMap} tm      TimeMap object
-         * @param {String} value    Date to set (one of the strings accepted by TimeMap#parseDate)
+         * @function
+         * Set a new value on a config object for TimeMap.init()
+         * @see TimeMap.init
+         *
+         * @param {TimeMap} config  Config object to modify
+         * @param {mixed} value     Value to set
          */
-        date: function(tm, value) {
-            tm.scrollToDate(value);
-        },
+        this.setConfig = setConfig || function(config, value) {
+            // default: do nothing
+        };
         
         /**
-         * Select/open a particular item
-         * 
-         * @param {TimeMap} tm      TimeMap object
-         * @param {String} value    Index of item to select
+         * @function
+         * Parse a state value from a string
+         *
+         * @param {String} s        String to parse
+         * @return {mixed}          Current state value
          */
-        selected: function(tm, value) {
-            var index = parseInt(value),
-                item = tm.getItems()[index];
-            if (item) {
-                item.openInfoWindow();
-            }
-        }
-    },
-
-    /**
-     * @namespace
-     * Map of serializer functions, each returning the value of the current state
-     * as a string.  Add your own functions to this object to serialize additional 
-     * state variables.
-     */
-    serializers: {
-        /**
-         * Get the map zoom level
-         * 
-         * @param {TimeMap} tm      TimeMap object
-         * @return {String}         Zoom level
-         */
-        zoom: function(tm) {
-            return tm.map.getZoom();
-        },
+        this.fromString = fromStr || function(s) {
+            // default: this is a string
+            return s;
+        };
         
         /**
-         * Get the map center
-         * 
-         * @param {TimeMap} tm      TimeMap object
-         * @return {String}         Map center ("lat,lon" or "lat,lon,zoom")
+         * @function
+         * Serialize a state value as a string
+         *
+         * @param {TimeMap} value   Value to serialize
+         * @return {String}         Serialized string
          */
-        center: function(tm) {
-            var center = tm.map.getCenter();
-            return center.lat() + "," + center.lng();
-        },
+        this.toString = toStr || function(value) {
+            // default: use the built-in string method
+            return value.toString();
+        };
         
         /**
-         * Get the timeline center date
+         * Set the current state value from a string
          * 
-         * @param {TimeMap} tm      TimeMap object
-         * @return {String}         Timeline center date, in ISO8601 format
+         * @param {TimeMap} tm      TimeMap object to modify
+         * @param {String} s        String version of value to set
          */
-        date: function(tm) {
-            return TimeMap.util.formatDate(tm.timeline.getBand(0).getCenterVisibleDate());
-        },
-        
-        /**
-         * Get the selected item, if any
-         * 
-         * @param {TimeMap} tm      TimeMap object
-         * @return {String}         Index of item to select
-         */
-        selected: function(tm) {
-            var x = 0;
-            tm.eachItem(function(item) {
-                if (item.selected) {
-                    return x;
-                }
-                x++;
-            });
-        }
+        this.setString = function(tm, s) {
+            this.set(this.fromString(s));
+        };
     },
     
     /**
@@ -211,12 +171,16 @@ TimeMap.state = {
      * @return {Object}             Object with state config settings
      */
     fromUrl: function() {
-        var paramPairs = location.hash.substring(1).split('&'),
-            state = {}, x, param;
-        for (x=0; x < paramPairs.length; x++) {
-            if (paramPairs[x] != "") {
-                param = paramPairs[x].split('=');
-                state[param[0]] = decodeURIComponent(param[1]);
+        var pairs = location.hash.substring(1).split('&'),
+            params = TimeMap.state.params,
+            state = {}, x, pair, key;
+        for (x=0; x < pairs.length; x++) {
+            if (pairs[x] != "") {
+                pair = pairs[x].split('=');
+                key = pair[0];
+                if (key && key in params) {
+                    state[key] = params[key].fromString(decodeURI(pair[1]));
+                }
             }
         }
         return state;
@@ -229,14 +193,18 @@ TimeMap.state = {
      * @return {String}             Parameter string in URL param format
      */
     toParamString: function(state) {
-        var params = [], key;
+        var params = TimeMap.state.params, 
+            paramArray = [], 
+            key;
         // go through each key in state
         for (key in state) {
             if (state.hasOwnProperty(key)) {
-                params.append(key + "=" + encodeURIComponent(state[key]);
+                if (key in params) {
+                    paramArray.push(key + "=" + encodeURI(params[key].toString(state[key])));
+                }
             }
         }
-        return params.join("&");
+        return paramArray.join("&");
     },
     
     /**
@@ -249,6 +217,164 @@ TimeMap.state = {
         var paramString = TimeMap.state.toParamString(state),
             url = location.href.split("#")[0];
         return url + "#" + paramString;
-    }
+    },
     
+    /**
+     * Set state settings on a config object for TimeMap.init()
+     * @see TimeMap.init
+     *
+     * @param {Object} config       Config object for TimeMap.init()
+     * @param {Object} state        Object with state config settings
+     */
+    setConfig: function(config, state) {
+        var params = TimeMap.state.params,
+            key;
+        for (key in state) {
+            if (state.hasOwnProperty(key)) {
+                if (key in params) {
+                    params[key].setConfig(config, state[key]);
+                }
+            }
+        }
+    },
+    
+    /**
+     * Set state settings on a config object for TimeMap.init() using
+     * parameters in the URL
+     * @see TimeMap.init
+     *
+     * @param {Object} config       Config object for TimeMap.init()
+     */
+    setConfigFromUrl: function(config) {
+        TimeMap.state.setConfig(config, TimeMap.state.fromUrl());
+    }
+
+};
+
+/**
+ * @namespace
+ * Namespace for state parameters, each with a set of functions to set and serialize values.
+ * Add your own Param objects to this namespace to get and set additional state variables.
+ */
+TimeMap.state.params = {
+        
+        /**
+         * @type TimeMap.state.Param
+         * Map zoom level
+         */
+        zoom: new TimeMap.state.Param(
+            // get
+            function(tm) {
+                return tm.map.getZoom();
+            },
+            // set
+            function(tm, value) {
+                tm.map.setZoom(value);
+            },
+            // setConfig
+            function(config, value) {
+                config.options = config.options || {};
+                config.options.mapZoom = value;
+            },
+            // fromString
+            function(s) {
+                return parseInt(s);
+            },
+            // toString
+            null
+        ),
+        
+        /**
+         * @type TimeMap.state.Param
+         * Map center
+         */
+        center: new TimeMap.state.Param(
+            // get
+            function(tm) {
+                return tm.map.getCenter();
+            },
+            // set
+            function(tm, value) {
+                tm.map.setCenter(value);
+            },
+            // setConfig
+            function(config, value) {
+                config.options = config.options || {};
+                config.options.mapCenter = value;
+            },
+            // fromString
+            function(s) {
+                var params = s.split(",");
+                if (params.length < 2) {
+                    // give up
+                    return null;
+                }
+                return new GLatLng(
+                    parseFloat(params[0]),
+                    parseFloat(params[1])
+                );
+            },
+            // toString
+            function(value) {
+                return value.lat() + "," + value.lng();
+            }
+        ),
+        
+        /**
+         * @type TimeMap.state.Param
+         * Timeline center date
+         */
+        date: new TimeMap.state.Param(
+            // get
+            function(tm) {
+                return tm.timeline.getBand(0).getCenterVisibleDate();
+            },
+            // set
+            function(tm, value) {
+                tm.scrollToDate(value);
+            },
+            // setConfig
+            function(config, value) {
+                config.scrollTo = value;
+            },
+            // fromString
+            function(s) {
+                return TimeMapDataset.hybridParser(s);
+            },
+            // toString
+            function(value) {
+                return TimeMap.util.formatDate(value);
+            }
+        ),
+        
+        /**
+         * @type TimeMap.state.Param
+         * Selected/open item, if any
+         */
+        selected: new TimeMap.state.Param(
+            // get
+            function(tm) {
+                var items = tm.getItems(),
+                    i = items.length-1;
+                while (i--) {
+                    if (items[i].selected) break;
+                }
+                return i;
+            },
+            // set
+            function(tm, value) {
+                var item = tm.getItems()[value];
+                if (item) {
+                    item.openInfoWindow();
+                }
+            },
+            // setConfig
+            null,
+            // fromString
+            function(s) {
+                return parseInt(s);
+            },
+            // toString
+            null
+        )
 };
