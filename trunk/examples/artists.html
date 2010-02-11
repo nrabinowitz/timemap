@@ -40,7 +40,6 @@ function onLoad() {
             "name" : null
           },
           "name" : null,
-          "sort" : "/people/person/date_of_birth",
           "type" : "/visual_art/visual_artist"
         }
     ];
@@ -65,7 +64,6 @@ function onLoad() {
             "name" : null
           },
           "name" : null,
-          "sort" : "/people/person/date_of_birth",
           "type" : "/book/author"
         }
     ];
@@ -78,21 +76,23 @@ function onLoad() {
             {
                 id: "artists",
                 title: "Artists",
-                theme: TimeMap.themes.green({classicTape: true}),
+                theme: "green",
                 type: "metaweb", // Data to be loaded from freebase.com
-                data: {    
+                options: {    
                     query: artistQuery,
-                    transformFunction: transformPersonData
+                    transformFunction: transformPersonData,
+                    classicTape: true
                 }
             },
             {
                 id: "authors",
                 title: "Authors",
-                theme: TimeMap.themes.red({classicTape: true}),
+                theme: "red",
                 type: "metaweb", // Data to be loaded from freebase.com
-                data: {
+                options: {
                     query: authorQuery,
-                    transformFunction: transformPersonData
+                    transformFunction: transformPersonData,
+                    classicTape: true
                 }
             }
         ],
