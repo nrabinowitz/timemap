@@ -8,6 +8,8 @@
  * Functions in this file are used to set the timemap state programmatically,
  * either in a script or from the url hash.
  *
+ * @requires param.js
+ *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
  */
 
@@ -54,6 +56,19 @@ TimeMap.prototype.getState = function() {
 };
 
 /**
+ * Initialize state tracking based on URL. 
+ * Note: continuous tracking will only work
+ * on browsers that support the "onhashchange" event.
+ */
+TimeMap.prototype.initState = function() {   
+    var tm = this;
+    tm.setStateFromUrl();
+    window.onhashchange = function() {
+        tm.setStateFromUrl();
+    };
+};
+
+/**
  * Set the timemap state with parameters in the URL
  */
 TimeMap.prototype.setStateFromUrl = function() {
@@ -87,83 +102,6 @@ TimeMap.prototype.getStateUrl = function() {
  * Namespace for static state functions
  */
 TimeMap.state = {
-    
-    /**
-     * @class
-     * A state parameter, with methods to get, set, and serialize the current value.
-     *
-     * @constructor
-     * @param {Function} get            Function to get the current state value
-     * @param {Function} set            Function to set the state to a new value
-     * @param {Function} [setConfig]    Function to set a new value in a config object
-     * @param {Function} [fromStr]      Function to parse the value from a string
-     * @param {Function} [toStr]        Function to serialize the current value to a string
-     */
-    Param: function(get, set, setConfig, fromStr, toStr) {
-        /**
-         * @function
-         * Get the current state value from a TimeMap object
-         *
-         * @param {TimeMap} tm      TimeMap object to inspect
-         * @return {mixed}          Current state value
-         */
-        this.get = get;
-        
-        /**
-         * @function
-         * Set the current state value on a TimeMap object
-         *
-         * @param {TimeMap} tm      TimeMap object to modify
-         * @param {mixed} value     Value to set
-         */
-        this.set = set;
-        
-        /**
-         * @function
-         * Set a new value on a config object for TimeMap.init()
-         * @see TimeMap.init
-         *
-         * @param {TimeMap} config  Config object to modify
-         * @param {mixed} value     Value to set
-         */
-        this.setConfig = setConfig || function(config, value) {
-            // default: do nothing
-        };
-        
-        /**
-         * @function
-         * Parse a state value from a string
-         *
-         * @param {String} s        String to parse
-         * @return {mixed}          Current state value
-         */
-        this.fromString = fromStr || function(s) {
-            // default: this is a string
-            return s;
-        };
-        
-        /**
-         * @function
-         * Serialize a state value as a string
-         *
-         * @param {TimeMap} value   Value to serialize
-         * @return {String}         Serialized string
-         */
-        this.toString = toStr || function(value) {
-            // default: use the built-in string method
-            return value.toString();
-        };
-        
-        /**
-         * Set the current state value from a string
-         * 
-         * @param {TimeMap} tm      TimeMap object to modify
-         * @param {String} s        String version of value to set
-         */
-        this.setString = function(tm, s) {
-            this.set(this.fromString(s));
-        };
-    },
     
     /**
      * Get the state parameters from the URL, returning as a config object
@@ -259,51 +197,41 @@ TimeMap.state = {
 TimeMap.state.params = {
         
         /**
-         * @type TimeMap.state.Param
          * Map zoom level
+         * @type TimeMap.Param
          */
-        zoom: new TimeMap.state.Param(
-            // get
-            function(tm) {
+        zoom: new TimeMap.Param({
+            get: function(tm) {
                 return tm.map.getZoom();
             },
-            // set
-            function(tm, value) {
+            set: function(tm, value) {
                 tm.map.setZoom(value);
             },
-            // setConfig
-            function(config, value) {
+            setConfig: function(config, value) {
                 config.options = config.options || {};
                 config.options.mapZoom = value;
             },
-            // fromString
-            function(s) {
+            fromStr: function(s) {
                 return parseInt(s);
-            },
-            // toString
-            null
-        ),
+            }
+        }),
         
         /**
-         * @type TimeMap.state.Param
          * Map center
+         * @type TimeMap.Param
          */
-        center: new TimeMap.state.Param(
-            // get
-            function(tm) {
+        center: new TimeMap.Param({
+            get: function(tm) {
                 return tm.map.getCenter();
             },
-            // set
-            function(tm, value) {
+            set: function(tm, value) {
                 tm.map.setCenter(value);
             },
-            // setConfig
-            function(config, value) {
+            setConfig: function(config, value) {
                 config.options = config.options || {};
                 config.options.mapCenter = value;
             },
-            // fromString
-            function(s) {
+            fromStr: function(s) {
                 var params = s.split(",");
                 if (params.length < 2) {
                     // give up
@@ -314,46 +242,39 @@ TimeMap.state.params = {
                     parseFloat(params[1])
                 );
             },
-            // toString
-            function(value) {
+            toStr: function(value) {
                 return value.lat() + "," + value.lng();
             }
-        ),
+        }),
         
         /**
-         * @type TimeMap.state.Param
          * Timeline center date
+         * @type TimeMap.Param
          */
-        date: new TimeMap.state.Param(
-            // get
-            function(tm) {
+        date: new TimeMap.Param({
+            get: function(tm) {
                 return tm.timeline.getBand(0).getCenterVisibleDate();
             },
-            // set
-            function(tm, value) {
+            set: function(tm, value) {
                 tm.scrollToDate(value);
             },
-            // setConfig
-            function(config, value) {
+            setConfig: function(config, value) {
                 config.scrollTo = value;
             },
-            // fromString
-            function(s) {
+            fromStr: function(s) {
                 return TimeMapDataset.hybridParser(s);
             },
-            // toString
-            function(value) {
+            toStr: function(value) {
                 return TimeMap.util.formatDate(value);
             }
-        ),
+        }),
         
         /**
-         * @type TimeMap.state.Param
          * Selected/open item, if any
+         * @type TimeMap.Param
          */
-        selected: new TimeMap.state.Param(
-            // get
-            function(tm) {
+        selected: new TimeMap.Param({
+            get: function(tm) {
                 var items = tm.getItems(),
                     i = items.length-1;
                 while (i--) {
@@ -361,20 +282,16 @@ TimeMap.state.params = {
                 }
                 return i;
             },
-            // set
-            function(tm, value) {
-                var item = tm.getItems()[value];
-                if (item) {
-                    item.openInfoWindow();
+            set: function(tm, value) {
+                if (value >= 0) {
+                    var item = tm.getItems()[value];
+                    if (item) {
+                        item.openInfoWindow();
+                    }
                 }
             },
-            // setConfig
-            null,
-            // fromString
-            function(s) {
+            fromStr: function(s) {
                 return parseInt(s);
-            },
-            // toString
-            null
-        )
+            }
+        })
 };

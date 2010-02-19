@@ -1080,10 +1080,10 @@ TimeMap.filters = {};
 TimeMap.filters.hidePastFuture = function(item) {
     var topband = item.dataset.timemap.timeline.getBand(0),
         maxVisibleDate = topband.getMaxVisibleDate().getTime(),
-        minVisibleDate = topband.getMinVisibleDate().getTime();
-    if (item.event) {
-        var itemStart = item.event.getStart().getTime(),
-            itemEnd = item.event.getEnd().getTime();
+        minVisibleDate = topband.getMinVisibleDate().getTime(),
+        itemStart = item.getStartTime(),
+        itemEnd = item.getEndTime();
+    if (itemStart) {
         // hide items in the future
         if (itemStart > maxVisibleDate) {
             return false;
@@ -1106,10 +1106,10 @@ TimeMap.filters.hidePastFuture = function(item) {
  */
 TimeMap.filters.showMomentOnly = function(item) {
     var topband = item.dataset.timemap.timeline.getBand(0),
-        momentDate = topband.getCenterVisibleDate().getTime();
-    if (item.event) {
-        var itemStart = item.event.getStart().getTime(),
-            itemEnd = item.event.getEnd().getTime();
+        momentDate = topband.getCenterVisibleDate().getTime(),
+        itemStart = item.getStartTime(),
+        itemEnd = item.getEndTime();
+    if (itemStart) {
         // hide items in the future
         if (itemStart > momentDate) {
             return false;
@@ -1718,23 +1718,25 @@ TimeMapTheme.create = function(theme, options) {
  */
 TimeMapItem = function(placemark, event, dataset, options) {
 
+    var item = this;
+
     /**
      * This item's timeline event
      * @type Timeline.Event
      */
-    this.event = event;
+    item.event = event;
     
     /**
      * This item's parent dataset
      * @type TimeMapDataset
      */
-    this.dataset = dataset;
+    item.dataset = dataset;
     
     /**
      * The timemap's map object
      * @type GMap2
      */
-    this.map = dataset.timemap.map;
+    item.map = dataset.timemap.map;
     
     // initialize placemark(s) with some type juggling
     if (placemark && util.isArray(placemark) && placemark.length === 0) {
@@ -1747,7 +1749,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
      * This item's placemark(s)
      * @type GMarker/GPolyline/GPolygon/GOverlay/Array
      */
-    this.placemark = placemark;
+    item.placemark = placemark;
     
     // set defaults for options
     var defaults = {
@@ -1759,7 +1761,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
         infoUrl: '',
         closeInfoWindow: TimeMapItem.closeInfoWindowBasic
     };
-    this.opts = options = util.merge(options, defaults, dataset.opts);
+    item.opts = options = util.merge(options, defaults, dataset.opts);
     
     // select default open function
     if (!options.openInfoWindow) {
@@ -1779,42 +1781,94 @@ TimeMapItem = function(placemark, event, dataset, options) {
      * 
      * @return {String}     Placemark type
      */
-    this.getType = function() { return this.opts.type; };
+    item.getType = function() { return item.opts.type; };
     
     /**
      * Return the title for this item
      * 
      * @return {String}     Item title
      */
-    this.getTitle = function() { return this.opts.title; };
+    item.getTitle = function() { return item.opts.title; };
     
     /**
      * Return the item's "info point" (the anchor for the map info window)
      * 
      * @return {GLatLng}    Info point
      */
-    this.getInfoPoint = function() { 
+    item.getInfoPoint = function() { 
         // default to map center if placemark not set
-        return this.opts.infoPoint || this.map.getCenter(); 
+        return item.opts.infoPoint || item.map.getCenter(); 
     };
+    
+    /**
+     * Return the start date of the item's event, if any
+     * 
+     * @return {Date}   Item start date or undefined
+     */
+    item.getStart = function() {
+        if (item.event) {
+            return item.event.getStart();
+        }
+    };
+    
+    /**
+     * Return the end date of the item's event, if any
+     * 
+     * @return {Date}   Item end dateor undefined
+     */
+    item.getEnd = function() {
+        if (item.event) {
+            return item.event.getEnd();
+        }
+    };
+    
+    /**
+     * Return the timestamp of the start date of the item's event, if any
+     * 
+     * @return {int}    Item start date timestamp or undefined
+     */
+    item.getStartTime = function() {
+        var start = item.getStart();
+        if (start) {
+            return start.getTime();
+        }
+    };
+    
+    /**
+     * Return the timestamp of the end date of the item's event, if any
+     * 
+     * @return {int}    Item end date timestamp or undefined
+     */
+    item.getEndTime = function() {
+        var end = item.getEnd();
+        if (end) {
+            return end.getTime();
+        }
+    };
+    
+    /**
+     * Whether the item is currently selected
+     * @type Boolean
+     */
+    item.selected = false;
     
     /**
      * Whether the item is visible
      * @type Boolean
      */
-    this.visible = true;
+    item.visible = true;
     
     /**
      * Whether the item's placemark is visible
      * @type Boolean
      */
-    this.placemarkVisible = false;
+    item.placemarkVisible = false;
     
     /**
      * Whether the item's event is visible
      * @type Boolean
      */
-    this.eventVisible = true;
+    item.eventVisible = true;
     
     /**
      * Open the info window for this item.
@@ -1822,9 +1876,9 @@ TimeMapItem = function(placemark, event, dataset, options) {
      * for whatever behavior you want when the event or placemark is clicked
      * @function
      */
-    this.openInfoWindow = function() {
-        options.openInfoWindow.call(this);
-        this.selected = true;
+    item.openInfoWindow = function() {
+        options.openInfoWindow.call(item);
+        item.selected = true;
     };
     
     /**
@@ -1833,9 +1887,9 @@ TimeMapItem = function(placemark, event, dataset, options) {
      * for whatever behavior you want.
      * @function
      */
-    this.closeInfoWindow = function() {
-        options.closeInfoWindow.call(this);
-        this.selected = false;
+    item.closeInfoWindow = function() {
+        options.closeInfoWindow.call(item);
+        item.selected = false;
     };
 };
 
@@ -1843,15 +1897,16 @@ TimeMapItem = function(placemark, event, dataset, options) {
  * Show the map placemark(s)
  */
 TimeMapItem.prototype.showPlacemark = function() {
-    if (this.placemark) {
-        if (this.getType() == "array") {
-            for (var i=0; i<this.placemark.length; i++) {
-                this.placemark[i].show();
+    var item = this, i;
+    if (item.placemark) {
+        if (item.getType() == "array") {
+            for (i=0; i<item.placemark.length; i++) {
+                item.placemark[i].show();
             }
         } else {
-            this.placemark.show();
+            item.placemark.show();
         }
-        this.placemarkVisible = true;
+        item.placemarkVisible = true;
     }
 };
 
@@ -1859,17 +1914,18 @@ TimeMapItem.prototype.showPlacemark = function() {
  * Hide the map placemark(s)
  */
 TimeMapItem.prototype.hidePlacemark = function() {
-    if (this.placemark) {
-        if (this.getType() == "array") {
-            for (var i=0; i<this.placemark.length; i++) {
-                this.placemark[i].hide();
+    var item = this, i;
+    if (item.placemark) {
+        if (item.getType() == "array") {
+            for (i=0; i<item.placemark.length; i++) {
+                item.placemark[i].hide();
             }
         } else {
-            this.placemark.hide();
+            item.placemark.hide();
         }
-        this.placemarkVisible = false;
+        item.placemarkVisible = false;
     }
-    this.closeInfoWindow();
+    item.closeInfoWindow();
 };
 
 /** 
@@ -1905,45 +1961,54 @@ TimeMapItem.prototype.hideEvent = function() {
  * Standard open info window function, using static text in map window
  */
 TimeMapItem.openInfoWindowBasic = function() {
-    var html = this.opts.infoHtml;
+    var item = this,
+        html = item.opts.infoHtml;
     // create content for info window if none is provided
     if (html === "") {
-        html = '<div class="infotitle">' + this.opts.title + '</div>';
-        if (this.opts.description !== "") {
-            html += '<div class="infodescription">' + this.opts.description + '</div>';
+        html = '<div class="infotitle">' + item.opts.title + '</div>';
+        if (item.opts.description !== "") {
+            html += '<div class="infodescription">' + item.opts.description + '</div>';
         }
     }
     // scroll timeline if necessary
-    if (this.placemark && !this.placemarkVisible && this.event) {
-        this.dataset.timemap.scrollToDate(this.event.getStart());
+    if (item.placemark && !item.placemarkVisible && item.event) {
+        item.dataset.timemap.scrollToDate(item.event.getStart());
     }
     // open window
-    if (this.getType() == "marker") {
-        this.placemark.openInfoWindowHtml(html);
+    if (item.getType() == "marker") {
+        item.placemark.openInfoWindowHtml(html);
     } else {
-        this.map.openInfoWindowHtml(this.getInfoPoint(), html);
+        item.map.openInfoWindowHtml(item.getInfoPoint(), html);
     }
+    // deselect when window is closed
+    item.closeListener = GEvent.addListener(item.map, "infowindowclose", function() { 
+        // deselect
+        item.selected = false;
+        // kill self
+        GEvent.removeListener(item.closeListener);
+    });
 };
 
 /**
  * Open info window function using ajax-loaded text in map window
  */
 TimeMapItem.openInfoWindowAjax = function() {
-    if (this.opts.infoHtml !== "") { // already loaded - change to static
-        this.openInfoWindow = TimeMapItem.openInfoWindowBasic;
-        this.openInfoWindow();
-    } else { // load content via AJAX
-        if (this.opts.infoUrl !== "") {
-            var item = this;
-            GDownloadUrl(this.opts.infoUrl, function(result) {
+    var item = this;
+    if (!item.opts.infoHtml) { // load content via AJAX
+        if (item.opts.infoUrl) {
+            GDownloadUrl(item.opts.infoUrl, function(result) {
                     item.opts.infoHtml = result;
                     item.openInfoWindow();
             });
-        } else { // fall back on basic function
-            this.openInfoWindow = TimeMapItem.openInfoWindowBasic;
-            this.openInfoWindow();
+            return;
         }
     }
+    // fall back on basic function if content is loaded or URL is missing
+    item.openInfoWindow = function() {
+        TimeMapItem.openInfoWindowBasic.call(item);
+        item.selected = true;
+    };
+    item.openInfoWindow();
 };
 
 /**
