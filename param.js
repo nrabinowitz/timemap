@@ -25,8 +25,8 @@
  */
 TimeMap.Param = function(options) {
     /**
-     * @function
      * Get the current state value from a TimeMap object
+     * @function
      *
      * @param {TimeMap} tm      TimeMap object to inspect
      * @return {mixed}          Current state value
@@ -34,8 +34,8 @@ TimeMap.Param = function(options) {
     this.get = options.get;
     
     /**
-     * @function
      * Set the current state value on a TimeMap object
+     * @function
      *
      * @param {TimeMap} tm      TimeMap object to modify
      * @param {mixed} value     Value to set
@@ -43,11 +43,11 @@ TimeMap.Param = function(options) {
     this.set = options.set;
     
     /**
-     * @function
      * Set a new value on a config object for TimeMap.init()
+     * @function
      * @see TimeMap.init
      *
-     * @param {TimeMap} config  Config object to modify
+     * @param {Object} config   Config object to modify
      * @param {mixed} value     Value to set
      */
     this.setConfig = options.setConfig || function(config, value) {
@@ -55,8 +55,8 @@ TimeMap.Param = function(options) {
     };
     
     /**
-     * @function
      * Parse a state value from a string
+     * @function
      *
      * @param {String} s        String to parse
      * @return {mixed}          Current state value
@@ -67,10 +67,10 @@ TimeMap.Param = function(options) {
     };
     
     /**
-     * @function
      * Serialize a state value as a string
+     * @function
      *
-     * @param {TimeMap} value   Value to serialize
+     * @param {mixed} value     Value to serialize
      * @return {String}         Serialized string
      */
     this.toString = options.toStr || function(value) {

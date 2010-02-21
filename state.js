@@ -161,7 +161,7 @@ TimeMap.state = {
      * Set state settings on a config object for TimeMap.init()
      * @see TimeMap.init
      *
-     * @param {Object} config       Config object for TimeMap.init()
+     * @param {Object} config       Config object for TimeMap.init(), modified in place
      * @param {Object} state        Object with state config settings
      */
     setConfig: function(config, state) {
@@ -180,6 +180,18 @@ TimeMap.state = {
      * Set state settings on a config object for TimeMap.init() using
      * parameters in the URL
      * @see TimeMap.init
+     * @example
+         // set up the config object
+         var config = {
+            // various settings, as usual for TimeMap.init()
+         };
+         
+         // get state settings from the URL, e.g.:
+         // http://www.example.com/mytimemap.html#zoom=4&selected=1
+         TimeMap.state.setConfigFromUrl(config);
+         
+         // initialize TimeMap object
+         var tm = TimeMap.init(config);
      *
      * @param {Object} config       Config object for TimeMap.init()
      */
@@ -270,7 +282,7 @@ TimeMap.state.params = {
         }),
         
         /**
-         * Selected/open item, if any
+         * Index of selected/open item, if any
          * @type TimeMap.Param
          */
         selected: new TimeMap.Param({
