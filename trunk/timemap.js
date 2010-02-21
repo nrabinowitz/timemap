@@ -1717,23 +1717,26 @@ TimeMapTheme.create = function(theme, options) {
  * </pre>
  */
 TimeMapItem = function(placemark, event, dataset, options) {
-
+    // improve compression
     var item = this;
 
     /**
      * This item's timeline event
+     * @name TimeMapItem#event
      * @type Timeline.Event
      */
     item.event = event;
     
     /**
      * This item's parent dataset
+     * @name TimeMapItem#dataset
      * @type TimeMapDataset
      */
     item.dataset = dataset;
     
     /**
      * The timemap's map object
+     * @name TimeMapItem#map
      * @type GMap2
      */
     item.map = dataset.timemap.map;
@@ -1747,6 +1750,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
     }
     /**
      * This item's placemark(s)
+     * @name TimeMapItem#placemark
      * @type GMarker/GPolyline/GPolygon/GOverlay/Array
      */
     item.placemark = placemark;
@@ -1778,6 +1782,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
     
     /**
      * Return the placemark type for this item
+     * @name TimeMapItem#getType
      * 
      * @return {String}     Placemark type
      */
@@ -1785,6 +1790,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
     
     /**
      * Return the title for this item
+     * @name TimeMapItem#getTitle
      * 
      * @return {String}     Item title
      */
@@ -1792,6 +1798,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
     
     /**
      * Return the item's "info point" (the anchor for the map info window)
+     * @name TimeMapItem#getInfoPoint
      * 
      * @return {GLatLng}    Info point
      */
@@ -1802,6 +1809,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
     
     /**
      * Return the start date of the item's event, if any
+     * @name TimeMapItem#getStart
      * 
      * @return {Date}   Item start date or undefined
      */
@@ -1813,6 +1821,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
     
     /**
      * Return the end date of the item's event, if any
+     * @name TimeMapItem#getEnd
      * 
      * @return {Date}   Item end dateor undefined
      */
@@ -1824,6 +1833,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
     
     /**
      * Return the timestamp of the start date of the item's event, if any
+     * @name TimeMapItem#getStartTime
      * 
      * @return {int}    Item start date timestamp or undefined
      */
@@ -1836,6 +1846,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
     
     /**
      * Return the timestamp of the end date of the item's event, if any
+     * @name TimeMapItem#getEndTime
      * 
      * @return {int}    Item end date timestamp or undefined
      */
@@ -1848,24 +1859,28 @@ TimeMapItem = function(placemark, event, dataset, options) {
     
     /**
      * Whether the item is currently selected
+     * @name TimeMapItem#selected
      * @type Boolean
      */
     item.selected = false;
     
     /**
      * Whether the item is visible
+     * @name TimeMapItem#visible
      * @type Boolean
      */
     item.visible = true;
     
     /**
      * Whether the item's placemark is visible
+     * @name TimeMapItem#placemarkVisible
      * @type Boolean
      */
     item.placemarkVisible = false;
     
     /**
      * Whether the item's event is visible
+     * @name TimeMapItem#eventVisible
      * @type Boolean
      */
     item.eventVisible = true;
@@ -1874,6 +1889,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
      * Open the info window for this item.
      * By default this is the map infoWindow, but you can set custom functions
      * for whatever behavior you want when the event or placemark is clicked
+     * @name TimeMapItem#openInfoWindow
      * @function
      */
     item.openInfoWindow = function() {
@@ -1885,6 +1901,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
      * Close the info window for this item.
      * By default this is the map infoWindow, but you can set custom functions
      * for whatever behavior you want.
+     * @name TimeMapItem#closeInfoWindow
      * @function
      */
     item.closeInfoWindow = function() {
