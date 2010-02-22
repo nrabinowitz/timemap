@@ -98,11 +98,6 @@ TimeMap = function(tElement, mElement, options) {
      * @type Object
      */
     this.chains = {};
-    /** 
-     * Bounds of the map 
-     * @type GLatLngBounds
-     */
-    this.mapBounds = new GLatLngBounds();
     
     // set defaults for options
     var defaults = {
@@ -179,6 +174,12 @@ TimeMap.prototype.initMap = function() {
         if (options.showMapTypeCtrl) {
             map.addControl(new GMapTypeControl());
         }
+        
+        /** 
+         * Bounds of the map 
+         * @type GLatLngBounds
+         */
+        this.mapBounds = map.getBounds();
     }
 };
 
@@ -2216,6 +2217,13 @@ TimeMap.util.formatDate = function(d, precision) {
     precision = precision || 3;
     var str = "";
     if (d) {
+        var yyyy = d.getUTCFullYear(),
+            mo = d.getUTCMonth(),
+            dd = d.getUTCDate();
+        // deal with early dates
+        if (yyyy < 1000) {
+            return (yyyy < 1 ? (yyyy * -1 + "BC") : yyyy + "");
+        }
         // check for date.js support
         if (d.toISOString && precision == 3) {
             return d.toISOString();
@@ -2224,9 +2232,6 @@ TimeMap.util.formatDate = function(d, precision) {
         var pad = function(num) {
             return ((num < 10) ? "0" : "") + num;
         };
-        var yyyy = d.getUTCFullYear(),
-            mo = d.getUTCMonth(),
-            dd = d.getUTCDate();
         str += yyyy + '-' + pad(mo + 1 ) + '-' + pad(dd);
         // show time if top interval less than a week
         if (precision > 1) {
