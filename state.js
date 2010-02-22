@@ -289,7 +289,7 @@ TimeMap.state.params = {
             get: function(tm) {
                 var items = tm.getItems(),
                     i = items.length-1;
-                while (i--) {
+                while (i >= 0 && i--) {
                     if (items[i].selected) break;
                 }
                 return i;
