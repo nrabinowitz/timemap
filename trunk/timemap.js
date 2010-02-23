@@ -62,7 +62,7 @@ var
  *   {Number} mapZoom               Intial map zoom level
  *   {GMapType/String} mapType      The maptype for the map
  *   {Array} mapTypes               The set of maptypes available for the map
- *   {Function/String} mapFilter    How to hide/show map items depending on timeline state;
+ *   {Function|String} mapFilter    How to hide/show map items depending on timeline state;
                                     options: "hidePastFuture", "showMomentOnly", or function
  *   {Boolean} showMapTypeCtrl      Whether to display the map type control
  *   {Boolean} showMapCtrl          Whether to show map navigation control
@@ -179,7 +179,11 @@ TimeMap.prototype.initMap = function() {
          * Bounds of the map 
          * @type GLatLngBounds
          */
-        this.mapBounds = map.getBounds();
+        this.mapBounds = options.mapZoom > 0 ?
+            // if the zoom has been set, use the map bounds
+            map.getBounds() :
+            // otherwise, start from scratch
+            new GLatLngBounds();
     }
 };
 
@@ -213,7 +217,7 @@ var util = TimeMap.util = {};
  * @param {Object} [config.options]                 Options for the TimeMap object (see the {@link TimeMap} constructor)
  * @param {Object[]} config.datasets                Array of datasets to load
  * @param {Object} config.datasets[x]               Configuration options for a particular dataset
- * @param {String/Class} config.datasets[x].type    Loader type for this dataset (generally a sub-class 
+ * @param {String|Class} config.datasets[x].type    Loader type for this dataset (generally a sub-class 
  *                                                  of {@link TimeMap.loaders.base})
  * @param {Object} config.datasets[x].options       Options for the loader. See the {@link TimeMap.loaders.base}
  *                                                  constructor and the constructors for the various loaders for 
@@ -222,7 +226,7 @@ var util = TimeMap.util = {};
  *                                                  object, for future reference; otherwise "ds"+x is used
  * @param {String} [config.datasets[x] ...]         Other options for the TimeMapDataset object 
  *                                                  (see the {@link TimeMapDataset} constructor)
- * @param {String/Array} [config.bandIntervals]     Intervals for the two default timeline bands. Can either be an 
+ * @param {String|Array} [config.bandIntervals]     Intervals for the two default timeline bands. Can either be an 
  *                                                  array of interval constants or a key in {@link TimeMap.intervals}
  * @param {Object[]} [config.bandInfo]              Array of configuration objects for Timeline bands, to be passed to
  *                                                  Timeline.createBandInfo (see {@link http://code.google.com/p/simile-widgets/wiki/Timeline_GettingStarted}).
@@ -234,7 +238,7 @@ var util = TimeMap.util = {};
  *                                                  (this will override dataDisplayedFunction and scrollTo)
  * @param {Function} [config.dataDisplayedFunction] Function to be run as soon as all datasets are loaded and 
  *                                                  displayed on the map and timeline
- * @param {String/Date} [config.scrollTo]           Date to scroll to once data is loaded - see 
+ * @param {String|Date} [config.scrollTo]           Date to scroll to once data is loaded - see 
  *                                                  {@link TimeMap.parseDate} for options; default is "earliest"
  * @return {TimeMap}                                The initialized TimeMap object
  */
@@ -385,7 +389,7 @@ TimeMap.loadManager = new function() {
      * @param {Object} options      Container for optional settings:<pre>
      *   {Function} dataLoadedFunction      Custom function replacing default completion function;
      *                                      should take one parameter, the TimeMap object
-     *   {String/Date} scrollTo             Where to scroll the timeline when load is complete
+     *   {String|Date} scrollTo             Where to scroll the timeline when load is complete
      *                                      Options: "earliest", "latest", "now", date string, Date
      *   {Function} dataDisplayedFunction   Custom function to fire once data is loaded and displayed;
      *                                      should take one parameter, the TimeMap object
@@ -435,7 +439,7 @@ TimeMap.loadManager = new function() {
  * ({@link TimeMapDataset.hybridParser}) but accepts "now", "earliest", 
  * "latest", "first", and "last" (referring to loaded events)
  *
- * @param {String/Date} s   String (or date) to parse
+ * @param {String|Date} s   String (or date) to parse
  * @return {Date}           Parsed date
  */
 TimeMap.prototype.parseDate = function(s) {
@@ -472,7 +476,7 @@ TimeMap.prototype.parseDate = function(s) {
  * onScroll listener. This involves a certain amount of reverse engineering,
  * and may not be future-proof.
  *
- * @param {String/Date} d           Date to scroll to (either a date object, a 
+ * @param {String|Date} d           Date to scroll to (either a date object, a 
  *                                  date string, or one of the strings accepted 
  *                                  by TimeMap#parseDate)
  * @param {Boolean} [lazyLayout]    Whether to call timeline.layout() even if not
@@ -711,7 +715,7 @@ TimeMap.loaders.counter = 0;
  *   {Function} parserFunction          Parser function to turn a string into a JavaScript array
  *   {Function} preloadFunction         Function to call on data before loading
  *   {Function} transformFunction       Function to call on individual items before loading
- *   {String/Date} scrollTo             Date to scroll the timeline to in the default callback 
+ *   {String|Date} scrollTo             Date to scroll the timeline to in the default callback 
  *                                      (see {@link TimeMap#parseDate} for accepted syntax)
  * </pre>
  */
@@ -745,7 +749,7 @@ TimeMap.loaders.base = function(options) {
     /**
      * Date to scroll the timeline to on load
      * @default "earliest"
-     * @type String/Date
+     * @type String|Date
      */
     this.scrollTo = options.scrollTo || "earliest";
     
@@ -1139,8 +1143,8 @@ TimeMap.filters.showMomentOnly = function(item) {
  * @param {Object} [options]        Object holding optional arguments:<pre>
  *   {String} id                        Key for this dataset in the datasets map
  *   {String} title                     Title of the dataset (for the legend)
- *   {String/TimeMapTheme} theme        Theme settings.
- *   {String/Function} dateParser       Function to replace default date parser.
+ *   {String|TimeMapTheme} theme        Theme settings.
+ *   {String|Function} dateParser       Function to replace default date parser.
  *   {Function} openInfoWindow          Function redefining how info window opens
  *   {Function} closeInfoWindow         Function redefining how info window closes
  *   {mixed} ...                        Any of the options for {@link TimeMapTheme} may be set here,
@@ -1713,7 +1717,7 @@ TimeMapTheme.create = function(theme, options) {
  *   {String} infoUrl                   URL from which to retrieve full HTML for the info window
  *   {Function} openInfoWindow          Function redefining how info window opens
  *   {Function} closeInfoWindow         Function redefining how info window closes
- *   {String/TimeMapTheme} theme        Theme applying to this item, overriding dataset theme
+ *   {String|TimeMapTheme} theme        Theme applying to this item, overriding dataset theme
  *   {mixed} ...                        Any of the options for {@link TimeMapTheme} may be set here
  * </pre>
  */
