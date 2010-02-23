@@ -212,36 +212,28 @@ TimeMap.state.params = {
          * Map zoom level
          * @type TimeMap.Param
          */
-        zoom: new TimeMap.Param({
+        zoom: new TimeMap.OptionParam({
             get: function(tm) {
                 return tm.map.getZoom();
             },
             set: function(tm, value) {
                 tm.map.setZoom(value);
             },
-            setConfig: function(config, value) {
-                config.options = config.options || {};
-                config.options.mapZoom = value;
-            },
             fromStr: function(s) {
                 return parseInt(s);
             }
-        }),
+        }, "mapZoom"),
         
         /**
          * Map center
          * @type TimeMap.Param
          */
-        center: new TimeMap.Param({
+        center: new TimeMap.OptionParam({
             get: function(tm) {
                 return tm.map.getCenter();
             },
             set: function(tm, value) {
                 tm.map.setCenter(value);
-            },
-            setConfig: function(config, value) {
-                config.options = config.options || {};
-                config.options.mapCenter = value;
             },
             fromStr: function(s) {
                 var params = s.split(",");
@@ -257,7 +249,7 @@ TimeMap.state.params = {
             toStr: function(value) {
                 return value.lat() + "," + value.lng();
             }
-        }),
+        }, "mapCenter"),
         
         /**
          * Timeline center date
