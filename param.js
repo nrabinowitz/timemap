@@ -128,3 +128,81 @@ TimeMap.OptionParam = function(options, paramName) {
     }
     return new TimeMap.Param(options);
 };
+
+/**
+ * @class
+ * A convenience class for those parameters which deal with a value
+ * set at the top level of the config object for a TimeMap or TimeMapItem.
+ *
+ * @augments TimeMap.Param
+ *
+ * @constructor
+ * @param {Object} options          Container for named arguments (see {@link TimeMap.Param})
+ * @param {String} paramName        String name of the option parameter
+ */
+TimeMap.TopLevelParam = function(options, paramName) {
+    if (paramName) {
+        options.setConfig = function(config, value) {
+            config[paramName] = value;
+        };
+    }
+    return new TimeMap.Param(options);
+};
+
+
+/*----------------------------------------------------------------------------
+ * TimeMapItem params
+ *---------------------------------------------------------------------------*/
+ 
+/**
+ * @namespace Namespace for parameters used for loading data into a TimeMapItem 
+ * object. Because these are intended for loading, only setConfig is defined.
+ * XXX: The other functions would be easy enough to define here - worthwhile?
+ */
+TimeMap.loaders.base.prototype.params = {
+    /**
+     * Item title
+     * @type TimeMap.Param
+     */
+    title: new TimeMap.TopLevelParam({}, "title"),
+    
+    /**
+     * Item start date
+     * @type TimeMap.Param
+     */
+    start: new TimeMap.TopLevelParam({}, "start"),
+    
+    /**
+     * Item end date
+     * @type TimeMap.Param
+     */
+    end: new TimeMap.TopLevelParam({}, "end"),
+    
+    /**
+     * Item description
+     * @type TimeMap.Param
+     */
+    description: new TimeMap.OptionParam({}, "description"),
+    
+    /**
+     * Item latitude
+     * @type TimeMap.Param
+     */
+    lat: new TimeMap.Param({
+        setConfig: function(config, value) {
+            config.point = config.point || {};
+            config.point.lat = value;
+        }
+    }),
+    
+    /**
+     * Item longitude
+     * @type TimeMap.Param
+     */
+    lon: new TimeMap.Param({
+        setConfig: function(config, value) {
+            config.point = config.point || {};
+            config.point.lon = value;
+        }
+    })
+};

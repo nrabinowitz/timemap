@@ -255,15 +255,12 @@ TimeMap.state.params = {
          * Timeline center date
          * @type TimeMap.Param
          */
-        date: new TimeMap.Param({
+        date: new TimeMap.TopLevelParam({
             get: function(tm) {
                 return tm.timeline.getBand(0).getCenterVisibleDate();
             },
             set: function(tm, value) {
                 tm.scrollToDate(value);
-            },
-            setConfig: function(config, value) {
-                config.scrollTo = value;
             },
             fromStr: function(s) {
                 return TimeMapDataset.hybridParser(s);
@@ -271,7 +268,7 @@ TimeMap.state.params = {
             toStr: function(value) {
                 return TimeMap.util.formatDate(value);
             }
-        }),
+        }, "scrollTo"),
         
         /**
          * Index of selected/open item, if any
