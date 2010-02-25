@@ -11,7 +11,7 @@
  */
 
 // for JSLint
-/*global TimeMap */
+/*global TimeMap, TimeMapItem */
  
 /**
  * @class
@@ -30,6 +30,7 @@
  * just the spreadsheet key. Note that the spreadsheet must be published.</p>
  *
  * @augments TimeMap.loaders.jsonp
+ * @requires param.js
  * @requires loaders/json.js
  *
  * @example Usage in TimeMap.init():
@@ -51,29 +52,44 @@
         }
     ]
  *
- * @param {Object} options          All options for the loader:<pre>
- *   {String} key                       Key of spreadsheet to load, or
- *   {String} url                       Full JSONP url of spreadsheet to load
- *   {Function} preloadFunction         Function to call on data before loading
- *   {Function} transformFunction       Function to call on individual items before loading
- * </pre>
+ * @param {Object} options          All options for the loader:
+ * @param {String} options.key                      Key of spreadsheet to load, or
+ * @param {String} options.url                      Full JSONP url of spreadsheet to load
+ * @param {Object} [options.columnMap]              Map of paramName:columnName pairs, if using non-standard 
+ *                                                  column names; see keys in {@link TimeMap.loaders.base#params}
+ *                                                  for the standard param names
+ * @param {String[]} [options.extraColumns]         Array of additional columns to load; all named columns will be 
+ *                                                  loaded into the item.opts object.
+ * @param {Function} [options.preloadFunction]      Function to call on data before loading
+ * @param {Function} [options.transformFunction]    Function to call on individual items before loading
  * @return {TimeMap.loaders.remote} Remote loader configured for Google Spreadsheets
  */
 TimeMap.loaders.gss = function(options) {
-    var loader = new TimeMap.loaders.jsonp(options);
+    var loader = new TimeMap.loaders.jsonp(options),
+        params = loader.params, paramName, x,
+        setParamField = TimeMap.loaders.gss.setParamField
+        columnMap = options.columnMap || {},
+        extraColumns = options.extraColumns || [];
     
     // use key if no URL was supplied
     if (!loader.url) {
         loader.url = "http://spreadsheets.google.com/feeds/list/" + 
             options.key + "/1/public/values?alt=json-in-script&callback=";
     }
-        
-    /**
-     * Column map - defaults to TimeMap.loaders.gss.map
-     * @name TimeMap.loaders.gss#map
-     * @type Object
-     */
-    loader.map = options.map || TimeMap.loaders.gss.map;
+    
+    // Set up additional columns
+    for (x=0; x < extraColumns.length; x++) {
+        paramName = extraColumns[x];
+        params[paramName] = new TimeMap.OptionParam({}, paramName);
+    }
+    
+    // Set up parameters to work with Google Spreadsheets
+    for (paramName in params) {
+        if (params.hasOwnProperty(paramName)) {
+            fieldName = columnMap[paramName] || paramName;
+            setParamField(params[paramName], fieldName);
+        }
+    }
     
     /**
      * Preload function for spreadsheet data
@@ -92,31 +108,15 @@ TimeMap.loaders.gss = function(options) {
      * @return {Object} data        Transformed data for one item
      */
     loader.transform = function(data) {
-        // map spreadsheet column ids to corresponding TimeMap elements
-        var fieldMap = loader.map;
-        var getField = function(f) {
-            var el = data['gsx$' + fieldMap[f]];
-            if (el) {
-                return el.$t;
+        var item = {}, params = loader.params, paramName,
+            transform = options.transformFunction;
+        // run through parameters, loading each
+        for (paramName in params) {
+            if (params.hasOwnProperty(paramName)) {
+                params[paramName].setConfigGSS(item, data);
             }
-            else {
-                return false;
-            }
-        };
-        var item = {
-            title: getField("title"),
-            start: getField("start"),
-            end: getField("end"),
-            point: {
-                lat: getField("lat"),
-                lon: getField("lon")
-            },
-            options: {
-                description: getField("description")
-            }
-        };
+        }
         // hook for further transformation
-        var transform = options.transformFunction;
         if (transform) {
             item = transform(item);
         }
@@ -127,14 +127,26 @@ TimeMap.loaders.gss = function(options) {
 };
 
 /**
- * 1:1 map of expected spreadsheet column ids. Modify this map
- * before loading data if you want different names for your columns.
+ * Set a parameter to get its value from a given Google Spreadsheet field.
+ *
+ * @param {TimeMap.Param} param     Param object
+ * @param {String} fieldName        Name of the field
  */
-TimeMap.loaders.gss.map = {
-    title:'title',
-    description:'description',
-    start:'start',
-    end:'end',
-    lat:'lat',
-    lon:'lon'
+TimeMap.loaders.gss.setParamField = function(param, fieldName) {
+    // internal function: Get the value of a Google Spreadsheet field
+    var getField = function(data, fieldName) {
+        // get element, converting field name to GSS format
+        var el = data['gsx$' + fieldName.toLowerCase().replace(" ", "")];
+        if (el) {
+            return el.$t;
+        }
+        return null;
+    };
+    // set the method on the parameter
+    param.setConfigGSS = function(config, data) {
+        var value = getField(data, fieldName);
+        if (value) {
+            this.setConfig(config, value);
+        }
+    };
 };

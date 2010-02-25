@@ -8,16 +8,13 @@
       type="text/javascript"></script>
     <script type="text/javascript" src="http://static.simile.mit.edu/timeline/api/timeline-api.js"></script>
     <script src="../timemap.js" type="text/javascript"></script>
+    <script src="../param.js" type="text/javascript"></script>
     <script src="../loaders/json.js" type="text/javascript"></script>
     <script src="../loaders/google_spreadsheet.js" type="text/javascript"></script>
 	<script type="text/javascript">
 
 var tm;
 function onLoad() {
-    
-    // modify this variable to map your spreadsheet column names to expected ids
-    var map = TimeMap.loaders.gss.map;
-    map['start'] = 'date';
     
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
@@ -34,7 +31,21 @@ function onLoad() {
                 options: {
                     // note that your spreadsheet must be published for this to work
                     key: "pjUcDAp-oNIOjmx3LCxT4XA",
-                    map: map
+                    // map spreadsheet column names to expected ids
+                    columnMap: {
+                        start: "date"
+                    },
+                    // load extra data from non-standard spreadsheet columns
+                    extraColumns: [
+                        "category"
+                    ],
+                    // let's do something with that extra data!
+                    transformFunction: function(data) {
+                        data.options.infoHtml = "<div class='infotitle'>" + data.title + "</div>" + 
+                            "<div class='infodescription'><em>Category</em>:" + data.options.category +
+                            "<br>" + data.options.description + '</div>';
+                        return data;
+                    }
                 }
             }
         ], 
@@ -74,6 +85,7 @@ function onLoad() {
     }
     
     div.infodescription {
+    font-style: normal;
     width: 300px;
     }
     </style>

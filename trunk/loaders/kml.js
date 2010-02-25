@@ -59,8 +59,8 @@ TimeMap.loaders.kml.parse = function(kml) {
     
     // get TimeMap utilty functions
     // assigning to variables should compress better
-    var util = TimeMap.util;
-    var getTagValue = util.getTagValue,
+    var util = TimeMap.util,
+        getTagValue = util.getTagValue,
         getNodeList = util.getNodeList,
         makePoint = util.makePoint,
         makePoly = util.makePoly,
@@ -163,9 +163,7 @@ TimeMap.loaders.kml.parse = function(kml) {
     }
     
     // clean up
-    kmlnode = null;
-    placemarks = null;
-    pm = null;
-    nList = null;
+    kmlnode = placemarks = pm = nList = null;
+    
     return items;
 };
