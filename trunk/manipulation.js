@@ -161,20 +161,6 @@ TimeMap.prototype.changeTimeIntervals = function (intervals) {
     this.timeline.layout();
     topband.setCenterVisibleDate(centerDate);
 };
- 
-/**
- * Scrolls the timeline the number of years passed (negative numbers scroll it back)
- * XXX: This should probably handle other intervals as well...
- *
- * @param {int} years    Number of years to scroll the timeline
-*/
-TimeMap.prototype.scrollTimeline = function (years) {
- 	var topband = this.timeline.getBand(0);
- 	var centerDate = topband.getCenterVisibleDate();
- 	var centerYear = centerDate.getFullYear() + parseFloat(years);
- 	centerDate.setFullYear(centerYear);
- 	topband.setCenterVisibleDate(centerDate);
-};
 
 
 /*----------------------------------------------------------------------------

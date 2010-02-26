@@ -80,7 +80,7 @@ TimeMap.loaders.gss = function(options) {
     // Set up additional columns
     for (x=0; x < extraColumns.length; x++) {
         paramName = extraColumns[x];
-        params[paramName] = new TimeMap.OptionParam({}, paramName);
+        params[paramName] = new TimeMap.params.OptionParam(paramName);
     }
     
     // Set up parameters to work with Google Spreadsheets

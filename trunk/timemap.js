@@ -471,7 +471,7 @@ TimeMap.prototype.parseDate = function(s) {
 }
 
 /**
- * Scroll the timeline to a given date. If lazyLayout is specified, this function
+ * Scroll the timeline to a given date. If forceLayout is specified, this function
  * will also call timeline.layout(), but only if it won't be called by the 
  * onScroll listener. This involves a certain amount of reverse engineering,
  * and may not be future-proof.
@@ -479,10 +479,10 @@ TimeMap.prototype.parseDate = function(s) {
  * @param {String|Date} d           Date to scroll to (either a date object, a 
  *                                  date string, or one of the strings accepted 
  *                                  by TimeMap#parseDate)
- * @param {Boolean} [lazyLayout]    Whether to call timeline.layout() even if not
+ * @param {Boolean} [forceLayout]   Whether to call timeline.layout() even if not
  *                                  required by the scroll.
  */
-TimeMap.prototype.scrollToDate = function(d, lazyLayout) {
+TimeMap.prototype.scrollToDate = function(d, forceLayout) {
     var d = this.parseDate(d), 
         timeline = this.timeline,
         needsLayout;
@@ -490,11 +490,11 @@ TimeMap.prototype.scrollToDate = function(d, lazyLayout) {
         var topband = timeline.getBand(0),
             minTime = topband.getMinDate().getTime(),
             maxTime = topband.getMaxDate().getTime();
-        needsLayout = (lazyLayout && d.getTime() > minTime && d.getTime() < maxTime);
+        needsLayout = (forceLayout && d.getTime() > minTime && d.getTime() < maxTime);
         timeline.getBand(0).setCenterVisibleDate(d);
     }
     // lay out the timeline if needed
-    if (needsLayout || (lazyLayout && !d)) {
+    if (needsLayout || (forceLayout && !d)) {
         timeline.layout();
     }
 }
