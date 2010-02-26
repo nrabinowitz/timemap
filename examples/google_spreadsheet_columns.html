@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <title>Google Spreadsheet Example</title>
+    <title>Google Spreadsheet, Arbitrary Columns Example</title>
     <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w"
       type="text/javascript"></script>
     <script type="text/javascript" src="http://static.simile.mit.edu/timeline/api/timeline-api.js"></script>
@@ -30,17 +30,48 @@ function onLoad() {
                 type: "gss",
                 options: {
                     // note that your spreadsheet must be published for this to work
-                    key: "pjUcDAp-oNIOjmx3LCxT4XA",
+                    key: "tu0AB_xb1LtMTuQwIn_ExSQ",
                     // map spreadsheet column names to expected ids
                     columnMap: {
                         start: "date"
+                    },
+                    // load extra data from non-standard spreadsheet columns
+                    extraColumns: [
+                        "city",
+                        "depthft",
+                        "pitno."
+                    ],
+                    // let's do something with that extra data!
+                    transformFunction: function(data) {
+                        titleMap = {
+                            title: "Owner",
+                            description: "Name",
+                            city: "Location",
+                            depthft: "Depth",
+                            "pitno.": "Pit Number"
+                        };
+                        // how about a little table?
+                        data.options.infoHtml = "<table style='quarrytable'>";
+                        data.options.infoHtml += "<tr><th colspan='2'>Quarry Details</th></tr>";
+                        // loop through our little map to make rows
+                        // easy enough to do this manually, if we wanted
+                        for (var key in titleMap) {
+                            if (titleMap.hasOwnProperty(key)) {
+                                var value = data[key] || data.options[key];
+                                data.options.infoHtml += "<tr><td class='title'>" + titleMap[key] + 
+                                    "</td><td>" + value + "</td></tr>";
+                            }
+                        }
+                        data.options.infoHtml += "</table>";
+                        console.log(data);
+                        return data;
                     }
                 }
             }
         ], 
         bandIntervals: [
-            Timeline.DateTime.WEEK, 
-            Timeline.DateTime.MONTH
+            Timeline.DateTime.YEAR, 
+            Timeline.DateTime.DECADE
         ]
     });
 };
@@ -73,17 +104,25 @@ function onLoad() {
     background: #EEEEEE;
     }
     
-    div.infodescription {
-    font-style: normal;
-    width: 300px;
+    table.quarrytable {
+        border:1px solid #000;
+        width:300px;
     }
+    
+    table.quarrytable tr td {
+        padding: 5px;
+    }
+    td.title {
+        font-weight: bold;
+    }
+    
     </style>
   </head>
 
   <body onload="onLoad();" onunload="GUnload();">
     <div id="help">
-    <h1>Data from a Google Spreadsheet</h1>
-    In this example, we're loading items from a Google Spreadsheet (<a href="http://spreadsheets.google.com/pub?key=pjUcDAp-oNIOjmx3LCxT4XA" target=_blank>published here</a>).
+    <h1>Google Spreadsheet, Arbitrary Columns</h1>
+    In this example, we're loading items from a Google Spreadsheet (<a href="http://spreadsheets.google.com/pub?key=tu0AB_xb1LtMTuQwIn_ExSQ" target=_blank>published here</a>). Additional arbitrary columns are loaded using the "extraColumns" setting, and displayed in the info window.
     </div>
     <div id="timemap">
         <div id="timelinecontainer">

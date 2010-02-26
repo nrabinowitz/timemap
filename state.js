@@ -12,96 +12,21 @@
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
  */
-
-/*----------------------------------------------------------------------------
- * TimeMap object methods
- *---------------------------------------------------------------------------*/
-
-/**
- * Set the timemap state with a set of configuration options.
- *
- * @param {Object} state    Object with state config settings
- */
-TimeMap.prototype.setState = function(state) {
-    var params = TimeMap.state.params,
-        key;
-    // go through each key in state
-    for (key in state) {
-        if (state.hasOwnProperty(key)) {
-            if (key in params) {
-                // run setter function with config value
-                params[key].set(this, state[key]);
-            }
-        }
-    }
-};
-
-/**
- * Get a configuration object of state variables
- *
- * @return {Object}     Object with state config settings
- */
-TimeMap.prototype.getState = function() {
-    var state = {},
-        params = TimeMap.state.params,
-        key;
-    // run through params, adding values to state
-    for (key in params) {
-        if (params.hasOwnProperty(key)) {
-            // get state value
-            state[key] = params[key].get(this);
-        }
-    }
-    return state;
-};
-
-/**
- * Initialize state tracking based on URL. 
- * Note: continuous tracking will only work
- * on browsers that support the "onhashchange" event.
- */
-TimeMap.prototype.initState = function() {   
-    var tm = this;
-    tm.setStateFromUrl();
-    window.onhashchange = function() {
-        tm.setStateFromUrl();
-    };
-};
-
-/**
- * Set the timemap state with parameters in the URL
- */
-TimeMap.prototype.setStateFromUrl = function() {
-    this.setState(TimeMap.state.fromUrl());
-};
-
-/**
- * Get current state parameters serialized as a hash string
- *
- * @return {String}     State parameters serialized as a hash string
- */
-TimeMap.prototype.getStateParamString = function() {
-    return TimeMap.state.toParamString(this.getState());
-};
-
-/**
- * Get URL with current state parameters in hash
- *
- * @return {String}     URL with state parameters
- */
-TimeMap.prototype.getStateUrl = function() {
-    return TimeMap.state.toUrl(this.getState());
-};
+ 
+// save a few bytes
+(function() {
 
 /*----------------------------------------------------------------------------
  * State namespace, with setters, serializers, and url functions
  *---------------------------------------------------------------------------*/
 
-/**
- * @namespace
- * Namespace for static state functions
- */
-TimeMap.state = {
+var paramNS = TimeMap.params,
+
+    /**
+     * @name TimeMap.state
+     * @namespace Namespace for static state functions
+     */
+    stateNS = TimeMap.state = {
     
     /**
      * Get the state parameters from the URL, returning as a config object
@@ -110,7 +35,7 @@ TimeMap.state = {
      */
     fromUrl: function() {
         var pairs = location.hash.substring(1).split('&'),
-            params = TimeMap.state.params,
+            params = stateNS.params,
             state = {}, x, pair, key;
         for (x=0; x < pairs.length; x++) {
             if (pairs[x] != "") {
@@ -131,7 +56,7 @@ TimeMap.state = {
      * @return {String}             Parameter string in URL param format
      */
     toParamString: function(state) {
-        var params = TimeMap.state.params, 
+        var params = stateNS.params, 
             paramArray = [], 
             key;
         // go through each key in state
@@ -152,7 +77,7 @@ TimeMap.state = {
      * @return {String}             Full URL with parameters
      */
     toUrl: function(state) {
-        var paramString = TimeMap.state.toParamString(state),
+        var paramString = stateNS.toParamString(state),
             url = location.href.split("#")[0];
         return url + "#" + paramString;
     },
@@ -165,7 +90,7 @@ TimeMap.state = {
      * @param {Object} state        Object with state config settings
      */
     setConfig: function(config, state) {
-        var params = TimeMap.state.params,
+        var params = stateNS.params,
             key;
         for (key in state) {
             if (state.hasOwnProperty(key)) {
@@ -196,10 +121,95 @@ TimeMap.state = {
      * @param {Object} config       Config object for TimeMap.init()
      */
     setConfigFromUrl: function(config) {
-        TimeMap.state.setConfig(config, TimeMap.state.fromUrl());
+        stateNS.setConfig(config, stateNS.fromUrl());
     }
 
 };
+
+/*----------------------------------------------------------------------------
+ * TimeMap object methods
+ *---------------------------------------------------------------------------*/
+
+/**
+ * Set the timemap state with a set of configuration options.
+ *
+ * @param {Object} state    Object with state config settings
+ */
+TimeMap.prototype.setState = function(state) {
+    var params = stateNS.params,
+        key;
+    // go through each key in state
+    for (key in state) {
+        if (state.hasOwnProperty(key)) {
+            if (key in params) {
+                // run setter function with config value
+                params[key].set(this, state[key]);
+            }
+        }
+    }
+};
+
+/**
+ * Get a configuration object of state variables
+ *
+ * @return {Object}     Object with state config settings
+ */
+TimeMap.prototype.getState = function() {
+    var state = {},
+        params = stateNS.params,
+        key;
+    // run through params, adding values to state
+    for (key in params) {
+        if (params.hasOwnProperty(key)) {
+            // get state value
+            state[key] = params[key].get(this);
+        }
+    }
+    return state;
+};
+
+/**
+ * Initialize state tracking based on URL. 
+ * Note: continuous tracking will only work
+ * on browsers that support the "onhashchange" event.
+ */
+TimeMap.prototype.initState = function() {   
+    var tm = this;
+    tm.setStateFromUrl();
+    window.onhashchange = function() {
+        tm.setStateFromUrl();
+    };
+};
+
+/**
+ * Set the timemap state with parameters in the URL
+ */
+TimeMap.prototype.setStateFromUrl = function() {
+    this.setState(stateNS.fromUrl());
+};
+
+/**
+ * Get current state parameters serialized as a hash string
+ *
+ * @return {String}     State parameters serialized as a hash string
+ */
+TimeMap.prototype.getStateParamString = function() {
+    return stateNS.toParamString(this.getState());
+};
+
+/**
+ * Get URL with current state parameters in hash
+ *
+ * @return {String}     URL with state parameters
+ */
+TimeMap.prototype.getStateUrl = function() {
+    return stateNS.toUrl(this.getState());
+};
+
+
+/*----------------------------------------------------------------------------
+ * State parameters
+ *---------------------------------------------------------------------------*/
 
 /**
  * @namespace
@@ -210,9 +220,9 @@ TimeMap.state.params = {
         
         /**
          * Map zoom level
-         * @type TimeMap.Param
+         * @type TimeMap.params.Param
          */
-        zoom: new TimeMap.OptionParam({
+        zoom: new paramNS.OptionParam("mapZoom", {
             get: function(tm) {
                 return tm.map.getZoom();
             },
@@ -222,13 +232,13 @@ TimeMap.state.params = {
             fromStr: function(s) {
                 return parseInt(s);
             }
-        }, "mapZoom"),
+        }),
         
         /**
          * Map center
-         * @type TimeMap.Param
+         * @type TimeMap.params.Param
          */
-        center: new TimeMap.OptionParam({
+        center: new paramNS.OptionParam("mapCenter", {
             get: function(tm) {
                 return tm.map.getCenter();
             },
@@ -249,13 +259,13 @@ TimeMap.state.params = {
             toStr: function(value) {
                 return value.lat() + "," + value.lng();
             }
-        }, "mapCenter"),
+        }),
         
         /**
          * Timeline center date
-         * @type TimeMap.Param
+         * @type TimeMap.params.Param
          */
-        date: new TimeMap.TopLevelParam({
+        date: new paramNS.TopLevelParam("scrollTo", {
             get: function(tm) {
                 return tm.timeline.getBand(0).getCenterVisibleDate();
             },
@@ -268,13 +278,13 @@ TimeMap.state.params = {
             toStr: function(value) {
                 return TimeMap.util.formatDate(value);
             }
-        }, "scrollTo"),
+        }),
         
         /**
          * Index of selected/open item, if any
-         * @type TimeMap.Param
+         * @type TimeMap.params.Param
          */
-        selected: new TimeMap.Param({
+        selected: new paramNS.Param({
             get: function(tm) {
                 var items = tm.getItems(),
                     i = items.length-1;
@@ -296,3 +306,5 @@ TimeMap.state.params = {
             }
         })
 };
+
+})();
