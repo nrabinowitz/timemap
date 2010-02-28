@@ -69,6 +69,8 @@ var
  *   {Boolean} centerMapOnItems     Whether to center and zoom the map based on loaded item positions
  *   {Function} openInfoWindow      Function redefining how info window opens
  *   {Function} closeInfoWindow     Function redefining how info window closes
+ *   {Boolean} noEventLoad          Whether to skip loading events on the timeline
+ *   {Boolean} noPlacemarkLoad      Whether to skip loading placemarks on the map
  *   {mixed} ...                    Any of the options for {@link TimeMapTheme} may be set here,
  *                                  to cascade to the entire TimeMap, though they can be overridden
  *                                  at lower levels
@@ -1088,7 +1090,7 @@ TimeMap.filters.hidePastFuture = function(item) {
         minVisibleDate = topband.getMinVisibleDate().getTime(),
         itemStart = item.getStartTime(),
         itemEnd = item.getEndTime();
-    if (itemStart) {
+    if (itemStart !== undefined) {
         // hide items in the future
         if (itemStart > maxVisibleDate) {
             return false;
@@ -1114,7 +1116,7 @@ TimeMap.filters.showMomentOnly = function(item) {
         momentDate = topband.getCenterVisibleDate().getTime(),
         itemStart = item.getStartTime(),
         itemEnd = item.getEndTime();
-    if (itemStart) {
+    if (itemStart !== undefined) {
         // hide items in the future
         if (itemStart > momentDate) {
             return false;
