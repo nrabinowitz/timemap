@@ -271,7 +271,8 @@ TimeMap.init = function(config) {
         // allow intervals to be specified by key
         var intervals = util.lookup(config.bandIntervals, TimeMap.intervals);
         // make default band info
-        config.bandInfo = [    		{
+        config.bandInfo = [    		
+            {
                 width:          "80%", 
                 intervalUnit:   intervals[0], 
                 intervalPixels: 70
@@ -473,7 +474,7 @@ TimeMap.prototype.parseDate = function(s) {
 }
 
 /**
- * Scroll the timeline to a given date. If forceLayout is specified, this function
+ * Scroll the timeline to a given date. If lazyLayout is specified, this function
  * will also call timeline.layout(), but only if it won't be called by the 
  * onScroll listener. This involves a certain amount of reverse engineering,
  * and may not be future-proof.
@@ -481,22 +482,32 @@ TimeMap.prototype.parseDate = function(s) {
  * @param {String|Date} d           Date to scroll to (either a date object, a 
  *                                  date string, or one of the strings accepted 
  *                                  by TimeMap#parseDate)
- * @param {Boolean} [forceLayout]   Whether to call timeline.layout() even if not
+ * @param {Boolean} [lazyLayout]    Whether to call timeline.layout() if not
  *                                  required by the scroll.
  */
-TimeMap.prototype.scrollToDate = function(d, forceLayout) {
+TimeMap.prototype.scrollToDate = function(d, lazyLayout) {
     var d = this.parseDate(d), 
-        timeline = this.timeline,
-        needsLayout;
+        timeline = this.timeline, x,
+        layouts = [];
     if (d) {
-        var topband = timeline.getBand(0),
-            minTime = topband.getMinDate().getTime(),
-            maxTime = topband.getMaxDate().getTime();
-        needsLayout = (forceLayout && d.getTime() > minTime && d.getTime() < maxTime);
+        // check which bands will need layout after scroll
+        for (x=0; x < timeline.getBandCount(); x++) {
+            var band = timeline.getBand(x),
+                minTime = band.getMinDate().getTime(),
+                maxTime = band.getMaxDate().getTime();
+            layouts[x] = (lazyLayout && d.getTime() > minTime && d.getTime() < maxTime);
+        }
+        // do scroll
         timeline.getBand(0).setCenterVisibleDate(d);
-    }
-    // lay out the timeline if needed
-    if (needsLayout || (forceLayout && !d)) {
+        // layout as necessary
+        for (x=0; x < layouts.length; x++) {
+            if (layouts[x]) {
+                timeline.getBand(x).layout();
+            }
+        }
+    } 
+    // layout if requested even if no date is found
+    else if (lazyLayout) {
         timeline.layout();
     }
 }
@@ -556,10 +567,12 @@ TimeMap.prototype.initTimeline = function(bands) {
     });
 
     // hijack timeline popup window to open info window
-    var painter = this.timeline.getBand(0).getEventPainter().constructor;
-    painter.prototype._showBubble = function(x, y, evt) {
-        evt.item.openInfoWindow();
-    };
+    for (x=0; x < tm.timeline.getBandCount(); x++) {
+        var painter = this.timeline.getBand(x).getEventPainter().constructor;
+        painter.prototype._showBubble = function(xx, yy, evt) {
+            evt.item.openInfoWindow();
+        };
+    }
     
     // filter chain for map placemarks
     this.addFilterChain("map", 
@@ -1127,6 +1140,24 @@ TimeMap.filters.showMomentOnly = function(item) {
             return false;
         }
     }
+    return true;
+};
+
+/**
+ * Convenience function: Do nothing. Can be used as a setting for mapFilter
+ * in TimeMap.init() options, if you don't want map items to be hidden or
+ * shown based on the timeline position.
+ * @example
+    TimeMap.init({
+        options: {
+            mapFilter: "none"
+        }
+    });
+ *
+ * @param {TimeMapItem} item    Item to test for filter
+ * @return {Boolean}            Whether to show the item
+ */
+TimeMap.filters.none = function(item) {
     return true;
 };
 
