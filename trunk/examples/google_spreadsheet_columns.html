@@ -42,29 +42,14 @@ function onLoad() {
                         "pitno."
                     ],
                     // let's do something with that extra data!
-                    transformFunction: function(data) {
-                        titleMap = {
-                            title: "Owner",
-                            description: "Name",
-                            city: "Location",
-                            depthft: "Depth",
-                            "pitno.": "Pit Number"
-                        };
-                        // how about a little table?
-                        data.options.infoHtml = "<table style='quarrytable'>";
-                        data.options.infoHtml += "<tr><th colspan='2'>Quarry Details</th></tr>";
-                        // loop through our little map to make rows
-                        // easy enough to do this manually, if we wanted
-                        for (var key in titleMap) {
-                            if (titleMap.hasOwnProperty(key)) {
-                                var value = data[key] || data.options[key];
-                                data.options.infoHtml += "<tr><td class='title'>" + titleMap[key] + 
-                                    "</td><td>" + value + "</td></tr>";
-                            }
-                        }
-                        data.options.infoHtml += "</table>";
-                        return data;
-                    }
+                    infoTemplate: "<table style='quarrytable'>" + 
+                                  "<tr><th colspan='2' class='title'>Quarry Details</th></tr>" +
+                                  "<tr><th>Owner</th><td>{{title}}</td></tr>" +
+                                  "<tr><th>Name</th><td>{{description}}</td></tr>" +
+                                  "<tr><th>Location</th><td>{{city}}</td></tr>" +
+                                  "<tr><th>Depth</th><td>{{depthft}}</td></tr>" +
+                                  "<tr><th>Pit Number</th><td>{{pitno.}}</td></tr>" +
+                                  "</table>"
                 }
             }
         ], 
@@ -111,8 +96,12 @@ function onLoad() {
     table.quarrytable tr td {
         padding: 5px;
     }
-    td.title {
+    th {
         font-weight: bold;
+        text-align: left;
+    }
+    th.title {
+        text-align: center;
     }
     
     </style>
