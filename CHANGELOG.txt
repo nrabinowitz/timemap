@@ -15,6 +15,7 @@ time, based on timeline location.
 cancelled, a default loader to be used, and even easier creation of new loaders
 - Added support for getting timemap state from the URL hash
 - Added support for loading extra data from arbitrary Google Spreadsheet columns
+- Added a templating concept for info window data
 - Additions and tweaks to documentation
 
 Version 1.5

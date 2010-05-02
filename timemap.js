@@ -66,11 +66,13 @@ var
                                     options: "hidePastFuture", "showMomentOnly", or function
  *   {Boolean} showMapTypeCtrl      Whether to display the map type control
  *   {Boolean} showMapCtrl          Whether to show map navigation control
- *   {Boolean} centerMapOnItems     Whether to center and zoom the map based on loaded item positions
- *   {Function} openInfoWindow      Function redefining how info window opens
- *   {Function} closeInfoWindow     Function redefining how info window closes
+ *   {Boolean} centerMapOnItems     Whether to center and zoom the map based on loaded item 
  *   {Boolean} noEventLoad          Whether to skip loading events on the timeline
  *   {Boolean} noPlacemarkLoad      Whether to skip loading placemarks on the map
+ *   {String} infoTemplate          HTML template for info window content
+ *   {String} templatePattern       Regex pattern defining variable syntax in the infoTemplate
+ *   {Function} openInfoWindow      Function redefining how info window opens
+ *   {Function} closeInfoWindow     Function redefining how info window closes
  *   {mixed} ...                    Any of the options for {@link TimeMapTheme} may be set here,
  *                                  to cascade to the entire TimeMap, though they can be overridden
  *                                  at lower levels
@@ -123,7 +125,8 @@ TimeMap = function(tElement, mElement, options) {
     
     // only these options will cascade to datasets and items
     options.mergeOnly = ['mergeOnly', 'theme', 'eventIconPath', 'openInfoWindow', 
-                         'closeInfoWindow', 'noPlacemarkLoad', 'noEventLoad']
+                         'closeInfoWindow', 'noPlacemarkLoad', 'noEventLoad', 
+                         'infoTemplate', 'templatePattern']
     
     // allow map types to be specified by key
     options.mapType = util.lookup(options.mapType, TimeMap.mapTypes);
@@ -1178,6 +1181,8 @@ TimeMap.filters.none = function(item) {
  *   {String} title                     Title of the dataset (for the legend)
  *   {String|TimeMapTheme} theme        Theme settings.
  *   {String|Function} dateParser       Function to replace default date parser.
+ *   {String} infoTemplate              HTML template for info window content
+ *   {String} templatePattern           Regex pattern defining variable syntax in the infoTemplate
  *   {Function} openInfoWindow          Function redefining how info window opens
  *   {Function} closeInfoWindow         Function redefining how info window closes
  *   {mixed} ...                        Any of the options for {@link TimeMapTheme} may be set here,
@@ -1748,6 +1753,9 @@ TimeMapTheme.create = function(theme, options) {
  *   {GLatLng} infoPoint                Point indicating the center of this item
  *   {String} infoHtml                  Full HTML for the info window
  *   {String} infoUrl                   URL from which to retrieve full HTML for the info window
+ *   {String} infoTemplate              HTML for the info window content, with variable expressions
+ *                                      (as "{{varname}}" by default) to be replaced by option data
+ *   {String} templatePattern           Regex pattern defining variable syntax in the infoTemplate
  *   {Function} openInfoWindow          Function redefining how info window opens
  *   {Function} closeInfoWindow         Function redefining how info window closes
  *   {String|TimeMapTheme} theme        Theme applying to this item, overriding dataset theme
@@ -1801,6 +1809,9 @@ TimeMapItem = function(placemark, event, dataset, options) {
         infoPoint: null,
         infoHtml: '',
         infoUrl: '',
+        infoTemplate: '<div class="infotitle">{{title}}</div>' + 
+                      '<div class="infodescription">{{description}}</div>',
+        templatePattern: /{{([^}]+)}}/g,
         closeInfoWindow: TimeMapItem.closeInfoWindowBasic
     };
     item.opts = options = util.merge(options, defaults, dataset.opts);
@@ -2010,19 +2021,24 @@ TimeMapItem.prototype.hideEvent = function() {
         }
         this.eventVisible = false;
     }
-};
+}; 
 
 /**
  * Standard open info window function, using static text in map window
  */
 TimeMapItem.openInfoWindowBasic = function() {
     var item = this,
-        html = item.opts.infoHtml;
+        opts = item.opts,
+        html = opts.infoHtml,
+        match;
     // create content for info window if none is provided
-    if (html === "") {
-        html = '<div class="infotitle">' + item.opts.title + '</div>';
-        if (item.opts.description !== "") {
-            html += '<div class="infodescription">' + item.opts.description + '</div>';
+    if (!html) {
+        // fill in template
+        html = opts.infoTemplate;
+        match = opts.templatePattern.exec(html);
+        while (match) {
+            html = html.replace(match[0], opts[match[1]]);
+            match = opts.templatePattern.exec(html);
         }
     }
     // scroll timeline if necessary
