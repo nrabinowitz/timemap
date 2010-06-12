@@ -19,6 +19,8 @@ If you would like your site included on this list, please email the [http://grou
 
   * [http://www.texaslegacy.org/bb/maps/maps.html The Texas Legacy Project] - A wide variety of timemaps displaying various Texas historical datasets. 
 
+  * Global Voices: [http://threatened.globalvoicesonline.org/ Threatened Voices] and [http://transparency.globalvoicesonline.org/ Technology for Transparency] - two timemaps tracking suppression of free speech and civic engagement technology, respectively.
+
   * [http://darwin.zoology.gla.ac.uk/~rpage/flu/ H1N1 Swine Flu TimeMap] - Timemap of H1N1 cases.
 
   * [http://drupal.org/project/timelinemap Timelinemap] - Drupal plugin using timemap.js.
