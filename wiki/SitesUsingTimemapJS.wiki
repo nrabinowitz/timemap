@@ -1,0 +1,21 @@
+#summary Some of the sites I'm aware of that use the timemap.js library.
+
+If you would like your site included on this list, please email the [http://groups.google.com/group/timemap-development discussion group].
+
+== Sites using timemap.js ==
+
+  * [http://opencontext.org/ Open Context] - A public online database of academic research data.
+
+  * [http://blantonmuseum.org/interact/pachyderm/blanton_vases.html The Blanton Vases] - Timemap of the collection of greek vases at the Blanton Museum of Art at UT Austin.
+
+  * [http://code.google.com/p/geodia/ GeoDia] - Archaeological timemap of the ancient Mediterranean. This was the initial inspiration for timemap.js, and is still a work in progress.
+
+  * [http://www.open.ac.uk/Arts/hestia/herodotus/basic.html The Hestia Project] - Display of the History of Herodotus using the timeline to display narrative sequence, rather than chronological time.
+
+  * [http://www.cannonade.net/timemap.php Cannonade.net WWII Timemap] - Displaying WWII events with a variety of filters.
+
+  * [http://www.texaslegacy.org/bb/maps/maps.html The Texas Legacy Project] - A wide variety of timemaps displaying various Texas historical datasets. 
+
+  * [http://sites.google.com/site/mapadofutebol/ Mapa do Futebol] - Timemap of football history.
+
+  
