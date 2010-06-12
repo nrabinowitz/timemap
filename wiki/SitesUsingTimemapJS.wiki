@@ -1,4 +1,5 @@
 #summary Some of the sites I'm aware of that use the timemap.js library.
+#labels Featured
 
 If you would like your site included on this list, please email the [http://groups.google.com/group/timemap-development discussion group].
 
@@ -16,6 +17,12 @@ If you would like your site included on this list, please email the [http://grou
 
   * [http://www.texaslegacy.org/bb/maps/maps.html The Texas Legacy Project] - A wide variety of timemaps displaying various Texas historical datasets. 
 
-  * [http://sites.google.com/site/mapadofutebol/ Mapa do Futebol] - Timemap of football history.
+  * [http://itn.co.uk/earth.html ITN Story Map] - Timemap of news items from the ITN website.
+
+  * [http://www.amazonwatch.org/tm/ Amazon Watch] - Timemap of news items from the !AmazonWatch website.
+
+  * [http://www.dalli.it/kk/it/proj/index.html Trifolium] - Timemap of environmental projects (Italian)
+
+  * [http://sites.google.com/site/mapadofutebol/ Mapa do Futebol] - Timemap of football history (Portuguese)
 
   
