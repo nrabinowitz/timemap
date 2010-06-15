@@ -1264,7 +1264,7 @@ TimeMapDataset = function(timemap, options) {
  * @return {Date}       Parsed date or null
  */
 TimeMapDataset.gregorianParser = function(s) {
-    if (!s) {
+    if (!s || typeof(s) != "string") {
         return null;
     }
     // look for BC
@@ -1304,14 +1304,14 @@ TimeMapDataset.hybridParser = function(s) {
     if (s instanceof Date) {
         return s;
     }
-    // try native date parse
-    var d = new Date(Date.parse(s));
+    // try native date parse and timestamp
+    var d = new Date(typeof(s) == "number" ? s : Date.parse(s));
     if (isNaN(d)) {
         if (typeof(s) == "string") {
             // look for Gregorian dates
             if (s.match(/^-?\d{1,6} ?(a\.?d\.?|b\.?c\.?e?\.?|c\.?e\.?)?$/i)) {
                 d = TimeMapDataset.gregorianParser(s);
-            }
+            } 
             // try ISO 8601 parse
             else {
                 try {
@@ -1320,8 +1320,11 @@ TimeMapDataset.hybridParser = function(s) {
                     d = null;
                 }
             }
-        }
-        else {
+            // look for timestamps
+            if (!d && s.match(/^\d{7,}$/)) {
+                d = new Date(parseInt(s));
+            }
+        } else {
             return null;
         }
     }
