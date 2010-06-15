@@ -10,7 +10,6 @@ Version 1.6
 -----------
 - Added progressive loader to easily load large datasets a little bit at a
 time, based on timeline location.
-- Some tweaks for improved performance
 - More changes to the loader architecture, allowing asynchronous loads to be 
 cancelled, a default loader to be used, and even easier creation of new loaders
 - Added support for getting timemap state from the URL hash
@@ -18,6 +17,7 @@ cancelled, a default loader to be used, and even easier creation of new loaders
 - Added a templating support for info window data
 - Added timestamp support to TimeMapDataset.hybridParser
 - Additions and tweaks to documentation
+- Some tweaks for improved performance
 
 Version 1.5
 -----------

@@ -20,6 +20,7 @@
  * types (point, polyline, polygon, and overlay) and multiple geometries.</p>
  *
  * @augments TimeMap.loaders.remote
+ * @requires param.js
  * @borrows TimeMap.loaders.kml.parse as #parse
  *
  * @example Usage in TimeMap.init():
@@ -42,7 +43,19 @@
  * @return {TimeMap.loaders.remote} Remote loader configured for KML
  */
 TimeMap.loaders.kml = function(options) {
-    var loader = new TimeMap.loaders.remote(options);
+    var loader = new TimeMap.loaders.remote(options),
+        extendedData = options.extendedData || [],
+        x;
+    
+    // set up ExtendedData
+    loader.params = [];
+    for (x=0; x < extendedData.length; x++) {
+        loader.params.push(
+            new TimeMap.params.ExtendedDataParam(extendedData[x])
+        );
+    }
+    
+    // set custom parser
     loader.parse = TimeMap.loaders.kml.parse;
     return loader;
 };
@@ -137,6 +150,14 @@ TimeMap.loaders.kml.parse = function(kml) {
             // XXX: worth closing unclosed polygons?
             data.placemarks.push(pmobj);
         }
+        // look for any ExtendedData specified
+        nList = getNodeList(pm, "ExtendedData");
+        if (nList.length > 0) {
+            for (j=0; j<this.params.length; j++) {
+                this.params[j].setConfigKML(data, getNodeList(nList[0], "Data"));
+            }
+        }
+        
         items.push(data);
     }
     
@@ -167,3 +188,33 @@ TimeMap.loaders.kml.parse = function(kml) {
     
     return items;
 };
+
+/**
+ * @class
+ * Class for parameters loaded from KML ExtendedData elements
+ *
+ * @augments TimeMap.params.OptionParam
+ *
+ * @constructor
+ * @param {String} paramName        String name of the parameter
+ */
+TimeMap.params.ExtendedDataParam = function(paramName) {
+    var param = new TimeMap.params.OptionParam(paramName);
+    
+    /**
+     * @name TimeMap.params.ExtendedDataParam#setConfigKML
+     * Set a config object based on an ExtendedData element
+     * 
+     * @param {Object} config       Config object to modify
+     * @param {XML NodeList} nList  List of Data nodes
+     */
+    param.setConfigKML = function(config, nList) {
+        for (var i=0; i<nList.length; i++) {
+            if (nList[i].getAttribute("name") == paramName) {
+                param.setConfig(config, util.getTagValue(nList[i]))
+            }
+        }
+    };
+    
+    return param;
+}
