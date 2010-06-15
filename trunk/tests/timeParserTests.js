@@ -10,6 +10,7 @@ function exposeTestFunctionNames() {
 function testHybridParser() {
     subTestISO8601('hybrid');
     subTestGregorian('hybrid');
+    subTestTimestamp('hybrid');
     subTestError('hybrid');
 }
 
@@ -50,6 +51,28 @@ function subTestISO8601(dsid) {
     // basic ISO8601 date + time, T format, no dividers: "19800102T102030"
     for (i=2; i<5; i++)
         testFunc(i, true);
+}
+
+// test subroutines and set up for date/time tests
+function subTestTimestamp(dsid) {
+    var ds = tm.datasets[dsid];
+    var items = ds.getItems();
+    var title = ds.getTitle();
+    var testFunc = function(i) {
+        var prefix = title + ", item " + i + " -- ";
+        assertNotNull(prefix + "event not null", items[i].event);
+        var d = items[i].event.getStart();
+        assertEquals(prefix + "year matches", 1980, d.getUTCFullYear());
+        assertEquals(prefix + "month matches", 0, d.getUTCMonth());
+        assertEquals(prefix + "day matches", 2, d.getUTCDate());
+        assertEquals(prefix + "hour matches", 10, d.getUTCHours());
+        assertEquals(prefix + "minute matches", 20, d.getUTCMinutes());
+        assertEquals(prefix + "second matches", 30, d.getUTCSeconds());
+    }
+    // timestamp integer: 315656430000
+    // timestamp string: "315656430000"
+    for (i=20; i<22; i++)
+        testFunc(i);
 }
 
 function subTestGregorian(dsid) {
@@ -99,7 +122,7 @@ function subTestError(dsid) {
     }
     for (i=10; i<13; i++)
         testFunc(i);
-    for (i=20; i<23; i++)
+    for (i=22; i<24; i++)
         testFunc(i);
 }
 
@@ -207,16 +230,21 @@ var items = [
     },
     {
     // 20: start is integer
-      "start" : 2002,
+      "start" : 315656430000,
       "title" : "Test Event"
     },
     {
-    // 21: start is object
+    // 21: start is integer string
+      "start" : "315656430000",
+      "title" : "Test Event"
+    },
+    {
+    // 22: start is object
       "start" : {},
       "title" : "Test Event"
     },
     {
-    // 22: start is array
+    // 23: start is array
       "start" : [],
       "title" : "Test Event"
     }
