@@ -12,10 +12,11 @@ Version 1.6
 time, based on timeline location.
 - More changes to the loader architecture, allowing asynchronous loads to be 
 cancelled, a default loader to be used, and even easier creation of new loaders
-- Added support for getting timemap state from the URL hash
-- Added support for loading extra data from arbitrary Google Spreadsheet columns
-- Added a templating support for info window data
-- Added timestamp support to TimeMapDataset.hybridParser
+- Support for getting timemap state from the URL hash
+- Support for loading extra data from arbitrary Google Spreadsheet columns
+- Support for ExtendedData in KML
+- Templating support for info window data
+- Timestamp support in TimeMapDataset.hybridParser
 - Additions and tweaks to documentation
 - Some tweaks for improved performance
 

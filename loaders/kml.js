@@ -211,7 +211,7 @@ TimeMap.params.ExtendedDataParam = function(paramName) {
     param.setConfigKML = function(config, nList) {
         for (var i=0; i<nList.length; i++) {
             if (nList[i].getAttribute("name") == paramName) {
-                param.setConfig(config, util.getTagValue(nList[i]))
+                param.setConfig(config, TimeMap.util.getTagValue(nList[i], "value"))
             }
         }
     };
