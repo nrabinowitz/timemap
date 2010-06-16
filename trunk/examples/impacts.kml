@@ -38,6 +38,9 @@
           <Data name="Url">
             <value>http://en.wikipedia.org/wiki/Sudbury_Basin</value>
           </Data>
+          <Data name="theme">
+            <value>red</value>
+          </Data>
         </ExtendedData>
         <Point>
             <coordinates>-81.1833333333333,46.6,0</coordinates>
@@ -58,6 +61,9 @@
           </Data>
           <Data name="Url">
             <value>http://en.wikipedia.org/wiki/Chicxulub_crater</value>
+          </Data>
+          <Data name="theme">
+            <value>yellow</value>
           </Data>
         </ExtendedData>
         <Point>
@@ -80,6 +86,9 @@
           <Data name="Url">
             <value>http://en.wikipedia.org/wiki/Manicouagan_crater</value>
           </Data>
+          <Data name="theme">
+            <value>blue</value>
+          </Data>
         </ExtendedData>
         <Point>
             <coordinates>-68.7,51.3833333333333,0</coordinates>
@@ -101,6 +110,9 @@
           <Data name="Url">
             <value>http://en.wikipedia.org/wiki/Popigai_crater</value>
           </Data>
+          <Data name="theme">
+            <value>orange</value>
+          </Data>
         </ExtendedData>
         <Point>
             <coordinates>111.183333333333,71.65,0</coordinates>
@@ -121,6 +133,9 @@
           </Data>
           <Data name="Url">
             <value>http://en.wikipedia.org/wiki/Acraman_crater</value>
+          </Data>
+          <Data name="theme">
+            <value>purple</value>
           </Data>
         </ExtendedData>
         <Point>
