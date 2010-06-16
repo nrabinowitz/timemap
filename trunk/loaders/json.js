@@ -38,11 +38,9 @@
     ]
  *
  * @constructor
- * @param {Object} options          All options for the loader:<pre>
- *   {Array} url                        URL of JSON service to load, callback name left off
- *   {Function} preloadFunction         Function to call on data before loading
- *   {Function} transformFunction       Function to call on individual items before loading
- * </pre>
+ * @param {Object} options          All options for the loader:
+ * @param {String} options.url          URL of JSON service to load, callback name left off
+ * @param {mixed} [options[...]]        Other options (see {@link TimeMap.loaders.remote})
  */
 TimeMap.loaders.jsonp = function(options) {
     var loader = new TimeMap.loaders.remote(options);
@@ -92,12 +90,9 @@ TimeMap.loaders.jsonp = function(options) {
         }
     ]
  *
- * @param {Object} options          All options for the loader:<pre>
- *   {Array} url                        URL of JSON service to load, callback name left off
- *   {Function} preloadFunction         Function to call on data before loading
- *   {Function} transformFunction       Function to call on individual items before loading
- * </pre>
- * @return {TimeMap.loaders.remote} Remote loader configured for JSON strings
+ * @param {Object} options          All options for the loader
+ * @param {String} options.url          URL of JSON file to load
+ * @param {mixed} [options[...]]        Other options (see {@link TimeMap.loaders.remote})
  */
 TimeMap.loaders.json_string = function(options) {
     var loader = new TimeMap.loaders.remote(options);

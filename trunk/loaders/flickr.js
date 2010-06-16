@@ -39,12 +39,9 @@
         }
     ]
  *
- * @param {Object} options          All options for the loader:<pre>
- *   {String} url                       Full JSONP url of Flickr feed to load
- *   {Function} preloadFunction         Function to call on data before loading
- *   {Function} transformFunction       Function to call on individual items before loading
- * </pre>
- * @return {TimeMap.loaders.remote} Remote loader configured for Flickr
+ * @param {Object} options          All options for the loader
+ * @param {String} options.url          Full JSONP url of Flickr feed to load
+ * @param {mixed} [options[...]]        Other options (see {@link TimeMap.loaders.jsonp})
  */
 TimeMap.loaders.flickr = function(options) {
     var loader = new TimeMap.loaders.jsonp(options);

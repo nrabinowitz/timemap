@@ -28,6 +28,10 @@
     <item><title>Test Event:GeoRSS-Simple with Extra Data</title><description>Test Description</description><pubDate>02 Jan 1980 00:00:00 +0000</pubDate><georss:point>23.456 12.345</georss:point><link>http://www.example.com/</link></item>
 
     <item><title>Test Event:GeoRSS-Simple with Namespaced Extra Data</title><description>Test Description</description><pubDate>02 Jan 1980 00:00:00 +0000</pubDate><georss:point>23.456 12.345</georss:point><dc:subject>Testing</dc:subject></item>
+    
+    <item><title>Test Event:GeoRSS-Simple with Extra Data, mapped</title><description>Test Description</description><pubDate>02 Jan 1980 00:00:00 +0000</pubDate><georss:point>23.456 12.345</georss:point><author>nick@example.com</author></item>
+
+    <item><title>Test Event:GeoRSS-Simple with Namespaced Extra Data, mapped</title><description>Test Description</description><pubDate>02 Jan 1980 00:00:00 +0000</pubDate><georss:point>23.456 12.345</georss:point><dc:publisher>Nick</dc:publisher></item>
 
     </channel>
 </rss>

@@ -39,44 +39,25 @@
         }
     ]
  *
- * @param {Object} options          All options for the loader:<pre>
- *   {String} url                       URL of KML file to load (NB: must be local address)
- *   {Function} preloadFunction         Function to call on data before loading
- *   {Function} transformFunction       Function to call on individual items before loading
- *   {String[]} extendedData            Array of names for ExtendedData data elements
- * </pre>
- * @return {TimeMap.loaders.remote} Remote loader configured for KML
+ * @param {Object} options          All options for the loader
+ * @param {String} options.url              URL of KML file to load (NB: must be local address)
+ * @param {String[]} [options.extendedData] Array of names for ExtendedData data elements
+ * @param {mixed} [options[...]]            Other options (see {@link TimeMap.loaders.xml})
+ * @return {TimeMap.loaders.xml}    Loader configured for KML
  */
 TimeMap.loaders.kml = function(options) {
     var loader = new TimeMap.loaders.xml(options),
+        tagMap = options.tagMap || {},
         extendedData = options.extendedData || [],
-        edParams = [],
-        x;
+        tagName, x;
     
-    // set up ExtendedData
+    // Add ExtendedData parameters to extra params
     for (x=0; x < extendedData.length; x++) {
-        edParams.push(
-            new TimeMap.params.ExtendedDataParam(extendedData[x])
+        tagName = extendedData[x];
+        loader.extraParams.push(
+            new TimeMap.params.ExtendedDataParam(tagMap[tagName] || tagName, tagName)
         );
     }
-    
-    /**
-     * @name TimeMap.loaders.kml#parseExtended
-     * Parse any ExtendedData data elements that have been specified
-     *
-     * @param {Object} config       Config object to modify
-     * @param {XML NodeList} node   XML node to look for tags in
-     */
-    loader.parseExtendedData = function(config, node) {
-        var getNodeList = TimeMap.util.getNodeList,
-            nList = getNodeList(node, "ExtendedData");
-        if (nList.length > 0) {
-            for (x=0; x<edParams.length; x++) {
-                edParams[x].setConfigKML(config, getNodeList(nList[0], "Data"));
-            }
-        }
-    };
-
     
     // set custom parser
     loader.parse = TimeMap.loaders.kml.parse;
@@ -173,9 +154,7 @@ TimeMap.loaders.kml.parse = function(kml) {
             // XXX: worth closing unclosed polygons?
             data.placemarks.push(pmobj);
         }
-        // look for any ExtendedData specified
-        this.parseExtendedData(data, pm);
-        // look for any extra tags specified
+        // look for any extra tags and/or ExtendedData specified
         this.parseExtra(data, pm);
         
         items.push(data);
@@ -200,9 +179,7 @@ TimeMap.loaders.kml.parse = function(kml) {
         data.overlay.south = getTagValue(nList[0], "south");
         data.overlay.east = getTagValue(nList[0], "east");
         data.overlay.west = getTagValue(nList[0], "west");
-        // look for any ExtendedData specified
-        this.parseExtendedData(data, pm);
-        // look for any extra tags specified
+        // look for any extra tags and/or ExtendedData specified
         this.parseExtra(data, pm);
         items.push(data);
     }
@@ -221,24 +198,31 @@ TimeMap.loaders.kml.parse = function(kml) {
  *
  * @constructor
  * @param {String} paramName        String name of the parameter
+ * @param {String} [tagName]        Tag name, if different
  */
-TimeMap.params.ExtendedDataParam = function(paramName) {
-    var param = new TimeMap.params.OptionParam(paramName);
+TimeMap.params.ExtendedDataParam = function(paramName, tagName) {
+    return new TimeMap.params.OptionParam(paramName, {
     
-    /**
-     * @name TimeMap.params.ExtendedDataParam#setConfigKML
-     * Set a config object based on an ExtendedData element
-     * 
-     * @param {Object} config       Config object to modify
-     * @param {XML NodeList} nList  List of Data nodes
-     */
-    param.setConfigKML = function(config, nList) {
-        for (var i=0; i<nList.length; i++) {
-            if (nList[i].getAttribute("name") == paramName) {
-                param.setConfig(config, TimeMap.util.getTagValue(nList[i], "value"))
+        /**
+         * @name TimeMap.params.ExtendedDataParam#setConfigKML
+         * Set a config object based on an ExtendedData element
+         * 
+         * @param {Object} config       Config object to modify
+         * @param {XML NodeList} node   Parent node to look for tags in
+         */
+        setConfigXML: function(config, nList) {
+            var util = TimeMap.util,
+                nList = util.getNodeList(node, "Data"),
+                i;
+            for (i=0; i<nList.length; i++) {
+                if (nList[i].getAttribute("name") == paramName) {
+                    param.setConfig(config, util.getTagValue(nList[i], "value"))
+                }
             }
-        }
-    };
+            node = nList = null;
+        },
+        
+        sourceName: tagName || paramName
     
-    return param;
+    });
 };
