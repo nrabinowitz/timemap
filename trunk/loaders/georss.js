@@ -31,7 +31,9 @@
  * <p>At the moment, this only supports points; polygons, polylines, and boxes
  * will be added at some later point.</p>
  *
- * @augments TimeMap.loaders.remote
+ * @augments TimeMap.loaders.xml
+ * @requires loaders/xml.js
+ * @requires param.js
  * @borrows TimeMap.loaders.georss.parse as #parse
  *
  * @example Usage in TimeMap.init():
@@ -53,7 +55,7 @@
  * @return {TimeMap.loaders.remote} Remote loader configured for GeoRSS
  */
 TimeMap.loaders.georss = function(options) {
-    var loader = new TimeMap.loaders.remote(options);
+    var loader = new TimeMap.loaders.xml(options);
     loader.parse = TimeMap.loaders.georss.parse;
     return loader;
 };
@@ -196,13 +198,12 @@ TimeMap.loaders.georss.parse = function(rss) {
             
             done = true;
         }
+        // look for any extra tags specified
+        this.parseExtra(data, pm);
         items.push(data);
     }
     
     // clean up
-    node = null;
-    placemarks = null;
-    pm = null;
-    nList = null;
+    node = placemarks = pm = nList = null;
     return items;
 };
