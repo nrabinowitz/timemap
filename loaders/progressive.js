@@ -1,4 +1,4 @@
-/* 
+    /* 
  * Timemap.js Copyright 2008 Nick Rabinowitz.
  * Licensed under the MIT License (see LICENSE.txt)
  */
@@ -52,21 +52,20 @@
     ]
  *
  * @constructor
- * @param {Object} options          All options for the loader:<pre>
- *   {TimeMap.loaders.remote} [loader]  Instantiated loader class (overrides "type")
- *   {String} [type]                    Name of loader class to use
- *   {String/Date} start                Start of initial date range, as date or string
- *   {Number} interval                  Size in milliseconds of date ranges to load at a time
- *   {String/Date} [dataMinDate]        Minimum date available in data (optional, will avoid
- *                                      unnecessary service requests if supplied)
- *   {String/Date} [dataMaxDate]        Maximum date available in data (optional, will avoid
- *                                      unnecessary service requests if supplied)
- *   {Function} [formatUrl]             Function taking (urlTemplate, start, end) and returning
- *                                      a URL formatted as needed by the service
- *   {Function} [formatDate]            Function to turn a date into a string formatted
- *                                      as needed by the service
- *   ...more                            Any other options needed by the "type" loader
- * </pre>
+ * @param {Object} options          All options for the loader
+ * @param {TimeMap.loaders.remote} [options.loader] Instantiated loader class (overrides "type")
+ * @param {String} [options.type]                   Name of loader class to use
+ * @param {String/Date} options.start               Start of initial date range, as date or string
+ * @param {Number} options.interval                 Size in milliseconds of date ranges to load at a time
+ * @param {String/Date} [options.dataMinDate]       Minimum date available in data (optional, will avoid
+ *                                                  unnecessary service requests if supplied)
+ * @param {String/Date} [options.dataMaxDate]       Maximum date available in data (optional, will avoid
+ *                                                  unnecessary service requests if supplied)
+ * @param {Function} [options.formatUrl]            Function taking (urlTemplate, start, end) and returning
+ *                                                  a URL formatted as needed by the service
+ * @param {Function} [options.formatDate]           Function to turn a date into a string formatted
+ *                                                  as needed by the service
+ * @param {mixed} [options[...]]                    Other options needed by the "type" loader
  */
 TimeMap.loaders.progressive = function(options) {
     // get loader

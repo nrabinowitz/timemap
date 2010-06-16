@@ -265,7 +265,7 @@ TimeMap.state.params = {
          * Timeline center date
          * @type TimeMap.params.Param
          */
-        date: new paramNS.TopLevelParam("scrollTo", {
+        date: new paramNS.Param("scrollTo", {
             get: function(tm) {
                 return tm.timeline.getBand(0).getCenterVisibleDate();
             },
@@ -284,7 +284,7 @@ TimeMap.state.params = {
          * Index of selected/open item, if any
          * @type TimeMap.params.Param
          */
-        selected: new paramNS.Param({
+        selected: new paramNS.Param("selected", {
             get: function(tm) {
                 var items = tm.getItems(),
                     i = items.length-1;

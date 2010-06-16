@@ -66,7 +66,7 @@ function testAtomItemAttributes() {
 
 function testMixedItemsLoaded() {
     var ds = tm.datasets["mixed"];
-    assertEquals("Twelve items in item array", 12, ds.getItems().length);
+    assertEquals("Fourteen items in item array", 14, ds.getItems().length);
 }
 
 function testMixedPlacemarksFound() {
@@ -145,6 +145,12 @@ function testMixedExtraTags() {
     // Using a namespaced tag from the DC xmlns
     item = items[11];
     assertEquals(item.getTitle() + " has dc:subject tag data", "Testing", item.opts['dc:subject']);
+    // Using a bare tag from the RSS xmlns, mapped
+    item = items[12];
+    assertEquals(item.getTitle() + " has mapped tag data", "nick@example.com", item.opts.email);
+    // Using a namespaced tag from the DC xmlns, mapped
+    item = items[13];
+    assertEquals(item.getTitle() + " has mapped tag data", "Nick", item.opts.issuer);
 }
 
 
@@ -178,7 +184,11 @@ function setUpPage() {
                 type: "georss",
                 options: {
                     url: "data/data-mixed.xml",
-                    extraTags: ['link', 'dc:subject']
+                    extraTags: ['link', 'dc:subject', 'author', 'dc:publisher'],
+                    tagMap: {
+                        'author':'email',
+                        'dc:publisher':'issuer'
+                    }
                 }
             }
         ],

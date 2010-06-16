@@ -55,20 +55,18 @@
  * @param {Object} options          All options for the loader:
  * @param {String} options.key                      Key of spreadsheet to load, or
  * @param {String} options.url                      Full JSONP url of spreadsheet to load
- * @param {Object} [options.columnMap]              Map of paramName:columnName pairs, if using non-standard 
- *                                                  column names; see keys in {@link TimeMap.loaders.base#params}
- *                                                  for the standard param names
+ * @param {Object} [options.paramMap]               Map of paramName:columnName pairs for core parameters, 
+ *                                                  if using non-standard column names; see keys in 
+*                                                   {@link TimeMap.loaders.base#params} for the standard param names
  * @param {String[]} [options.extraColumns]         Array of additional columns to load; all named columns will be 
  *                                                  loaded into the item.opts object.
- * @param {Function} [options.preloadFunction]      Function to call on data before loading
- * @param {Function} [options.transformFunction]    Function to call on individual items before loading
- * @return {TimeMap.loaders.remote} Remote loader configured for Google Spreadsheets
+ * @param {mixed} [options[...]]    Other options (see {@link TimeMap.loaders.jsonp})
  */
 TimeMap.loaders.gss = function(options) {
     var loader = new TimeMap.loaders.jsonp(options),
         params = loader.params, paramName, x,
-        setParamField = TimeMap.loaders.gss.setParamField
-        columnMap = options.columnMap || {},
+        setParamField = TimeMap.loaders.gss.setParamField,
+        paramMap = options.paramMap || {},
         extraColumns = options.extraColumns || [];
     
     // use key if no URL was supplied
@@ -86,7 +84,7 @@ TimeMap.loaders.gss = function(options) {
     // Set up parameters to work with Google Spreadsheets
     for (paramName in params) {
         if (params.hasOwnProperty(paramName)) {
-            fieldName = columnMap[paramName] || paramName;
+            fieldName = paramMap[paramName] || paramName;
             setParamField(params[paramName], fieldName);
         }
     }
@@ -144,9 +142,6 @@ TimeMap.loaders.gss.setParamField = function(param, fieldName) {
     };
     // set the method on the parameter
     param.setConfigGSS = function(config, data) {
-        var value = getField(data, fieldName);
-        if (value) {
-            this.setConfig(config, value);
-        }
+        this.setConfig(config, getField(data, fieldName));
     };
 };

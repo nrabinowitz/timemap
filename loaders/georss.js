@@ -49,10 +49,8 @@
     ]
  *
  * @param {Object} options          All options for the loader:
- *   @param {String} options.url                    URL of GeoRSS file to load (NB: must be local address)
- *   @param {Function} [options.preloadFunction]    Function to call on data before loading
- *   @param {Function} [options.transformFunction]  Function to call on individual items before loading
- * @return {TimeMap.loaders.remote} Remote loader configured for GeoRSS
+ * @param {String} options.url          URL of GeoRSS file to load (NB: must be local address)
+ * @param {mixed} [options[...]]        Other options (see {@link TimeMap.loaders.xml})
  */
 TimeMap.loaders.georss = function(options) {
     var loader = new TimeMap.loaders.xml(options);
@@ -67,13 +65,13 @@ TimeMap.loaders.georss = function(options) {
  * @return {TimeMapItem[]}  Array of TimeMapItems
  */
 TimeMap.loaders.georss.parse = function(rss) {
-    var items = [], data, node, placemarks, pm;
+    var items = [], data, node, placemarks, pm, i;
     node = GXml.parse(rss);
     
     // get TimeMap utilty functions
     // assigning to variables should compress better
-    var util = TimeMap.util;
-    var getTagValue = util.getTagValue,
+    var util = TimeMap.util,
+        getTagValue = util.getTagValue,
         getNodeList = util.getNodeList,
         makePoint = util.makePoint,
         makePoly = util.makePoly,
@@ -92,7 +90,7 @@ TimeMap.loaders.georss.parse = function(rss) {
     // look for placemarks
     var tName = (feedType == 'rss' ? "item" : "entry");
     placemarks = getNodeList(node, tName);
-    for (var i=0; i<placemarks.length; i++) {
+    for (i=0; i<placemarks.length; i++) {
         pm = placemarks[i];
         data = { options: {} };
         // get title & description

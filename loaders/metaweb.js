@@ -47,12 +47,10 @@
         }
     ]
  *
- * @param {Object} options          All options for the loader:<pre>
- *   {Object} query                     MQL query to load
- *   {Function} preloadFunction         Function to call on data before loading
- *   {Function} transformFunction       Function to call on individual items before loading
- * </pre>
- * @return {TimeMap.loaders.remote} Remote loader configured for MetaWeb
+ * @param {Object} options          All options for the loader
+ * @param {Object} options.query                MQL query to load
+ * @param {Function} options.transformFunction  Function to call on individual items before loading
+ * @param {mixed} [options[...]]    Other options (see {@link TimeMap.loaders.jsonp})
  */
 TimeMap.loaders.metaweb = function(options) {
     var loader = new TimeMap.loaders.jsonp(options),

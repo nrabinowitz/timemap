@@ -729,13 +729,12 @@ TimeMap.loaders.counter = 0;
  * Abstract loader class. All loaders should inherit from this class.
  *
  * @constructor
- * @param {Object} [options]        All options for the loader:<pre>
- *   {Function} parserFunction          Parser function to turn a string into a JavaScript array
- *   {Function} preloadFunction         Function to call on data before loading
- *   {Function} transformFunction       Function to call on individual items before loading
- *   {String|Date} scrollTo             Date to scroll the timeline to in the default callback 
- *                                      (see {@link TimeMap#parseDate} for accepted syntax)
- * </pre>
+ * @param {Object} [options]        All options for the loader
+ * @param {Function} [options.parserFunction]       Parser function to turn a string into a JavaScript array
+ * @param {Function} [options.preloadFunction]      Function to call on data before loading
+ * @param {Function} [options.transformFunction]    Function to call on individual items before loading
+ * @param {String|Date} [options.scrollTo]          Date to scroll the timeline to in the default callback 
+ *                                                  (see {@link TimeMap#parseDate} for accepted syntax)
  */
 TimeMap.loaders.base = function(options) {
     var dummy = function(data) { return data; };
@@ -832,10 +831,9 @@ TimeMap.loaders.base = function(options) {
  * @augments TimeMap.loaders.base
  *
  * @constructor
- * @param {Object} options          All options for the loader:<pre>
- *   {Array} data                       Array of items to load
- *   {Function} preloadFunction         Function to call on data before loading
- *   {Function} transformFunction       Function to call on individual items before loading
+ * @param {Object} options          All options for the loader
+ * @param {Array} options.data          Array of items to load
+ * @param {mixed} [options[...]]        Other options (see {@link TimeMap.loaders.base})
  * </pre>
  */
 TimeMap.loaders.basic = function(options) {
@@ -875,10 +873,8 @@ TimeMap.loaders.basic = function(options) {
  *
  * @constructor
  * @param {Object} options          All options for the loader:<pre>
- *   {Array} url                        URL of file to load (NB: must be local address)
- *   {Function} parserFunction          Parser function to turn a string into a JavaScript array
- *   {Function} preloadFunction         Function to call on data before loading
- *   {Function} transformFunction       Function to call on individual items before loading
+ * @param {String} options.url          URL of file to load (NB: must be local address)
+ * @param {mixed} [options[...]]        Other options (see {@link TimeMap.loaders.base})
  * </pre>
  */
 TimeMap.loaders.remote = function(options) {
