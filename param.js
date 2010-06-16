@@ -153,6 +153,42 @@ var params = TimeMap.params = {
             config[paramName] = value;
         };
         return new params.Param(options);
+    },
+
+    /**
+     * @class
+     * A convenience class for those parameters which deal with a value
+     * parsed from an XML tag.
+     *
+     * @augments TimeMap.params.OptionParam
+     *
+     * @constructor
+     * @param {String} paramName        String name of the parameter
+     * @param {String} [tagName]        String name of the tag, if different
+     */
+    XMLParam: function(paramName, tagName) {
+        var param = new TimeMap.params.OptionParam(paramName),
+            tagName = tagName || paramName,
+            nameParts = tagName.split(':'),
+            ns;
+        // deal with namespaced tags
+        if (nameParts.length > 1) {
+            tagName = nameParts[1];
+            ns = nameParts[0];
+        }
+        
+        /**
+         * @name TimeMap.params.XMLParam#setConfigXML
+         * Set a config object based on an XML tag
+         * 
+         * @param {Object} config       Config object to modify
+         * @param {XML NodeList} node   Parent node of the desired tag
+         */
+        param.setConfigXML = function(config, node) {
+            param.setConfig(config, TimeMap.util.getTagValue(node, tagName, ns));
+        };
+        
+        return param;
     }
 };
 

@@ -9,13 +9,15 @@ function exposeTestFunctionNames() {
         'testAtomItemAttributes',
         'testMixedItemsLoaded',
         'testMixedPlacemarksFound',
-        'testMixedKMLTime'
+        'testMixedKMLTime', 
+        'testMixedExtraTags'
     ];
 }
 
 function testDatasetsAreDefined() {
     assertNotUndefined("RSS dataset is defined", tm.datasets["rss"]);
     assertNotUndefined("Atom dataset is defined", tm.datasets["atom"]);
+    assertNotUndefined("Mixed dataset is defined", tm.datasets["mixed"]);
 }
 
 function testRSSItemLoaded() {
@@ -64,7 +66,7 @@ function testAtomItemAttributes() {
 
 function testMixedItemsLoaded() {
     var ds = tm.datasets["mixed"];
-    assertEquals("Ten items in item array", 10, ds.getItems().length);
+    assertEquals("Twelve items in item array", 12, ds.getItems().length);
 }
 
 function testMixedPlacemarksFound() {
@@ -134,10 +136,22 @@ function testMixedKMLTime() {
     assertTrue(item.getTitle() + " event is instant", item.event.isInstant());
 }
 
+function testMixedExtraTags() {
+    var ds = tm.datasets["mixed"];
+    var items = tm.datasets["mixed"].getItems(), item, d, prefix;
+    // Using a bare tag from the RSS xmlns
+    item = items[10];
+    assertEquals(item.getTitle() + " has link tag data", "http://www.example.com/", item.opts.link);
+    // Using a namespaced tag from the DC xmlns
+    item = items[11];
+    assertEquals(item.getTitle() + " has dc:subject tag data", "Testing", item.opts['dc:subject']);
+}
+
 
 var tm = null;
 
 function setUpPage() {
+    TimeMap.util.nsMap['dc'] = 'http://purl.org/dc/elements/1.1/';
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
         timelineId: "timeline",     // Id of timeline div element (required) 
@@ -163,7 +177,8 @@ function setUpPage() {
                 id: "mixed",
                 type: "georss",
                 options: {
-                    url: "data/data-mixed.xml" 
+                    url: "data/data-mixed.xml",
+                    extraTags: ['link', 'dc:subject']
                 }
             }
         ],

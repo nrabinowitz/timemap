@@ -15,6 +15,7 @@ cancelled, a default loader to be used, and even easier creation of new loaders
 - Support for getting timemap state from the URL hash
 - Support for loading extra data from arbitrary Google Spreadsheet columns
 - Support for ExtendedData in KML
+- Support for loading arbitrary tags in XML (KML, GeoRSS)
 - Templating support for info window data
 - Timestamp support in TimeMapDataset.hybridParser
 - Additions and tweaks to documentation
