@@ -9,7 +9,7 @@ function exposeTestFunctionNames() {
 
 function testItemsLoaded() {
     var ds = tm.datasets["test"];
-    assertEquals("five items in item array", ds.getItems().length, 6);
+    assertEquals("Correct number of items in item array", 6, ds.getItems().length);
 }
 
 function testAllPlacemarksExist() {
@@ -24,10 +24,10 @@ function testAllPlacemarksExist() {
 
 function testPolyVertices() {
     var ds = tm.datasets["test"];
-    var polyline = ds.getItems()[2].placemark;
-    assertEquals("polyline has 3 vertices", polyline.getVertexCount(), 3);
-    var polygon = ds.getItems()[3].placemark;
-    assertEquals("polyline has 6 vertices", polygon.getVertexCount(), 6);
+    var polyline = ds.getItems()[1].placemark;
+    assertEquals("polyline has 3 vertices", 3, polyline.getVertexCount());
+    var polygon = ds.getItems()[2].placemark;
+    assertEquals("polyline has 6 vertices", 6, polygon.getVertexCount());
 }
 
 function testMultiplePlacemarks() {
@@ -35,23 +35,23 @@ function testMultiplePlacemarks() {
     var item, point;
     for (var x=4; x<5; x++) {
         item = ds.getItems()[x];
-        assertEquals(item.getTitle() + " has type 'array'", item.getType(), "array");
+        assertEquals(item.getTitle() + " has type 'array'", "array", item.getType());
         // check for array attributes
         assertNotUndefined(item.getTitle() + " placemark has pop function", item.placemark.pop);
         assertNotUndefined(item.getTitle() + " placemark has push function", item.placemark.push);
-        assertEquals(item.getTitle() + " has 4 placemarks", item.placemark.length, 4);
+        assertEquals(item.getTitle() + " has 4 placemarks", 4, item.placemark.length);
     }
-    item = ds.getItems()[4];
+    item = ds.getItems()[3];
     point = new GLatLng(23.456, 12.345);
     assertTrue("First placemark point used", point.equals(item.getInfoPoint()));
-    item = ds.getItems()[5];
+    item = ds.getItems()[4];
     point = new GLatLng(43.730473, 11.257896);
     assertTrue("Option info point used", point.equals(item.getInfoPoint()));
 }
 
 var tm = null;
 
-function setUpPage() {
+function basicPlacemarkTestSetup() {
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
         timelineId: "timeline",     // Id of timeline div element (required) 
@@ -70,21 +70,6 @@ function setUpPage() {
                               "lon" : 12.345
                            },
                           "title" : "Test Point",
-                          "options" : {
-                            "description": "Test Description"
-                          }
-                        },
-                        { // overlay
-                          "start" : "1980-01-02",
-                          "end" : "1990-01-02",
-                          "overlay" : {
-                              "image" : "data/tile.png",
-                              "north" : 38.285990,
-                              "south" : 29.231120,
-                              "east"  : 74.523837,
-                              "west"  : 60.533227
-                           },
-                          "title" : "Test Overlay",
                           "options" : {
                             "description": "Test Description"
                           }
@@ -247,6 +232,21 @@ function setUpPage() {
                               "lon" : 11.257896
                             }
                           }
+                        },
+                        { // overlay
+                          "start" : "1980-01-02",
+                          "end" : "1990-01-02",
+                          "overlay" : {
+                              "image" : "data/tile.png",
+                              "north" : 38.285990,
+                              "south" : 29.231120,
+                              "east"  : 74.523837,
+                              "west"  : 60.533227
+                           },
+                          "title" : "Test Overlay",
+                          "options" : {
+                            "description": "Test Description"
+                          }
                         }
                     ]
                 }
@@ -255,6 +255,26 @@ function setUpPage() {
     });
     setUpPageStatus = "complete";
 }
+
+
+function kmlPlacemarkTestSetup() {
+    tm = TimeMap.init({
+        mapId: "map",               // Id of map div element (required)
+        timelineId: "timeline",     // Id of timeline div element (required) 
+        datasets: [
+            {
+                title: "Test Dataset: KML",
+                id: "test",
+                type: "kml",
+                options: {
+                    url: "data/placemarks.kml"
+                }
+            }
+        ]
+    });
+    setUpPageStatus = "complete";
+}
+
 
 function setUp() {
     var eventSource = tm.timeline.getBand(0).getEventSource();

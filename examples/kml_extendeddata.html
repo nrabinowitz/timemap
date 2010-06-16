@@ -29,9 +29,12 @@ function onLoad() {
                 options: {
                     url: "impacts.kml", // KML file to load
                     // array of ExtendedData elements to look for
-                    extendedData: ["Country", "Diameter", "Age", "Url"],
+                    extendedData: ["Country", "Diameter", "Age", "Url", "theme"],
+                    tagMap: {
+                        "Url":"wiki_link"
+                    },
                     // template for loaded data
-                    infoTemplate: '<strong><a href="{{Url}}" target="_blank">{{title}}, ' +
+                    infoTemplate: '<strong><a href="{{wiki_link}}" target="_blank">{{title}}, ' +
                                   '{{Country}}</a></strong><br><br>' +
                                   '<strong>Age:</strong> {{Age}}<br>' +
                                   '<strong>Diameter:</strong> {{Diameter}}<br>'
@@ -66,7 +69,7 @@ function onLoad() {
   <body onload="onLoad();" onunload="GUnload();">
     <div id="help">
     <h1>KML Example: Loading ExtendedData</h1>
-    In this example, we're loading a KML file of meteorite impact structures with ExtendedData elements and using a custom template for the info window to display the loaded data. <a href="http://code.google.com/apis/kml/documentation/extendeddata.html">Learn more about ExtendedData here.</a>    (Okay, so the dates here are a little arbitrary - sometime soon I'll figure out a good way to display dates in the negative millions of years...)
+    In this example, we're loading a KML file of meteorite impact structures with ExtendedData elements and using a custom template for the info window to display the loaded data. We're also using ExtendedData to load different themes for each item. <a href="http://code.google.com/apis/kml/documentation/extendeddata.html">Learn more about ExtendedData here.</a> (Okay, so the dates here are a little arbitrary - sometime soon I'll figure out a good way to display dates in the negative millions of years...)
     </div>
     <div id="timemap">
         <div id="timelinecontainer">

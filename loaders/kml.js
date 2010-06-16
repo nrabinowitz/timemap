@@ -210,19 +210,19 @@ TimeMap.params.ExtendedDataParam = function(paramName, tagName) {
          * @param {Object} config       Config object to modify
          * @param {XML NodeList} node   Parent node to look for tags in
          */
-        setConfigXML: function(config, nList) {
+        setConfigXML: function(config, node) {
             var util = TimeMap.util,
                 nList = util.getNodeList(node, "Data"),
                 i;
             for (i=0; i<nList.length; i++) {
-                if (nList[i].getAttribute("name") == paramName) {
-                    param.setConfig(config, util.getTagValue(nList[i], "value"))
+                if (nList[i].getAttribute("name") == tagName) {
+                    this.setConfig(config, util.getTagValue(nList[i], "value"))
                 }
             }
             node = nList = null;
         },
         
-        sourceName: tagName || paramName
+        sourceName: tagName
     
     });
 };
