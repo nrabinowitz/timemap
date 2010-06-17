@@ -1,5 +1,5 @@
 /* 
- * Timemap.js Copyright 2008 Nick Rabinowitz.
+ * Timemap.js Copyright 2010 Nick Rabinowitz.
  * Licensed under the MIT License (see LICENSE.txt)
  */
 

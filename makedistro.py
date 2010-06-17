@@ -124,8 +124,8 @@ if not runonly or runonly == 'jsdoc':
     files += [f for f in glob.glob(os.path.join('loaders','*.js'))]
     
     # run jsdoc to create docs
-    os.system("java -Djsdoc.dir=%s -jar %s %s -t=%s %s -d=docs -r=1 %s" % (
+    os.system("java -Djsdoc.dir=%s -jar %s %s -c=%s %s -r=1 %s" % (
         jsdoc, os.path.join(jsdoc, 'jsrun.jar'), os.path.join(jsdoc, 'app', 'run.js'),
-        os.path.join(jsdoc, 'templates', 'jsdoc'), verbose, " ".join(files)
+        os.path.join('docs', 'jsdoc-toolkit', 'timemap.conf'), verbose, " ".join(files)
     ))
     print "Created documentation in docs/ directory"
