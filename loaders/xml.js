@@ -33,7 +33,6 @@
  *
  * @param {Object} options          All options for the loader
  * @param {String} options.url              URL of XML file to load (NB: must be local address)
- * @param {String} [options.itemTag]        Name of tag containing one item
  * @parem {String[]} [options.extraTags]    Array of names for extra tag elements to load
  * @param {Object} [options.tagMap]         Map of tagName:paramName pairs, if you want to load
  *                                          data into a differently-named elements
@@ -42,10 +41,8 @@
  */
 TimeMap.loaders.xml = function(options) {
     var loader = new TimeMap.loaders.remote(options),
-        itemTag = options.itemTag || "item",
         tagMap = options.tagMap || {},
         extraTags = options.extraTags || [],
-        paramMap = options.paramMap || {},
         params = loader.params, 
         paramName, tagName, x;
     
@@ -66,16 +63,6 @@ TimeMap.loaders.xml = function(options) {
         );
     }
     
-    // Set up parameter mapping
-    for (tagName in tagMap) {
-        if (tagMap.hasOwnProperty(tagName)) {
-            paramName = tagMap[tagName];
-            if (params[paramName]) {
-                params[paramName].sourceName = tagName;
-            }
-        }
-    }
-    
     /**
      * @name TimeMap.loaders.xml#parseExtra
      * Parse any extra tags that have been specified into the config object
@@ -89,35 +76,6 @@ TimeMap.loaders.xml = function(options) {
             extraParams[x].setConfigXML(config, node);
         }
         node = null;
-    };
-    
-    /**
-     * @name TimeMap.loaders.xml#parse
-     * Basic XML parser function
-     *
-     * @param {String} xml      XML to parse
-     */
-    loader.parse = function(xml) {
-        var items = [],
-            root = GXml.parse(xml),
-            placemarks = TimeMap.util.getNodeList(root, itemTag),
-            i, pm, paramName, data;
-        for (i=0; i<placemarks.length; i++) {
-            data = {};
-            pm = placemarks[x];
-            // run through parameters, loading each
-            for (paramName in params) {
-                if (params.hasOwnProperty(paramName)) {
-                    params[paramName].setConfigXML(pm, data);
-                }
-            }
-            // look for any extra tags specified
-            loader.parseExtra(data, pm);
-            items.push(data);
-        }
-        // clean up
-        node = placemarks = pm = null;
-        return items;
     };
     
     return loader;

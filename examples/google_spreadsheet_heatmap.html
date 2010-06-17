@@ -240,6 +240,7 @@ function onLoad() {
             getScaleFromData: function(data) {
                 return (data["log1.6"] > 9) ? 9 : parseInt(data["log1.6"]);
             },
+            mapFilter: "hideFuture",
             // there isn't going to be a good way to show 139 duration events on the timeline
             noEventLoad: true
         },
