@@ -14,19 +14,7 @@
 
  /**
  * @class
- * XML loader factory - inherits from remote loader
- *
- * <p>This is a basic loader class for XML files, including a basic parse method for
- * simple XML files in a format like:</p> <pre>
-    <root>
-        <item>
-            <tag>data</tag>
-            ...
-        </item>
-        ...
-    </root>
- </pre>
- * 
+ * This is a base loader class for XML files.
  *
  * @augments TimeMap.loaders.remote
  * @requires param.js
@@ -47,8 +35,8 @@ TimeMap.loaders.xml = function(options) {
         paramName, tagName, x;
     
     /**
-     * @name TimeMap.loaders.xml#extraParams
      * Additional parameters to load
+     * @name TimeMap.loaders.xml#extraParams
      * @type TimeMap.params.OptionParam[]
      */
     loader.extraParams = [];
@@ -64,8 +52,8 @@ TimeMap.loaders.xml = function(options) {
     }
     
     /**
-     * @name TimeMap.loaders.xml#parseExtra
      * Parse any extra tags that have been specified into the config object
+     * @name TimeMap.loaders.xml#parseExtra
      *
      * @param {Object} config       Config object to modify
      * @param {XML NodeList} node   Parent node to look for tags in

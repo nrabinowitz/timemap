@@ -15,9 +15,9 @@
 
 /**
  * @class
- * Flickr loader factory - inherits from jsonp loader
+ * Flickr loader: Load JSONP data from Flickr. 
  *
- * <p>This is a loader for data from Flickr. You probably want to use it with a
+ * <p>This is a loader for Flickr data. You probably want to use it with a
  * URL for the Flickr Geo Feed API: <a href="http://www.flickr.com/services/feeds/geo/">http://www.flickr.com/services/feeds/geo/</a></p>
  *
  * <p>The loader takes a full URL, minus the JSONP callback function.</p>

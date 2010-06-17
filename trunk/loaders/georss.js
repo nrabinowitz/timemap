@@ -14,9 +14,9 @@
 
 /**
  * @class
- * GeoRSS loader factory - inherits from remote loader.
+ * GeoRSS loader: Load GeoRSS feeds.
  *
- * <p>This is a loader class for GeoRSS feeds. Parsing is complicated by the 
+ * <p> Parsing is complicated by the 
  * diversity of GeoRSS formats; this parser handles:</p>
  * <ul>
  *  <li>RSS feeds</li>
