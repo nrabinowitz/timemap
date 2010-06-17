@@ -40,17 +40,20 @@ var params = TimeMap.params = {
         
         /**
          * String name of this param
+         * @name TimeMap.params.Param#paramName
          * @type String
          */
         param.paramName = paramName;
         
         /**
          * String name of the source element, if different
+         * @name TimeMap.params.Param#sourceName
          */
         param.sourceName = options.sourceName || paramName;
     
         /**
          * Get the current state value from a TimeMap or TimeMapItem object
+         * @name TimeMap.params.Param#get
          * @function
          *
          * @param {TimeMap|TimeMapItem} o       Object to inspect
@@ -60,6 +63,7 @@ var params = TimeMap.params = {
         
         /**
          * Set the current state value on a TimeMap or TimeMapItem object
+         * @name TimeMap.params.Param#set
          * @function
          *
          * @param {TimeMap|TimeMapItem} o       Object to modify
@@ -69,6 +73,7 @@ var params = TimeMap.params = {
         
         /**
          * Set a new value on a config object for TimeMap.init()
+         * @name TimeMap.params.Param#setConfig
          * @function
          * @see TimeMap.init
          *
@@ -82,6 +87,7 @@ var params = TimeMap.params = {
         
         /**
          * Parse a state value from a string
+         * @name TimeMap.params.Param#fromString
          * @function
          *
          * @param {String} s        String to parse
@@ -94,6 +100,7 @@ var params = TimeMap.params = {
         
         /**
          * Serialize a state value as a string
+         * @name TimeMap.params.Param#toString
          * @function
          *
          * @param {mixed} value     Value to serialize
@@ -106,6 +113,7 @@ var params = TimeMap.params = {
         
         /**
          * Get the current value as a string
+         * @name TimeMap.params.Param#getString
          * 
          * @param {TimeMap|TimeMapItem} o       Object to inspect
          */
@@ -115,6 +123,7 @@ var params = TimeMap.params = {
         
         /**
          * Set the current state value from a string
+         * @name TimeMap.params.Param#setString
          * 
          * @param {TimeMap|TimeMapItem} o       Object to modify
          * @param {String} s                    String version of value to set
@@ -124,8 +133,8 @@ var params = TimeMap.params = {
         };
         
         /**
-         * @name TimeMap.params.XMLParam#setConfigXML
          * Set a config object based on an XML tag
+         * @name TimeMap.params.Param#setConfigXML
          * 
          * @param {Object} config       Config object to modify
          * @param {XML NodeList} node   Parent node of the desired tag

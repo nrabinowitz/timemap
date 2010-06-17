@@ -14,12 +14,11 @@
 
 var tm;
 function onLoad() {
-
-    // Setting the state from the URL takes a couple of extra steps, shown below
-    // (numbered in the order they're called).
     
-    // Step one: Set up the config as a variable
-    var config = {
+    // If you include the state.js file (or use timemap_full.pack.js)
+    // and have state information in the hash, it will be used for the configuration
+    
+    tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
         timelineId: "timeline",     // Id of timeline div element (required)
         options: {
@@ -68,19 +67,8 @@ function onLoad() {
         bandIntervals: [
             Timeline.DateTime.DECADE, 
             Timeline.DateTime.CENTURY
-        ],
-        
-        // Step Three (because it's called asynchronously): Call tm.initState() once data is loaded
-        dataDisplayedFunction: function(tm) {
-            tm.initState();
-        }
-    };
-    
-    // Step Two: Set URL state in config object
-    TimeMap.state.setConfigFromUrl(config);
-    
-    // Step Four: Initialize TimeMap object
-    tm = TimeMap.init(config);
+        ]
+    });
 }
     </script>
 	<link href="examples.css" type="text/css" rel="stylesheet"/>
