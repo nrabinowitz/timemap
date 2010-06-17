@@ -762,8 +762,8 @@ TimeMap.loaders.counter = 0;
  *                                                  (see {@link TimeMap#parseDate} for accepted syntax)
  */
 TimeMap.loaders.base = function(options) {
-    var loader = this,
-        dummy = function(data) { return data; };
+    var dummy = function(data) { return data; },
+        loader = this;
      
     /**
      * Parser function to turn a string into a JavaScript array
@@ -1673,24 +1673,23 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
  * map markers and timeline events.
  *
  * @constructor
- * @param {Object} [options]        A container for optional arguments:<pre>
- *      {GIcon} icon                    Icon for marker placemarks
- *      {String} color                  Default color in hex for events, polylines, polygons
- *      {String} lineColor              Color for polylines, defaults to options.color
- *      {String} polygonLineColor       Color for polygon outlines, defaults to lineColor
- *      {Number} lineOpacity            Opacity for polylines
- *      {Number} polgonLineOpacity      Opacity for polygon outlines, defaults to options.lineOpacity
- *      {Number} lineWeight             Line weight in pixels for polylines
- *      {Number} polygonLineWeight      Line weight for polygon outlines, defaults to options.lineWeight
- *      {String} fillColor              Color for polygon fill, defaults to options.color
- *      {String} fillOpacity            Opacity for polygon fill
- *      {String} eventColor             Background color for duration events
- *      {String} eventIconPath          Path to instant event icon directory
- *      {String} eventIconImage         Filename of instant event icon image
- *      {URL} eventIcon                 URL for instant event icons (overrides path + image)
- *      {Boolean} classicTape           Whether to use the "classic" style timeline event tape
- *                                      (NB: this needs additional css to work - see examples/artists.html)
- * </pre>
+ * @param {Object} [options]        A container for optional arguments
+ * @param {GIcon} [options.icon]                Icon for marker placemarks
+ * @param {String} [options.color]              Default color in hex for events, polylines, polygons
+ * @param {String} [options.lineColor]          Color for polylines, defaults to options.color
+ * @param {String} [options.polygonLineColor]   Color for polygon outlines, defaults to lineColor
+ * @param {Number} [options.lineOpacity]        Opacity for polylines
+ * @param {Number} [options.polgonLineOpacity]  Opacity for polygon outlines, defaults to options.lineOpacity
+ * @param {Number} [options.lineWeight]         Line weight in pixels for polylines
+ * @param {Number} [options.polygonLineWeight]  Line weight for polygon outlines, defaults to options.lineWeight
+ * @param {String} [options.fillColor]          Color for polygon fill, defaults to options.color
+ * @param {String} [options.fillOpacity]        Opacity for polygon fill
+ * @param {String} [options.eventColor]         Background color for duration events
+ * @param {String} [options.eventIconPath]      Path to instant event icon directory
+ * @param {String} [options.eventIconImage]     Filename of instant event icon image
+ * @param {URL} [options.eventIcon]             URL for instant event icons (overrides path + image)
+ * @param {Boolean} [options.classicTape]       Whether to use the "classic" style timeline event tape
+ *                                              (needs additional css to work - see examples/artists.html)
  */
 TimeMapTheme = function(options) {
 
@@ -1796,21 +1795,20 @@ TimeMapTheme.create = function(theme, options) {
  * @param {placemark} placemark     Placemark or array of placemarks (GMarker, GPolyline, etc)
  * @param {Event} event             The timeline event
  * @param {TimeMapDataset} dataset  Reference to the parent dataset object
- * @param {Object} [options]        A container for optional arguments:<pre>
- *   {String} title                     Title of the item
- *   {String} description               Plain-text description of the item
- *   {String} type                      Type of map placemark used (marker. polyline, polygon)
- *   {GLatLng} infoPoint                Point indicating the center of this item
- *   {String} infoHtml                  Full HTML for the info window
- *   {String} infoUrl                   URL from which to retrieve full HTML for the info window
- *   {String} infoTemplate              HTML for the info window content, with variable expressions
- *                                      (as "{{varname}}" by default) to be replaced by option data
- *   {String} templatePattern           Regex pattern defining variable syntax in the infoTemplate
- *   {Function} openInfoWindow          Function redefining how info window opens
- *   {Function} closeInfoWindow         Function redefining how info window closes
- *   {String|TimeMapTheme} theme        Theme applying to this item, overriding dataset theme
- *   {mixed} ...                        Any of the options for {@link TimeMapTheme} may be set here
- * </pre>
+ * @param {Object} [options]        A container for optional arguments
+ * @param {String} [options.title]                  Title of the item
+ * @param {String} [options.description]            Plain-text description of the item
+ * @param {String} [options.type]                   Type of map placemark used (marker. polyline, polygon)
+ * @param {GLatLng} [options.infoPoint]             Point indicating the center of this item
+ * @param {String} [options.infoHtml]               Full HTML for the info window
+ * @param {String} [options.infoUrl]                URL from which to retrieve full HTML for the info window
+ * @param {String} [options.infoTemplate]           HTML for the info window content, with variable expressions
+ *                                                  (as "{{varname}}" by default) to be replaced by option data
+ * @param {String} [options.templatePattern]        Regex pattern defining variable syntax in the infoTemplate
+ * @param {Function} [options.openInfoWindow]       Function redefining how info window opens
+ * @param {Function} [options.closeInfoWindow]      Function redefining how info window closes
+ * @param {String|TimeMapTheme} [options.theme]     Theme applying to this item, overriding dataset theme
+ * @param {mixed} [options[...]]                    Any of the options for {@link TimeMapTheme} may be set here
  */
 TimeMapItem = function(placemark, event, dataset, options) {
     // improve compression

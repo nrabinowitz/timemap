@@ -15,7 +15,7 @@
 
 /**
  * @class
- * JSONP loader class - expects a service that takes a callback function name as
+ * JSONP loader - expects a service that takes a callback function name as
  * the last URL parameter.
  *
  * <p>The jsonp loader assumes that the JSON can be loaded from a url to which a 

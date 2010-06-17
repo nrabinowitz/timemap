@@ -15,9 +15,9 @@
  
 /**
  * @class
- * Google spreadsheet loader factory - inherits from jsonp loader.
+ * Google Spreadsheet loader.
  *
- * <p>This is a loader for data from Google Spreadsheets. Takes an optional map
+ * <p>This is a loader for data from Google Spreadsheets. The constructor takes an optional map
  * to indicate which columns contain which data elements; the default column
  * names (case-insensitive) are: title, description, start, end, lat, lon</p>
  * 

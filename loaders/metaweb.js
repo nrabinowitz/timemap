@@ -15,7 +15,7 @@
 
 /**
  * @class
- * Metaweb loader factory - inherits from jsonp loader
+ * Metaweb loader: Load data from freebase.com.
  *
  * <p>This is a loader for data from the Metaweb service at freebase.com. See
  * the API documentation at <a href="http://www.freebase.com/view/en/documentation">http://www.freebase.com/view/en/documentation</a> for

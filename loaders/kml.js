@@ -14,7 +14,7 @@
 
 /**
  * @class
- * KML loader factory - inherits from remote loader
+ * KML loader: load KML files.
  *
  * <p>This is a loader class for KML files. Currently supports all geometry
  * types (point, polyline, polygon, and overlay) and multiple geometries. Supports loading
