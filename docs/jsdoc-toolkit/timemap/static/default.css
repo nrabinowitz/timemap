@@ -1,81 +1,96 @@
 /* default.css */
-body
-{
-	font: 12px Verdana, Arial, sans-serif;
-	width: 800px;
+body {
+	font: 13px Verdana, Arial, sans-serif;
+    padding: 0;
+    margin: 15px;
 }
 
-.header
-{
+.header {
 	clear: both;
 	background-color: #ccc;
 	padding: 8px;
 }
-
-h1
-{
+a:link, a:visited {
+    color: #00A;
+}
+a:hover, a:active {
+    color: #00F;
+}
+h1 {
 	font-size: 150%;
 	font-weight: bold;
 	padding: 0;
-	margin: 1em 0 0 .3em;
+}
+h3.projectTitle {
+    font-size: 12px;
+    font-weight: bold;
+    margin: 0;
+}
+h1.classTitle {
+	font-size:170%;
+	line-height:130%;
 }
 
-hr
-{
+hr {
 	border: none 0;
-	border-top: 1px solid #7F8FB1;
+	border-top: 1px solid #627C9D;
 	height: 1px;
 }
 
-pre.code
-{
+pre.code {
 	display: block;
 	padding: 8px;
 	border: 1px dashed #ccc;
 }
 
-#index
-{
-	margin-top: 24px;
+#index {
 	float: left;
-	width: 160px;
+	width: 220px;
 	position: absolute;
 	left: 8px;
 	background-color: #F3F3F3;
 	padding: 8px;
 }
 
-#content
-{
-	margin-left: 190px;
+#content {
+	margin-left: 260px;
 	width: 600px;
 }
 
-.classList
-{
-	list-style-type: none;
-	padding: 0;
-	margin: 0 0 0 8px;
-	font-family: arial, sans-serif;
-	font-size: 1em;
-	overflow: auto;
+#index img {
+    margin: 15px 0;
+    border: 1px solid #627C9D;
 }
 
-.classList li
-{
+ul.classList {
+	list-style-type: none;
+	padding: 0;
+    margin: 0;
+	font-size: 11px;
+}
+
+ul.classList li {
 	padding: 0;
 	margin: 0 0 8px 0;
 }
 
-.summaryTable { width: 100%; }
-
-h1.classTitle
-{
-	font-size:170%;
-	line-height:130%;
+h2 { 
+    font-weight: bold;
+	font-size: 18px;
+	padding: 20px 0 10px 0;
+    margin: 0;
 }
 
-h2 { font-size: 110%; }
+code {
+	font-family: "Lucida Console", "Courier New", Courier, monospace; 
+	font-size: 12px;
+}
+pre {
+	font-family: "Lucida Console", "Courier New", Courier, monospace; 
+	font-size: 12px;
+}
+
+
 caption, div.sectionTitle
 {
 	background-color: #7F8FB1;
@@ -86,48 +101,46 @@ caption, div.sectionTitle
 	border: 1px #7F8FB1 solid;
 }
 
-div.sectionTitle { margin-bottom: 8px; }
-.summaryTable thead { display: none; }
-
-.summaryTable td
-{
-	vertical-align: top;
-	padding: 4px;
-	border-bottom: 1px #7F8FB1 solid;
-	border-right: 1px #7F8FB1 solid;
+div.sectionTitle { 
+    margin-bottom: 8px; 
+}
+div.toplinks {
+    font-size: 11px;
+    padding-top: 8px;
 }
 
-/*col#summaryAttributes {}*/
-.summaryTable td.attributes
-{
-	border-left: 1px #7F8FB1 solid;
-	width: 140px;
-	text-align: right;
-}
 
 td.attributes, .fixedFont
 {
-	line-height: 15px;
-	color: #002EBE;
-	font-family: "Courier New",Courier,monospace;
-	font-size: 13px;
+	font-family: "Lucida Console", "Courier New", Courier, monospace; 
+	font-size: 12px;
 }
 
-.summaryTable td.nameDescription
-{
-	text-align: left;
-	font-size: 13px;
-	line-height: 15px;
+/* tables */
+.summaryTable {
+    text-align: left;
+	margin-top: 10px;
+	border: 1px solid #999999;
+	width: 100%;
+	margin-bottom: 20px;
 }
-
-.summaryTable td.nameDescription, .description
-{
-	line-height: 15px;
-	padding: 4px;
-	padding-left: 4px;
+.summaryTable th {
+	color: #FFFFFF;
+	background-color: #627C9D;
+	white-space: nowrap;
+    padding: 3px 10px;
 }
-
-.summaryTable { margin-bottom: 8px; }
+.summaryTable td {
+	border-top: #999999 1px solid;
+	vertical-align: top;
+    padding: 5px 10px;
+}
+.row0 {
+	background-color: #F2F2F2;
+}
+.row1 {
+	background-color: #FFFFFF;
+}
 
 ul.inheritsList
 {

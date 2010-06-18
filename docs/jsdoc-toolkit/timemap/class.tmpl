@@ -20,7 +20,10 @@
 
 <!-- ============================== classes index ============================ -->
 		<div id="index">
-            <h1>{+JSDOC.opt.D.projectTitle+}</h1>
+            <h3 class="projectTitle">{+JSDOC.opt.D.projectTitle+} Code Reference</h3>
+            <div class="toplinks">{+new Link().toFile("index.html").withText("Class Index")+}
+| {+new Link().toFile("files.html").withText("File Index")+}</div>
+            <img src="../jsdoc-toolkit/timemap/static/timemap_sq.jpg">
 			<!-- begin publish.classesIndex -->
 			{+publish.classesIndex+}
 			<!-- end publish.classesIndex -->
