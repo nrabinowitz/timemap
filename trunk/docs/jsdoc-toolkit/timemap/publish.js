@@ -111,6 +111,7 @@ function publish(symbolSet) {
 	catch(e) { print(e.message); quit(); }
 	
 	var classesIndex = classesindexTemplate.process({
+        file: symbols.filter(function($) {return $.name == 'timemap.js'})[0],
         core: coreClasses,
         loaders: loaderClasses,
         param: paramClasses,
