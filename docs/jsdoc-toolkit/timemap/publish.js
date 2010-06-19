@@ -17,6 +17,14 @@ function publish(symbolSet) {
 	
 	// create the folders and subfolders to hold the output
 	IO.mkPath((publish.conf.outDir+"symbols/src").split("/"));
+    
+    // copy the image, if supplied
+    var projectImagePath = JSDOC.opt.D.image;
+    if (projectImagePath) {
+        IO.copyFile(projectImagePath, publish.conf.outDir);
+        // get the file name
+        JSDOC.opt.D.imageFile = projectImagePath.substr(projectImagePath.lastIndexOf("/")+1);
+    }
 		
 	// used to allow Link to check the details of things being linked to
 	Link.symbolSet = symbolSet;

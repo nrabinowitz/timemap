@@ -19,7 +19,9 @@
             <h3 class="projectTitle">{+JSDOC.opt.D.projectTitle+} Code Reference</h3>
             <div class="toplinks">{+new Link().toFile("index.html").withText("Class Index")+}
 | File Index</div>
-            <img src="jsdoc-toolkit/timemap/static/timemap_sq.jpg">
+            <if test="JSDOC.opt.D.imageFile">
+                <img src="{+JSDOC.opt.D.imageFile+}">
+            </if>
 			{+publish.classesIndex+}
 		</div>
 		
