@@ -44,10 +44,6 @@ function publish(symbolSet) {
 	function isaFile($) {return ($.is("FILE"))}
 	function isaClass($) {return ($.is("CONSTRUCTOR") || $.isNamespace)}
     function notGlobal($) {return ($.alias != '_global_')}
-    function isCore($) {return ($.alias == 'TimeMap' || $.alias == 'TimeMapDataset' || $.alias == 'TimeMapItem')}
-    function isLoader($) {return ($.alias.indexOf('TimeMap.loaders') >= 0)}
-    function isParam($) {return ($.alias.indexOf('TimeMap.params') >= 0) ||
-                                ($.alias.indexOf('TimeMap.state') >= 0)}
                                 
 	
 	// get an array version of the symbolset, useful for filtering
@@ -64,16 +60,11 @@ function publish(symbolSet) {
  	// get a list of all the classes in the symbolset
  	var classes = symbols
         .filter(isaClass)
-        .filter(notGlobal)
         .sort(makeSortby("alias"));
-    var coreClasses = classes.filter(isCore);
-    var loaderClasses = classes.filter(isLoader);
-    var paramClasses = classes.filter(isParam);
-    var otherClasses = classes.filter(function($) {
-        return coreClasses.indexOf($) < 0 &&
-            loaderClasses.indexOf($) < 0 &&
-            paramClasses.indexOf($) < 0;
-    });
+    // suppress the _global_ namespace if desired
+    if (JSDOC.opt.D.suppressGlobal) {
+        classes = classes.filter(notGlobal);
+    }
 	
 	// create a filemap in which outfiles must be to be named uniquely, ignoring case
 	if (JSDOC.opt.u) {
@@ -114,17 +105,24 @@ function publish(symbolSet) {
 	
 	// create the class index page
 	try {
-		var classesindexTemplate = new JSDOC.JsPlate(publish.conf.templatesDir+"index.tmpl");
+        var indexTemplatePath = JSDOC.opt.D.customIndexTemplate ? 
+            JSDOC.opt.D.customIndexTemplate : publish.conf.templatesDir+"index.tmpl";
+		var classesindexTemplate = new JSDOC.JsPlate(indexTemplatePath);
 	}
 	catch(e) { print(e.message); quit(); }
 	
-	var classesIndex = classesindexTemplate.process({
-        file: symbols.filter(function($) {return $.name == 'timemap.js'})[0],
-        core: coreClasses,
-        loaders: loaderClasses,
-        param: paramClasses,
-        util: otherClasses
-    });
+    // Get overview from readme file
+    var readme = false;
+    if (JSDOC.opt.D.readmeFile) {
+        readme = symbols.filter(function($) {return $.name == JSDOC.opt.D.readmeFile})[0];
+    }
+    var data = {
+        readme: readme,
+        classes: classes
+    };
+    if (JSDOC.opt.D.customIndexData) JSDOC.opt.D.customIndexData(data);
+    
+	var classesIndex = classesindexTemplate.process(data);
 	IO.saveFile(publish.conf.outDir, "index"+publish.conf.ext, classesIndex);
 	classesindexTemplate = classesIndex = classes = null;
 	

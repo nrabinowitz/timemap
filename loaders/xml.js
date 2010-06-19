@@ -5,7 +5,7 @@
  
 /**
  * @fileOverview
- * GeoRSS Loader
+ * XML Loader
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
  */

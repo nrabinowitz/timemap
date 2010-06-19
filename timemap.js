@@ -1,13 +1,20 @@
 /*! 
- * Timemap.js Copyright 2010 Nick Rabinowitz.
+ * Timemap.js Copyright 2008 Nick Rabinowitz.
  * Licensed under the MIT License (see LICENSE.txt)
  */
 
 /**
  * @overview
- * Timemap.js is intended to sync a SIMILE Timeline with a Google Map.
- * Dependencies: Google Maps API v2, SIMILE Timeline v1.2 - 2.3.1
+ *
+ * <p>Timemap.js is intended to sync a SIMILE Timeline with a Google Map. 
+ * Depends on: Google Maps API v2, SIMILE Timeline v1.2 - 2.3.1. 
  * Thanks to Jorn Clausen (http://www.oe-files.de) for initial concept and code. 
+ * Timemap.js is licensed under the MIT License (see <a href="../LICENSE.txt">LICENSE.txt</a>).</p>
+ * <ul>
+ *     <li><a href="http://code.google.com/p/timemap/">Project Homepage</a></li>
+ *     <li><a href="http://groups.google.com/group/timemap-development">Discussion Group</a></li>
+ *     <li><a href="../examples/index.html">Working Examples</a></li>
+ * </ul>
  *
  * @name timemap.js
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
@@ -718,10 +725,7 @@ TimeMap.prototype.getItems = function() {
  */
 TimeMap.loaders = {};
 
-/**
- * @namespace
- * Namespace for storing callback functions
- */
+// Namespace for storing callback functions
 TimeMap.loaders.cb = {};
 
 /**
