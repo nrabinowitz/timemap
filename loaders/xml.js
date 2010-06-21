@@ -54,6 +54,7 @@ TimeMap.loaders.xml = function(options) {
     /**
      * Parse any extra tags that have been specified into the config object
      * @name TimeMap.loaders.xml#parseExtra
+     * @function
      *
      * @param {Object} config       Config object to modify
      * @param {XML NodeList} node   Parent node to look for tags in

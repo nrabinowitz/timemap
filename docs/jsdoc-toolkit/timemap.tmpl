@@ -39,67 +39,23 @@
 			<h1 class="classTitle">Class Index</h1>
             
             <hr />
-            
-            {!
-                
-            !}
 			
             <h2>Core Classes</h2>
             <p>These are the base classes of the library - the models that hold the timemap data.</p>
-			<table class="summaryTable" cellspacing="0" cellpadding="3"> 
-                <tr> 
-                    <th width="30%">Class</th><th width="70%">Description</th> 
-                </tr> 
-                <for each="thisClass" in="data.core">
-                    <tr class="row{+($thisClass_i % 2)+}"> 
-                        <td>{+(new Link().toSymbol(thisClass.alias))+}</td>
-                        <td>{+resolveLinks(summarize(thisClass.classDesc))+}</td> 
-                    </tr> 
-                </for>
-            </table>
+			{+doTemplate('classlist.tmpl', data.core)+}
             
             <h2>Loader Classes</h2>
             <p>These classes provide different ways of loading data from various sources.</p>
-            <table class="summaryTable" cellspacing="0" cellpadding="3"> 
-                <tr> 
-                    <th width="30%">Class</th><th width="70%">Description</th> 
-                </tr> 
-                <for each="thisClass" in="data.loaders">
-                    <tr class="row{+($thisClass_i % 2)+}"> 
-                        <td>{+(new Link().toSymbol(thisClass.alias))+}</td>
-                        <td>{+resolveLinks(summarize(thisClass.classDesc))+}</td> 
-                    </tr> 
-                </for>
-            </table> 
+			{+doTemplate('classlist.tmpl', data.loaders)+}
 			
             
             <h2>Param Classes</h2>
             <p>These classes provide an architecture for loading data elements, either in the loaders or from a URL or other source. You probably won't need to worry about them much.</p>
-			<table class="summaryTable" cellspacing="0" cellpadding="3"> 
-                <tr> 
-                    <th width="30%">Class</th><th width="70%">Description</th> 
-                </tr> 
-                <for each="thisClass" in="data.param">
-                    <tr class="row{+($thisClass_i % 2)+}"> 
-                        <td>{+(new Link().toSymbol(thisClass.alias))+}</td>
-                        <td>{+resolveLinks(summarize(thisClass.classDesc))+}</td> 
-                    </tr> 
-                </for>
-            </table>
+			{+doTemplate('classlist.tmpl', data.param)+}
             
             <h2>Theme &amp; Utility Classes</h2>
             <p>These classes provide functionality and predefined objects for themes and utility functions.</p>
-			<table class="summaryTable" cellspacing="0" cellpadding="3"> 
-                <tr> 
-                    <th width="30%">Class</th><th width="70%">Description</th> 
-                </tr> 
-                <for each="thisClass" in="data.util">
-                    <tr class="row{+($thisClass_i % 2)+}"> 
-                        <td>{+(new Link().toSymbol(thisClass.alias))+}</td>
-                        <td>{+resolveLinks(summarize(thisClass.classDesc))+}</td> 
-                    </tr> 
-                </for>
-            </table>
+			{+doTemplate('classlist.tmpl', data.util)+}
 			
 		</div>
 		<div class="fineprint" style="clear:both">

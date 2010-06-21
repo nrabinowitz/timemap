@@ -204,8 +204,9 @@ TimeMap.params.ExtendedDataParam = function(paramName, tagName) {
     return new TimeMap.params.OptionParam(paramName, {
     
         /**
-         * @name TimeMap.params.ExtendedDataParam#setConfigKML
          * Set a config object based on an ExtendedData element
+         * @name TimeMap.params.ExtendedDataParam#setConfigKML
+         * @function
          * 
          * @param {Object} config       Config object to modify
          * @param {XML NodeList} node   Parent node to look for tags in

@@ -28,8 +28,8 @@
  *  <li>GML </li>
  *  <li>W3C Geo</li>
  * </ul>
- * <p>At the moment, this only supports points; polygons, polylines, and boxes
- * will be added at some later point.</p>
+ * <p>At the moment, this only supports points, polygons, polylines; boxes
+ * may be added at some later point.</p>
  *
  * @augments TimeMap.loaders.xml
  * @requires loaders/xml.js

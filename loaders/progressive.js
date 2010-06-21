@@ -150,7 +150,15 @@ TimeMap.loaders.progressive = function(options) {
         addListener = false;
     };
     
-    // override load function
+    /**
+     * Load data based on current time
+     * @name TimeMap.loaders.progressive#load
+     * @function
+     * @param {TimeMapDataset} dataset      Dataset to load data into
+     * @param {Function} callback           Callback to execute when data is loaded
+     * @param {Date} start                  Start date to load data from
+     * @param {Number} currBlock            Index of the current time block
+     */
     loader.load = function(dataset, callback, start, currBlock) {
         // set start date, defaulting to zero date
         start = cleanDate(start) || zeroDate;

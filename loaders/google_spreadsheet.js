@@ -92,6 +92,7 @@ TimeMap.loaders.gss = function(options) {
     /**
      * Preload function for spreadsheet data
      * @name TimeMap.loaders.gss#preload
+     * @function
      * @parameter {Object} data     Data to preload
      * @return {Array} data         Array of item data
      */
@@ -102,6 +103,7 @@ TimeMap.loaders.gss = function(options) {
     /**
      * Transform function for spreadsheet data
      * @name TimeMap.loaders.gss#transform
+     * @function
      * @parameter {Object} data     Data to transform
      * @return {Object} data        Transformed data for one item
      */
