@@ -81,6 +81,7 @@ TimeMap.loaders.metaweb = function(options) {
     /**
      * Preload function for Metaweb
      * @name TimeMap.loaders.metaweb#preload
+     * @function
      * @parameter {Object} data     Data to preload
      * @return {Array} data         Array of item data
      */

@@ -1,0 +1,27 @@
+<table class="summaryTable" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="col">Parameter</th>
+            <th scope="col">Type</th>
+            <th scope="col" width="100%">Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    <for each="item" in="data">
+        <tr>
+            <td class="paramname {+item.isOptional?'optional':''+}">{+item.name+}</td>
+            <td class="datatype">
+                <if test="item.type">
+                    {+new Link().toSymbol(item.type)+}
+                </if>
+            </td>
+            <td>
+                {+resolveLinks(item.desc)+}
+                <if test="item.defaultValue">
+                    <span class="defaultvalue">Default: {+item.defaultValue+}</span>
+                </if>
+            </td>
+        </tr>
+    </for>
+    </tbody>
+</table>

@@ -37,17 +37,8 @@
             <if test="data.readme">{+data.readme.desc+}</if>
             
 			<h1 class="classTitle">Class Index</h1>
-			<table class="summaryTable" cellspacing="0" cellpadding="3"> 
-                <tr> 
-                    <th width="30%">Class</th><th width="70%">Description</th> 
-                </tr> 
-                <for each="thisClass" in="data.classes">
-                    <tr class="row{+($thisClass_i % 2)+}"> 
-                        <td>{+(new Link().toSymbol(thisClass.alias))+}</td>
-                        <td>{+resolveLinks(summarize(thisClass.classDesc))+}</td> 
-                    </tr> 
-                </for>
-            </table>
+			
+			{+doTemplate('classlist.tmpl', data.classes)+}
 			
 		</div>
 		<div class="fineprint" style="clear:both">

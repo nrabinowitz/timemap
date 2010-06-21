@@ -49,6 +49,7 @@ TimeMap.loaders.flickr = function(options) {
     /**
      * Preload function for Flickr feeds
      * @name TimeMap.loaders.flickr#preload
+     * @function
      * @parameter {Object} data     Data to preload
      * @return {Array} data         Array of item data
      */
@@ -59,6 +60,7 @@ TimeMap.loaders.flickr = function(options) {
     /**
      * Transform function for Flickr feeds
      * @name TimeMap.loaders.flickr#transform
+     * @function
      * @parameter {Object} data     Data to transform
      * @return {Object} data        Transformed data for one item
      */

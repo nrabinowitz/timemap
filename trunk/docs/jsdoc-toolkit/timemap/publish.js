@@ -18,6 +18,9 @@ function publish(symbolSet) {
 	// create the folders and subfolders to hold the output
 	IO.mkPath((publish.conf.outDir+"symbols/src").split("/"));
     
+    // copy "inherited" image
+    IO.copyFile(publish.conf.templatesDir+"inherited.gif", publish.conf.outDir+"symbols/");
+    
     // copy the image, if supplied
     var projectImagePath = JSDOC.opt.D.image;
     if (projectImagePath) {
@@ -226,4 +229,14 @@ function resolveLinks(str, from) {
 	);
 	
 	return str;
+}
+
+/** Get a JSPlate template by filename and process it with provided data */
+function doTemplate(filename, data) {
+    var templatesDir = JSDOC.opt.t || SYS.pwd+"../templates/jsdoc/";
+    try {
+		var template = new JSDOC.JsPlate(publish.conf.templatesDir + filename);
+        return template.process(data);
+	}
+	catch(e) { print(e.message); quit(); }
 }

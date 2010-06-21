@@ -61,8 +61,8 @@ var
  * @constructor
  * This will create the visible map, but not the timeline, which must be initialized separately.
  *
- * @param {element} tElement     The timeline element.
- * @param {element} mElement     The map element.
+ * @param {DOM Element} tElement     The timeline element.
+ * @param {DOM Element} mElement     The map element.
  * @param {Object} [options]       A container for optional arguments
  * @param {Boolean} [options.syncBands]         Whether to synchronize all bands in timeline
  * @param {GLatLng} [options.mapCenter]         Point for map center
@@ -129,8 +129,8 @@ TimeMap = function(tElement, mElement, options) {
     tm.chains = {};
     
     /** 
-     * @name TimeMap#opts
      * Container for optional settings passed in the "options" parameter
+     * @name TimeMap#opts
      * @type Object
      */
     tm.opts = options = util.merge(options, defaults);
@@ -206,6 +206,7 @@ TimeMap.prototype.initMap = function() {
 
 /**
  * Current library version.
+ * @constant
  * @type String
  */
 TimeMap.version = "1.6pre";
@@ -406,6 +407,7 @@ TimeMap.loadManager = new function() {
     /**
      * Initialize (or reset) the load manager
      * @name TimeMap.loadManager#init
+     * @function
      *
      * @param {TimeMap} tm          TimeMap instance
      * @param {int} target     Number of datasets we're loading
@@ -430,6 +432,7 @@ TimeMap.loadManager = new function() {
     /**
      * Increment the count of loaded datasets
      * @name TimeMap.loadManager#increment
+     * @function
      */
     mgr.increment = function() {
         mgr.count++;
@@ -443,6 +446,7 @@ TimeMap.loadManager = new function() {
      * Default behavior is to scroll to a given date (if provided) and
      * layout the timeline.
      * @name TimeMap.loadManager#complete
+     * @function
      */
     mgr.complete = function() {
         var tm = mgr.tm,
@@ -808,6 +812,7 @@ TimeMap.loaders.base = function(options) {
      * Get the name of a callback function that can be cancelled. This callback applies the parser,
      * preload, and transform functions, loads the data, then calls the user callback
      * @name TimeMap.loaders.base#getCallbackName
+     * @function
      *
      * @param {TimeMapDataset} dataset  Dataset to load data into
      * @param {Function} callback       User-supplied callback function. If no function 
@@ -844,6 +849,7 @@ TimeMap.loaders.base = function(options) {
      * Get a callback function that can be cancelled. This is a convenience function
      * to be used if the callback name itself is not needed.
      * @name TimeMap.loaders.base#getCallback 
+     * @function
      * @see TimeMap.loaders.base#getCallbackName
      *
      * @param {TimeMapDataset} dataset  Dataset to load data into
@@ -887,6 +893,7 @@ TimeMap.loaders.basic = function(options) {
      * Load javascript literal data.
      * New loaders should implement a load function with the same signature.
      * @name TimeMap.loaders.basic#load
+     * @function
      *
      * @param {TimeMapDataset} dataset  Dataset to load data into
      * @param {Function} callback       Function to call once data is loaded
@@ -923,6 +930,7 @@ TimeMap.loaders.remote = function(options) {
     /**
      * Load function for remote files.
      * @name TimeMap.loaders.remote#load
+     * @function
      *
      * @param {TimeMapDataset} dataset  Dataset to load data into
      * @param {Function} callback       Function to call once data is loaded
@@ -1221,12 +1229,12 @@ TimeMap.filters.none = function(item) {
  * @param {Object} [options]        Object holding optional arguments
  * @param {String} [options.id]                 Key for this dataset in the datasets map
  * @param {String} [options.title]              Title of the dataset (for the legend)
- * @param {String|TimeMapTheme} [optionstheme]  Theme settings.
- * @param {String|Function} [optionsdateParser] Function to replace default date parser.
- * @param {String} [optionsinfoTemplate]        HTML template for info window content
- * @param {String} [optionstemplatePattern]     Regex pattern defining variable syntax in the infoTemplate
- * @param {Function} [optionsopenInfoWindow]    Function redefining how info window opens
- * @param {Function} [optionscloseInfoWindow]   Function redefining how info window closes
+ * @param {String|TimeMapTheme} [options.theme]  Theme settings.
+ * @param {String|Function} [options.dateParser] Function to replace default date parser.
+ * @param {String} [options.infoTemplate]        HTML template for info window content
+ * @param {String} [options.templatePattern]     Regex pattern defining variable syntax in the infoTemplate
+ * @param {Function} [options.openInfoWindow]    Function redefining how info window opens
+ * @param {Function} [options.closeInfoWindow]   Function redefining how info window closes
  * @param {mixed} [options[...]]                Any of the options for {@link TimeMapTheme} may be set here,
  *                                              to cascade to the dataset's objects, though they can be 
  *                                              overridden at the TimeMapItem level
@@ -1816,7 +1824,20 @@ TimeMapTheme.create = function(theme, options) {
  */
 TimeMapItem = function(placemark, event, dataset, options) {
     // improve compression
-    var item = this;
+    var item = this,
+        // set defaults for options
+        defaults = {
+            type: 'none',
+            title: 'Untitled',
+            description: '',
+            infoPoint: null,
+            infoHtml: '',
+            infoUrl: '',
+            infoTemplate: '<div class="infotitle">{{title}}</div>' + 
+                          '<div class="infodescription">{{description}}</div>',
+            templatePattern: /{{([^}]+)}}/g,
+            closeInfoWindow: TimeMapItem.closeInfoWindowBasic
+        };
 
     /**
      * This item's timeline event
@@ -1856,23 +1877,15 @@ TimeMapItem = function(placemark, event, dataset, options) {
     /**
      * This item's placemark(s)
      * @name TimeMapItem#placemark
-     * @type GMarker/GPolyline/GPolygon/GOverlay/Array
+     * @type GMarker|GPolyline|GPolygon|GOverlay|Array
      */
     item.placemark = placemark;
     
-    // set defaults for options
-    var defaults = {
-        type: 'none',
-        title: 'Untitled',
-        description: '',
-        infoPoint: null,
-        infoHtml: '',
-        infoUrl: '',
-        infoTemplate: '<div class="infotitle">{{title}}</div>' + 
-                      '<div class="infodescription">{{description}}</div>',
-        templatePattern: /{{([^}]+)}}/g,
-        closeInfoWindow: TimeMapItem.closeInfoWindowBasic
-    };
+    /**
+     * Container for optional settings passed in through the "options" parameter
+     * @name TimeMapItem#opts
+     * @type Object
+     */
     item.opts = options = util.merge(options, defaults, dataset.opts);
     
     // select default open function
@@ -1891,6 +1904,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
     /**
      * Return the placemark type for this item
      * @name TimeMapItem#getType
+     * @function
      * 
      * @return {String}     Placemark type
      */
@@ -1899,6 +1913,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
     /**
      * Return the title for this item
      * @name TimeMapItem#getTitle
+     * @function
      * 
      * @return {String}     Item title
      */
@@ -1907,6 +1922,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
     /**
      * Return the item's "info point" (the anchor for the map info window)
      * @name TimeMapItem#getInfoPoint
+     * @function
      * 
      * @return {GLatLng}    Info point
      */
@@ -1918,6 +1934,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
     /**
      * Return the start date of the item's event, if any
      * @name TimeMapItem#getStart
+     * @function
      * 
      * @return {Date}   Item start date or undefined
      */
@@ -1930,6 +1947,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
     /**
      * Return the end date of the item's event, if any
      * @name TimeMapItem#getEnd
+     * @function
      * 
      * @return {Date}   Item end dateor undefined
      */
@@ -1942,6 +1960,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
     /**
      * Return the timestamp of the start date of the item's event, if any
      * @name TimeMapItem#getStartTime
+     * @function
      * 
      * @return {int}    Item start date timestamp or undefined
      */
@@ -1955,6 +1974,7 @@ TimeMapItem = function(placemark, event, dataset, options) {
     /**
      * Return the timestamp of the end date of the item's event, if any
      * @name TimeMapItem#getEndTime
+     * @function
      * 
      * @return {int}    Item end date timestamp or undefined
      */
