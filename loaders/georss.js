@@ -36,8 +36,8 @@
  * @requires param.js
  * @borrows TimeMap.loaders.georss.parse as #parse
  *
- * @example Usage in TimeMap.init():
- 
+ * @example
+TimeMap.init({
     datasets: [
         {
             title: "GeoRSS Dataset",
@@ -46,7 +46,10 @@
                 url: "mydata.rss" // GeoRSS file to load - must be a local URL
             }
         }
-    ]
+    ],
+    // etc...
+});
+ * @see <a href="../../examples/earthquake_georss.html">GeoRSS Example</a>
  *
  * @param {Object} options          All options for the loader:
  * @param {String} options.url          URL of GeoRSS file to load (NB: must be local address)

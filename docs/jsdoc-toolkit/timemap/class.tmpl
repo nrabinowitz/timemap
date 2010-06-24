@@ -5,7 +5,9 @@
 		<meta http-equiv="content-type" content="text/html; charset={+IO.encoding+}" />
 		<meta name="generator" content="JsDoc Toolkit" />
 		{! Link.base = "../"; /* all generated links will be relative to this */ !}
-		<title>{+JSDOC.opt.D.projectTitle+} : {+data.alias+} : JsDoc Reference</title>
+		<title>{+JSDOC.opt.D.projectTitle+} 
+                <if test="JSDOC.opt.D.version">v.{+JSDOC.opt.D.version+}</if>
+                : {+data.alias+} : JsDoc Reference</title>
 
 		<style type="text/css">
 			{+include("static/default.css")+}
@@ -20,7 +22,9 @@
 
 <!-- ============================== classes index ============================ -->
 		<div id="index">
-            <h3 class="projectTitle">{+JSDOC.opt.D.projectTitle+} Code Reference</h3>
+            <h3 class="projectTitle">{+JSDOC.opt.D.projectTitle+} 
+                <if test="JSDOC.opt.D.version">v.{+JSDOC.opt.D.version+}</if>
+            </h3>
             <div class="toplinks">{+new Link().toFile("index.html").withText("Class Index")+}
 | {+new Link().toFile("files.html").withText("File Index")+}</div>
             <if test="JSDOC.opt.D.imageFile">
@@ -55,41 +59,48 @@
 			</h1>
 
 <!-- ============================== class summary ========================== -->			
-            <dl>
+            <dl class="detailList">
             
-            <if test="data.author">
-                <dt>Author:</dt> 
-                <dd>{+data.author+}</dd>
-            </if>
+                <if test="data.author">
+                    <dt>Author:</dt> 
+                    <dd>{+data.author+}</dd>
+                </if>
+                
+                <if test="data.version">
+                    <dt>Version:</dt> 
+                    <dd>{+data.version+}</dd>
+                </if>
+                
+                <if test="data.augments.length">
+                    <dt>Extends:</dt> 
+                    <dd>{+
+                            data.augments
+                            .sort()
+                            .map(
+                                function($) { return new Link().toSymbol($); }
+                            )
+                            .join(", ")
+                    +}</dd>
+                </if>
+                
+                <if test="data.requires.length">
+                    <dt>Requires:</dt>
+                    <for each="item" in="data.requires">
+                        <dd class="{+$item_last?'':'tight'+}">{+ resolveLinks(item) +}</dd>
+                    </for>
+                </if>
+                
+                <if test="!data.isBuiltin()">
+                    <dt>Defined in:</dt>
+                    <dd>{+new Link().toSrc(data.srcFile)+}</dd>
+                </if>
             
-            <if test="data.version">
-                <dt>Version:</dt> 
-                <dd>{+data.version+}</dd>
-            </if>
-            
-            <if test="data.augments.length">
-                <dt>Extends:</dt> 
-                <dd>{+
-						data.augments
-						.sort()
-						.map(
-							function($) { return new Link().toSymbol($); }
-						)
-						.join(", ")
-                +}</dd>
-            </if>
-            
-            <if test="data.requires.length">
-                <dt>Requires:</dt>
-                <for each="item" in="data.requires">
-                    <dd>{+ resolveLinks(item) +}</dd>
-                </for>
-            </if>
-            
-            <if test="!data.isBuiltin()">
-                <dt>Defined in:</dt>
-                <dd>{+new Link().toSrc(data.srcFile)+}</dd>
-            </if>
+                <if test="data.see.length">
+                    <dt>See:</dt>
+                    <for each="item" in="data.see">
+                        <dd>{+ new Link().toSymbol(item) +}</dd>
+                    </for>
+                </if>
             </dl>
 
             <p class="description">
@@ -98,7 +109,7 @@
             
             <if test="data.example.length">
 				<for each="example" in="data.example">
-                    <pre class="code">{+example+}</pre>
+                    <pre class="code">{+makeExample(example)+}</pre>
 				</for>
             </if>
 
@@ -189,12 +200,12 @@ function notInheritedFilter($){return $.memberOf == data.alias}
             
 <!-- ============================== events summary ======================== -->
 			<if test="data.events.length">
-				{! var ownEvents = data.events.filter(function($){return !$.isNamespace}).sort(makeSortby("name")); !}
-				<if test="ownEvents.length">
+				{! var events = data.events.filter(function($){return !$.isNamespace}).sort(makeSortby("name")); !}
+				<if test="events.length">
                     <h2>Events</h2>
                     {+doTemplate('membertable.tmpl', {
                         type:'Event', 
-                        members:ownEvents,
+                        members:events,
                         alias: data.alias
                     })+}
                 </if>
@@ -207,7 +218,7 @@ function notInheritedFilter($){return $.memberOf == data.alias}
 					{+classType+}Detail
 				</div>
 				
-				<div class="fixedFont">
+				<div class="fixedFont membername">
 						<b>{+ data.alias +}</b><if test="classType != 'Namespace '">{+ makeSignature(data.params) +}</if>
 				</div>
                 
@@ -239,20 +250,14 @@ function notInheritedFilter($){return $.memberOf == data.alias}
 						<dt>Throws:</dt>
 						<for each="item" in="data.exceptions">
 							<dd>
-                                <if test="item.type"><span class="datatype">({+new Link().toSymbol(item.type)+})</span></if> {+resolveLinks(item.desc)+}
+                                <if test="item.type"><span class="datatype">{{+new Link().toSymbol(item.type)+}}</span></if> {+resolveLinks(item.desc)+}
                             </dd>
 						</for>
 					</if>
 					<if test="data.returns.length">
 						<dt>Returns:</dt>
 						<for each="item" in="data.returns">
-                            <dd><if test="item.type"><span class="datatype">({+new Link().toSymbol(item.type)+})</span></if> {+resolveLinks(item.desc)+}</dd>
-						</for>
-					</if>
-					<if test="data.see.length">
-						<dt>See:</dt>
-						<for each="item" in="data.see">
-							<dd>{+ new Link().toSymbol(item) +}</dd>
+                            <dd><if test="item.type"><span class="datatype">{{+new Link().toSymbol(item.type)+}}</span></if> {+resolveLinks(item.desc)+}</dd>
 						</for>
 					</if>
                 </dl>
@@ -262,49 +267,63 @@ function notInheritedFilter($){return $.memberOf == data.alias}
 
 <!-- ============================== static field details ========================== -->		
 			<if test="defined(staticProperties) && staticProperties.length">
-				<div class="sectionTitle">Static Field Details</div>
-				{+doTemplate('memberdetail.tmpl', {
-                    members: staticProperties.filter(notInheritedFilter),
-                    srcFile: data.srcFile
-                })+}
+                {! var ownStaticProperties = staticProperties.filter(notInheritedFilter); !}
+				<if test="ownStaticProperties.length">
+                    <div class="sectionTitle">Static Field Details</div>
+                    {+doTemplate('memberdetail.tmpl', {
+                        members: ownStaticProperties,
+                        srcFile: data.srcFile
+                    })+}
+				</if>
 			</if>
 
 <!-- ============================== static method details ========================= -->		
 			<if test="defined(staticMethods) && staticMethods.length">
-				<div class="sectionTitle">Static Method Details</div>
-				{+doTemplate('memberdetail.tmpl', {
-                    members: staticMethods.filter(notInheritedFilter),
-                    srcFile: data.srcFile
-                })+}
+                {! var ownStaticMethods = staticMethods.filter(notInheritedFilter); !}
+				<if test="ownStaticMethods.length">
+                    <div class="sectionTitle">Static Method Details</div>
+                    {+doTemplate('memberdetail.tmpl', {
+                        members: ownStaticMethods,
+                        srcFile: data.srcFile
+                    })+}
+				</if>
 			</if>
             
 <!-- ============================== instance field details ========================== -->		
 			<if test="defined(instanceProperties) && instanceProperties.length">
-				<div class="sectionTitle">Field Details</div>
-				{+doTemplate('memberdetail.tmpl', {
-                    members: instanceProperties.filter(notInheritedFilter),
-                    srcFile: data.srcFile
-                })+}
+                {! var ownInstanceProperties = instanceProperties.filter(notInheritedFilter); !}
+				<if test="ownInstanceProperties.length">
+                    <div class="sectionTitle">Field Details</div>
+                    {+doTemplate('memberdetail.tmpl', {
+                        members: ownInstanceProperties,
+                        srcFile: data.srcFile
+                    })+}
+				</if>
 			</if>
 
 <!-- ============================== static method details ========================= -->		
 			<if test="defined(instanceMethods) && instanceMethods.length">
-				<div class="sectionTitle">Method Details</div>
-				{+doTemplate('memberdetail.tmpl', {
-                    members: instanceMethods.filter(notInheritedFilter),
-                    srcFile: data.srcFile
-                })+}
+                {! var ownInstanceMethods = instanceMethods.filter(notInheritedFilter); !}
+				<if test="ownInstanceMethods.length">
+                    <div class="sectionTitle">Method Details</div>
+                    {+doTemplate('memberdetail.tmpl', {
+                        members: ownInstanceMethods,
+                        srcFile: data.srcFile
+                    })+}
+				</if>
 			</if>
 			
 <!-- ============================== event details ========================= -->		
-			<if test="defined(ownEvents) && ownEvents.length">
-				<div class="sectionTitle">Events</div>
-				{+doTemplate('memberdetail.tmpl', {
-                    members: ownEvents.filter(notInheritedFilter),
-                    srcFile: data.srcFile
-                })+}
+			<if test="defined(events) && events.length">
+                {! var ownEvents = events.filter(notInheritedFilter); !}
+				<if test="ownEvents.length">
+                    <div class="sectionTitle">Events</div>
+                    {+doTemplate('memberdetail.tmpl', {
+                        members: ownEvents,
+                        srcFile: data.srcFile
+                    })+}
+				</if>
 			</if>
-
 		
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">

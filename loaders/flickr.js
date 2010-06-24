@@ -25,8 +25,8 @@
  * @augments TimeMap.loaders.jsonp
  * @requires loaders/json.js
  *
- * @example Usage in TimeMap.init():
- 
+ * @example
+TimeMap.init({
     datasets: [
         {
             title: "Flickr Dataset",
@@ -37,7 +37,10 @@
                 url: "http://www.flickr.com/services/feeds/geo/?format=json&jsoncallback="
             }
         }
-    ]
+    ],
+    // etc...
+});
+ * @see <a href="../../examples/pathlines.html">Flickr Pathlines Example</a>
  *
  * @param {Object} options          All options for the loader
  * @param {String} options.url          Full JSONP url of Flickr feed to load

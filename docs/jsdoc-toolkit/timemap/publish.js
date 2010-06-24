@@ -31,7 +31,7 @@ function publish(symbolSet) {
 		
 	// used to allow Link to check the details of things being linked to
 	Link.symbolSet = symbolSet;
-
+    
 	// create the required templates
 	try {
 		var classTemplate = new JSDOC.JsPlate(publish.conf.templatesDir+"class.tmpl");
@@ -42,7 +42,7 @@ function publish(symbolSet) {
 		quit();
 	}
 	
-	// some ustility filters
+	// some utility filters
 	function hasNoParent($) {return ($.memberOf == "")}
 	function isaFile($) {return ($.is("FILE"))}
 	function isaClass($) {return ($.is("CONSTRUCTOR") || $.isNamespace)}
@@ -51,6 +51,14 @@ function publish(symbolSet) {
 	
 	// get an array version of the symbolset, useful for filtering
 	var symbols = symbolSet.toArray();
+    
+    // Get overview from readme file
+    var readme = false;
+    if (JSDOC.opt.D.readmeFile) {
+        readme = symbols.filter(function($) {return $.name == JSDOC.opt.D.readmeFile})[0];
+        // set the version from the readme
+        if (!JSDOC.opt.D.version) JSDOC.opt.D.version = readme.version;
+    }
 	
 	// create the hilited source code files
 	var files = JSDOC.opt.srcFiles;
@@ -113,12 +121,6 @@ function publish(symbolSet) {
 		var classesindexTemplate = new JSDOC.JsPlate(indexTemplatePath);
 	}
 	catch(e) { print(e.message); quit(); }
-	
-    // Get overview from readme file
-    var readme = false;
-    if (JSDOC.opt.D.readmeFile) {
-        readme = symbols.filter(function($) {return $.name == JSDOC.opt.D.readmeFile})[0];
-    }
     var data = {
         readme: readme,
         classes: classes
@@ -239,4 +241,12 @@ function doTemplate(filename, data) {
         return template.process(data);
 	}
 	catch(e) { print(e.message); quit(); }
+}
+
+/** make a highlighted example */
+function makeExample(example) {
+    var hiliter = new JsHilite(example, IO.encoding);
+    hiliter.showLinenumbers = false;
+    hiliter.header = hiliter.footer = '';
+    return hiliter.hilite();
 }

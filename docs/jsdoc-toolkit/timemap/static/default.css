@@ -42,12 +42,14 @@ pre.code {
 	display: block;
 	padding: 8px;
 	border: 1px dashed #ccc;
+    overflow: auto;
 }
 
 #index {
 	float: left;
 	width: 220px;
 	position: absolute;
+    margin-bottom: 15px;
 	left: 8px;
 	background-color: #F3F3F3;
 	padding: 8px;
@@ -118,6 +120,12 @@ td.attributes, .fixedFont
 	white-space: nowrap;
     padding: 3px 10px;
 }
+.summaryTable th.param {
+	color: #000;
+	background-color: #F2F2F2;
+	white-space: nowrap;
+    padding: 3px 10px;
+}
 .summaryTable td {
 	border-top: #999999 1px solid;
 	vertical-align: top;
@@ -140,17 +148,44 @@ ul.inheritsList
 	padding-left: 0;
 }
 
-.detailList {
-	margin-left: 20px; 
-	line-height: 15px;
-}
-.detailList dt { margin-left: 20px; }
-
-.detailList .heading
+.detailList dt
 {
+    float: left;
+    clear: both;
 	font-weight: bold;
-	padding-bottom: 6px;
 	margin-left: 0;
+}
+.detailList dd { 
+	padding-bottom: .5em;
+    margin-left: 7em; 
+}
+.detailList dd.tight {
+    padding-bottom: 0;
+}
+.membertitle {
+    font-size: 1.2em;
+    padding: .5em;
+    margin: 2.5em 0px 0.2em;
+    background: #EEF;
+    border-bottom: 3px double #999;
+}
+.membername {
+    font-weight: bold;
+}
+.datatype {
+    color: #999;
+}
+.paramname {
+    font-weight: bold;
+}
+.paramconfig {
+    color: #999;
+}
+.optional {
+	font-style: italic;
+}
+.defaultvalue {
+	font-style: italic;
 }
 
 .light, td.attributes, .light a:link, .light a:visited
@@ -163,6 +198,13 @@ div.indexClass {
     border-top: 1px solid #7F8FB1;
     margin-bottom: .5em;
 }
+
+/* syntax coloring for examples */
+.KEYW {color: #339; font-weight: bold;}
+.COMM {color: #999; font-style: italic;}
+.NUMB {color: #933;}
+.STRN {color: #393;}
+.REGX {color: #993;}
 
 .fineprint
 {

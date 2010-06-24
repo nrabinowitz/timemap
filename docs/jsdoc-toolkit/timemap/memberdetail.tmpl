@@ -1,9 +1,9 @@
 <for each="member" in="data.members">
     <a name="{+member.isEvent?'event:':''+}{+Link.symbolNameToLinkName(member)+}"> </a>
-    <div class="fixedFont">
-    <if test="member.isStatic && member.memberOf != '_global_'"><span class="parent">{+member.memberOf+}.</span></if><span class="membername">{+member.name.replace(/\^\d+$/, '')+}</span><if test="member.isa=='FUNCTION'">{+makeSignature(member.params)+}</if>
+    <div class="fixedFont membertitle">
+    <if test="member.isStatic && member.memberOf != '_global_'"><span class="parent">{+member.memberOf+}.</span></if><span class="membername">{+member.name.replace(/\^\d+$/, '')+}</span><if test="member.isa=='FUNCTION'"><span class="membersignature">{+makeSignature(member.params)+}</span></if>
     
-    <if test="member.type"><span class="datatype">({+new Link().toSymbol(member.type)+})</span></if>
+    <if test="member.type"><span class="datatype">:{{+new Link().toSymbol(member.type)+}}</span></if>
     </div>
     
     <div class="description">
@@ -21,7 +21,7 @@
     
     <if test="member.example.length">
         <for each="example" in="member.example">
-            <pre class="code">{+example+}</pre>
+            <pre class="code">{+makeExample(example)+}</pre>
         </for>
     </if>
 
@@ -49,14 +49,14 @@
             <dt>Throws:</dt>
             <for each="item" in="member.exceptions">
                 <dd>
-                    <if test="item.type"><span class="datatype">({+new Link().toSymbol(item.type)+})</span></if> {+resolveLinks(item.desc)+}
+                    <if test="item.type"><span class="datatype">{{+new Link().toSymbol(item.type)+}}</span></if> {+resolveLinks(item.desc)+}
                 </dd>
             </for>
         </if>
         <if test="member.returns.length">
             <dt>Returns:</dt>
             <for each="item" in="member.returns">
-                <dd><if test="item.type"><span class="datatype">({+new Link().toSymbol(item.type)+})</span></if> {+resolveLinks(item.desc)+}</dd>
+                <dd><if test="item.type"><span class="datatype">{{+new Link().toSymbol(item.type)+}}</span></if> {+resolveLinks(item.desc)+}</dd>
             </for>
         </if>
         <if test="member.defaultValue">
@@ -78,6 +78,4 @@
             <dd>{+new Link().toSrc(member.srcFile)+}</dd>
         </if>
     </dl>
-
-    <if test="!$member_last"><hr /></if>
 </for>

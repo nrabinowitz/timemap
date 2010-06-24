@@ -33,8 +33,8 @@
  * @requires param.js
  * @requires loaders/json.js
  *
- * @example Usage in TimeMap.init():
- 
+ * @example
+TimeMap.init({
     datasets: [
         {
             title: "Google Spreadsheet by key",
@@ -50,7 +50,11 @@
                 url: "http://spreadsheets.google.com/feeds/list/pjUcDAp-oNIOjmx3LCxT4XA/1/public/values?alt=json-in-script&callback="
             }
         }
-    ]
+    ],
+    // etc...
+});
+ * @see <a href="../../examples/google_spreadsheet.html">Google Spreadsheet Example</a>
+ * @see <a href="../../examples/google_spreadsheet_columns.html">Google Spreadsheet Example, Arbitrary Columns</a>
  *
  * @param {Object} options          All options for the loader:
  * @param {String} options.key                      Key of spreadsheet to load, or

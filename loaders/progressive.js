@@ -24,8 +24,8 @@
  * is that the data service can take start and end parameters and return the data for 
  * that date range.</p>
  *
- * @example Usage in TimeMap.init():
- 
+ * @example
+TimeMap.init({
     datasets: [
         {
             title: "Progressive JSONP Dataset",
@@ -35,10 +35,12 @@
                 url: "http://www.test.com/getsomejson.php?start=[start]&end=[end]callback="
             }
         }
-    ]
+    ],
+    // etc...
+});
  *
- * @example Usage in TimeMap.init():
- 
+ * @example
+TimeMap.init({
     datasets: [
         {
             title: "Progressive KML Dataset",
@@ -49,21 +51,25 @@
                 })
             }
         }
-    ]
+    ],
+    // etc...
+}); 
+ * @see <a href="../../examples/progressive.html">Progressive Loader Example</a>
  *
  * @constructor
  * @param {Object} options          All options for the loader
  * @param {TimeMap.loaders.remote} [options.loader] Instantiated loader class (overrides "type")
  * @param {String} [options.type]                   Name of loader class to use
- * @param {String/Date} options.start               Start of initial date range, as date or string
+ * @param {String|Date} options.start               Start of initial date range, as date or string
  * @param {Number} options.interval                 Size in milliseconds of date ranges to load at a time
- * @param {String/Date} [options.dataMinDate]       Minimum date available in data (optional, will avoid
+ * @param {String|Date} [options.dataMinDate]       Minimum date available in data (optional, will avoid
  *                                                  unnecessary service requests if supplied)
- * @param {String/Date} [options.dataMaxDate]       Maximum date available in data (optional, will avoid
+ * @param {String|Date} [options.dataMaxDate]       Maximum date available in data (optional, will avoid
  *                                                  unnecessary service requests if supplied)
  * @param {Function} [options.formatUrl]            Function taking (urlTemplate, start, end) and returning
  *                                                  a URL formatted as needed by the service
- * @param {Function} [options.formatDate]           Function to turn a date into a string formatted
+ * @param {Function} [options.formatDate={@link TimeMap.util.formatDate}]           
+ *                                                  Function to turn a date into a string formatted
  *                                                  as needed by the service
  * @param {mixed} [options[...]]                    Other options needed by the "type" loader
  */

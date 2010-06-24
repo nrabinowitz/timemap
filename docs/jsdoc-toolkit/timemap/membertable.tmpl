@@ -18,6 +18,7 @@
             <td class="nameDescription">
                 <div class="fixedFont">
                 <if test="member.isStatic && member.memberOf != '_global_'">{+member.memberOf+}.</if><b>{+new Link().toSymbol(member.alias).withText(member.name)+}</b><if test="data.type=='Method'||data.type=='Event'">{+makeSignature(member.params)+}</if>
+                <if test="data.type=='Field' && member.type"><span class="datatype">:{{+new Link().toSymbol(member.type)+}}</span></if>
                 </div>
                 <div class="description">
                     <if test="member.isPrivate">

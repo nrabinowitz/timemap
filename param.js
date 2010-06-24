@@ -222,7 +222,6 @@ var params = TimeMap.params = {
 /**
  * @namespace Namespace for parameters used for loading data into a TimeMapItem 
  * object. Because these are intended for loading, only setConfig is defined.
- * XXX: The other functions would be easy enough to define here - worthwhile?
  */
 TimeMap.loaders.base.prototype.params = {
     /**
@@ -245,7 +244,7 @@ TimeMap.loaders.base.prototype.params = {
     
     /**
      * Item description
-     * @type TimeMap.params.Param
+     * @type TimeMap.params.OptionParam
      */
     description: new params.OptionParam("description"),
     
