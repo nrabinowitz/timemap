@@ -14,6 +14,12 @@
 
 /*globals TimeMap, TimeMapDataset, TimeMapItem, Timeline */
  
+(function(){
+    var window = this,
+        TimeMap = window.TimeMap, 
+        TimeMapDataset = window.TimeMapDataset, 
+        TimeMapItem = window.TimeMapItem;
+        
 /*----------------------------------------------------------------------------
  * TimeMap manipulation: stuff affecting every dataset
  *---------------------------------------------------------------------------*/
@@ -23,12 +29,13 @@
  * that this is more efficient than calling clear() on each dataset.
  */
 TimeMap.prototype.clear = function() {
-    this.eachItem(function(item) {
+    var tm = this;
+    tm.eachItem(function(item) {
         item.event = item.placemark = null;
     });
-    this.map.clearOverlays();
-    this.eventSource.clear();
-    this.datasets = [];
+    tm.map.clearOverlays();
+    tm.eventSource.clear();
+    tm.datasets = [];
 };
 
 /**
@@ -56,11 +63,12 @@ TimeMap.prototype.hideDataset = function (id){
  * Hides all the datasets on the map
  */
 TimeMap.prototype.hideDatasets = function(){
-	this.each(function(ds) {
+    var tm = this;
+	tm.each(function(ds) {
 		ds.visible = false;
 	});
-    this.filter("map");
-    this.filter("timeline");
+    tm.filter("map");
+    tm.filter("timeline");
 };
 
 /**
@@ -78,21 +86,23 @@ TimeMap.prototype.showDataset = function(id) {
  * Shows all the datasets on the map
  */
 TimeMap.prototype.showDatasets = function() {
-	this.each(function(ds) {
+    var tm = this;
+	tm.each(function(ds) {
 		ds.visible = true;
 	});
-    this.filter("map");
-    this.filter("timeline");
+    tm.filter("map");
+    tm.filter("timeline");
 };
  
 /**
  * Change the default map type
  *
- * @param {String or Object} mapType   New map type If string, looks up in TimeMap.mapTypes.
+ * @param {String|Object} mapType   New map type If string, looks up in TimeMap.mapTypes.
  */
 TimeMap.prototype.changeMapType = function (mapType) {
+    var tm = this;
     // check for no change
-    if (mapType == this.opts.mapType) {
+    if (mapType == tm.opts.mapType) {
         return;
     }
     // look for mapType
@@ -104,8 +114,8 @@ TimeMap.prototype.changeMapType = function (mapType) {
         return;
     }
     // change it
-    this.opts.mapType = mapType;
-    this.map.setMapType(mapType);
+    tm.opts.mapType = mapType;
+    tm.map.setMapType(mapType);
 };
 
 /*----------------------------------------------------------------------------
@@ -128,11 +138,12 @@ TimeMap.prototype.refreshTimeline = function () {
 /**
  * Change the intervals on the timeline.
  *
- * @param {String or Array} intervals   New intervals. If string, looks up in TimeMap.intervals.
+ * @param {String|Array} intervals   New intervals. If string, looks up in TimeMap.intervals.
  */
 TimeMap.prototype.changeTimeIntervals = function (intervals) {
+    var tm = this;
     // check for no change
-    if (intervals == this.opts.bandIntervals) {
+    if (intervals == tm.opts.bandIntervals) {
         return;
     }
     // look for intervals
@@ -143,22 +154,23 @@ TimeMap.prototype.changeTimeIntervals = function (intervals) {
     if (!intervals) {
         return;
     }
-    this.opts.bandIntervals = intervals;
+    tm.opts.bandIntervals = intervals;
     // internal function - change band interval
-    var changeInterval = function(band, interval) {
+    function changeInterval(band, interval) {
         band.getEther()._interval = Timeline.DateTime.gregorianUnitLengths[interval];
         band.getEtherPainter()._unit = interval;
     };
     // grab date
-    var topband = this.timeline.getBand(0);
-    var centerDate = topband.getCenterVisibleDate();
+    var topband = tm.timeline.getBand(0),
+        centerDate = topband.getCenterVisibleDate(),
+        x;
     // change interval for each band
-    for (var x=0; x<this.timeline.getBandCount(); x++) {
-        changeInterval(this.timeline.getBand(x), intervals[x]);
+    for (x=0; x<tm.timeline.getBandCount(); x++) {
+        changeInterval(tm.timeline.getBand(x), intervals[x]);
     }
     // re-layout timeline
     topband.getEventPainter().getLayout()._laidout = false;
-    this.timeline.layout();
+    tm.timeline.layout();
     topband.setCenterVisibleDate(centerDate);
 };
 
@@ -171,11 +183,12 @@ TimeMap.prototype.changeTimeIntervals = function (intervals) {
  * Delete all items, clearing them from map and timeline
  */
 TimeMapDataset.prototype.clear = function() {
-    this.each(function(item) {
+    var ds = this;
+    ds.each(function(item) {
         item.clear();
     });
-    this.items = [];
-    this.timemap.timeline.layout();
+    ds.items = [];
+    ds.timemap.timeline.layout();
 };
 
 /**
@@ -184,25 +197,28 @@ TimeMapDataset.prototype.clear = function() {
  * @param {TimeMapItem} item      Item to delete
  */
 TimeMapDataset.prototype.deleteItem = function(item) {
-    for (var x=0; x < this.items.length; x++) {
-        if (this.items[x] == item) {
+    var ds = this, x;
+    for (x=0; x < ds.items.length; x++) {
+        if (ds.items[x] == item) {
             item.clear();
-            this.items.splice(x, 1);
+            ds.items.splice(x, 1);
             break;
         }
     }
-    this.timemap.timeline.layout();
+    ds.timemap.timeline.layout();
 };
 
 /**
  * Show dataset
  */
 TimeMapDataset.prototype.show = function() {
-    if (!this.visible) {
-        this.visible = true;
-        this.timemap.filter("map");
-        this.timemap.filter("timeline");
-        this.timemap.timeline.layout();
+    var ds = this,
+        tm = ds.timemap;
+    if (!ds.visible) {
+        ds.visible = true;
+        tm.filter("map");
+        tm.filter("timeline");
+        tm.timeline.layout();
     }
 };
 
@@ -210,10 +226,12 @@ TimeMapDataset.prototype.show = function() {
  * Hide dataset
  */
 TimeMapDataset.prototype.hide = function() {
-    if (this.visible) {
-        this.visible = false;
-        this.timemap.filter("map");
-        this.timemap.filter("timeline");
+    var ds = this,
+        tm = ds.timemap;
+    if (ds.visible) {
+        ds.visible = false;
+        tm.filter("map");
+        tm.filter("timeline");
     }
 };
 
@@ -223,11 +241,12 @@ TimeMapDataset.prototype.hide = function() {
  * @param {TimeMapTheme} theme       New theme settings
  */
  TimeMapDataset.prototype.changeTheme = function(newTheme) {
-    this.opts.theme = newTheme;
-    this.each(function(item) {
+    var ds = this;
+    ds.opts.theme = newTheme;
+    ds.each(function(item) {
         item.changeTheme(newTheme);
     });
-    this.timemap.timeline.layout();
+    ds.timemap.timeline.layout();
  };
  
  
@@ -239,45 +258,49 @@ TimeMapDataset.prototype.hide = function() {
  * Show event and placemark
  */
 TimeMapItem.prototype.show = function() {
-    this.showEvent();
-    this.showPlacemark();
-    this.visible = true;
+    var item = this;
+    item.showEvent();
+    item.showPlacemark();
+    item.visible = true;
 };
 
 /** 
  * Hide event and placemark
  */
 TimeMapItem.prototype.hide = function() {
-    this.hideEvent();
-    this.hidePlacemark();
-    this.visible = false;
+    var item = this;
+    item.hideEvent();
+    item.hidePlacemark();
+    item.visible = false;
 };
 
 /**
  * Delete placemark from map and event from timeline
  */
 TimeMapItem.prototype.clear = function() {
-    if (this.event) {
+    var item = this,
+        i;
+    if (item.event) {
         // this is just ridiculous
-        this.dataset.timemap.timeline.getBand(0)
-            .getEventSource()._events._events.remove(this.event);
+        item.dataset.timemap.timeline.getBand(0)
+            .getEventSource()._events._events.remove(item.event);
     }
-    if (this.placemark) {
-        this.hidePlacemark();
-        var f = function(p) {
+    if (item.placemark) {
+        item.hidePlacemark();
+        function removeOverlay(p) {
             try {
-                this.map.removeOverlay(p);
+                item.map.removeOverlay(p);
             } catch(e) {}
         };
-        if (this.getType() == "array") {
-            for (var i=0; i<this.placemark.length; i++) {
-                f(this.placemark[i]);
+        if (item.getType() == "array") {
+            for (i=0; i<item.placemark.length; i++) {
+                removeOverlay(item.placemark[i]);
             }
         } else {
-            f(this.placemark);
+            removeOverlay(item.placemark);
         }
     }
-    this.event = this.placemark = null;
+    item.event = item.placemark = null;
 };
 
  /**
@@ -287,15 +310,17 @@ TimeMapItem.prototype.clear = function() {
  * @param {Date} e      (Optional) End date for the event
  */
 TimeMapItem.prototype.createEvent = function(s, e) {
-    var instant = (e === undefined);
-    var title = this.getTitle();
+    var item = this,
+        theme = item.opts.theme,
+        instant = (e === undefined),
+        title = item.getTitle();
     // create event
     var event = new Timeline.DefaultEventSource.Event(s, e, null, null, instant, title, 
-        null, null, null, this.opts.theme.eventIcon, this.opts.theme.eventColor, null);
+        null, null, null, theme.eventIcon, theme.eventColor, null);
     // add references
-    event.item = this;
-    this.event = event;
-    this.dataset.eventSource.add(event);
+    event.item = item;
+    item.event = event;
+    item.dataset.eventSource.add(event);
 };
  
  /**
@@ -304,11 +329,16 @@ TimeMapItem.prototype.createEvent = function(s, e) {
  * @param {TimeMapTheme} theme   New theme settings
  */
  TimeMapItem.prototype.changeTheme = function(newTheme) {
-    this.opts.theme = newTheme;
+    var item = this,
+        type = item.getType(),
+        event = item.event,
+        placemark = item.placemark,
+        i;
+    item.opts.theme = newTheme;
     // change placemark
-    if (this.placemark) {
+    if (placemark) {
         // internal function - takes type, placemark
-        var changePlacemark = function(pm, type, theme) {
+        function changePlacemark(pm, type, theme) {
             type = type || TimeMap.util.getPlacemarkType(pm);
             switch (type) {
                 case "marker":
@@ -329,18 +359,18 @@ TimeMapItem.prototype.createEvent = function(s, e) {
                     break;
             }
         };
-        if (this.getType() == 'array') {
-            for (var i=0; i<this.placemark.length; i++) {
-                changePlacemark(this.placemark[i], false, newTheme);
+        if (type == 'array') {
+            for (i=0; i<placemark.length; i++) {
+                changePlacemark(placemark[i], false, newTheme);
             }
         } else {
-            changePlacemark(this.placemark, this.getType(), newTheme);
+            changePlacemark(placemark, type, newTheme);
         }
     }
     // change event
-    if (this.event) {
-        this.event._color = newTheme.eventColor;
-        this.event._icon = newTheme.eventIcon;
+    if (event) {
+        event._color = newTheme.eventColor;
+        event._icon = newTheme.eventIcon;
     }
 };
 
@@ -352,24 +382,25 @@ TimeMapItem.prototype.createEvent = function(s, e) {
  * @return {TimeMapItem}                Next/previous item, if any
  */
 TimeMapItem.prototype.getNextPrev = function(backwards, inDataset) {
-    if (!this.event) {
+    var item = this,
+        eventSource = item.dataset.timemap.timeline.getBand(0).getEventSource(),
+        // iterator dates are non-inclusive, hence the juggle here
+        i = backwards ? 
+            eventSource.getEventReverseIterator(
+                new Date(eventSource.getEarliestDate().getTime() - 1),
+                item.event.getStart()) :
+            eventSource.getEventIterator(
+                item.event.getStart(), 
+                new Date(eventSource.getLatestDate().getTime() + 1)
+            ),
+        next = null;
+    if (!item.event) {
         return;
     }
-    var eventSource = this.dataset.timemap.timeline.getBand(0).getEventSource();
-    // iterator dates are non-inclusive, hence the juggle here
-    var i = backwards ? 
-        eventSource.getEventReverseIterator(
-            new Date(eventSource.getEarliestDate().getTime() - 1),
-            this.event.getStart()) :
-        eventSource.getEventIterator(
-            this.event.getStart(), 
-            new Date(eventSource.getLatestDate().getTime() + 1)
-        );
-    var next = null;
     while (next === null) {
         if (i.hasNext()) {
             next = i.next().item;
-            if (inDataset && next.dataset != this.dataset) {
+            if (inDataset && next.dataset != item.dataset) {
                 next = null;
             }
         } else {
@@ -400,3 +431,5 @@ TimeMapItem.prototype.getNext = function(inDataset) {
 TimeMapItem.prototype.getPrev = function(inDataset) {
     return this.getNextPrev(true, inDataset);
 }
+
+})();

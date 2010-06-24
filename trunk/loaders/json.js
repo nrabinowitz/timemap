@@ -25,8 +25,8 @@
  *
  * @augments TimeMap.loaders.remote
  *
- * @example Usage in TimeMap.init():
- 
+ * @example
+TimeMap.init({
     datasets: [
         {
             title: "JSONP Dataset",
@@ -35,7 +35,9 @@
                 url: "http://www.example.com/getsomejson.php?callback="
             }
         }
-    ]
+    ],
+    // etc...
+});
  *
  * @constructor
  * @param {Object} options          All options for the loader:
@@ -79,8 +81,8 @@ TimeMap.loaders.jsonp = function(options) {
  *
  * @requires lib/json2.pack.js
  *
- * @example Usage in TimeMap.init():
- 
+ * @example
+TimeMap.init({
     datasets: [
         {
             title: "JSON String Dataset",
@@ -89,7 +91,9 @@ TimeMap.loaders.jsonp = function(options) {
                 url: "mydata.json"    // Must be a local URL
             }
         }
-    ]
+    ],
+    // etc...
+});
  *
  * @param {Object} options          All options for the loader
  * @param {String} options.url          URL of JSON file to load

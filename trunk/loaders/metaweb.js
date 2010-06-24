@@ -18,7 +18,7 @@
  * Metaweb loader: Load data from freebase.com.
  *
  * <p>This is a loader for data from the Metaweb service at freebase.com. See
- * the API documentation at <a href="http://www.freebase.com/view/en/documentation">http://www.freebase.com/view/en/documentation</a> for
+ * the API documentation at <a href="http://www.freebase.com/docs/mql/ch01.html">http://www.freebase.com/docs/mql/ch01.html</a> for
  * a description of how to write MQL queries. This code is based on code from
  * the API site.</p>
  *
@@ -26,8 +26,8 @@
  * @requires lib/json2.pack.js
  * @requires loaders/jsonp.js
  *
- * @example Usage in TimeMap.init():
- 
+ * @example
+TimeMap.init({
     datasets: [
         {
             title: "Freebase Dataset",
@@ -45,11 +45,16 @@
                 }
             }
         }
-    ]
+    ],
+    // etc...
+});
+ * @see <a href="../../examples/artists.html">Metaweb Example</a>
  *
  * @param {Object} options          All options for the loader
  * @param {Object} options.query                MQL query to load
  * @param {Function} options.transformFunction  Function to call on individual items before loading
+ * @param {String} [options.host=http://www.freebase.com]   Host url of web service
+ * @param {String} [options.service=/api/service/mqlread]   Path to web service on host
  * @param {mixed} [options[...]]    Other options (see {@link TimeMap.loaders.jsonp})
  */
 TimeMap.loaders.metaweb = function(options) {

@@ -27,8 +27,8 @@
  * @requires param.js
  * @borrows TimeMap.loaders.kml.parse as #parse
  *
- * @example Usage in TimeMap.init():
- 
+ * @example
+TimeMap.init({
     datasets: [
         {
             title: "KML Dataset",
@@ -37,7 +37,11 @@
                 url: "mydata.kml"   // Must be local
             }
         }
-    ]
+    ],
+    // etc...
+});
+ * @see <a href="../../examples/kenya.html">KML Example</a>
+ * @see <a href="../../examples/kml_extendeddata.html">KML ExtendedData Example</a>
  *
  * @param {Object} options          All options for the loader
  * @param {String} options.url              URL of KML file to load (NB: must be local address)

@@ -24,7 +24,10 @@ var paramNS = TimeMap.params,
 
     /**
      * @name TimeMap.state
-     * @namespace Namespace for static state functions
+     * @namespace Namespace for static state functions used to 
+     * set the timemap state programmatically, either in a script or 
+     * from the url hash.
+     * @see <a href="../../examples/state.html#zoom=8&center=44.04811573082351,13.29345703125&date=1500-01-21T12:17:37Z&selected=0">State Example</a>
      */
     stateNS = TimeMap.state = {
     
@@ -103,20 +106,21 @@ var paramNS = TimeMap.params,
     
     /**
      * Set state settings on a config object for TimeMap.init() using
-     * parameters in the URL
+     * parameters in the URL. Note that as of Timemap.js v.1.6, this
+     * will run automatically if state functions are present.
      * @see TimeMap.init
      * @example
-         // set up the config object
-         var config = {
-            // various settings, as usual for TimeMap.init()
-         };
-         
-         // get state settings from the URL, e.g.:
-         // http://www.example.com/mytimemap.html#zoom=4&selected=1
-         TimeMap.state.setConfigFromUrl(config);
-         
-         // initialize TimeMap object
-         var tm = TimeMap.init(config);
+ // set up the config object
+ var config = {
+    // various settings, as usual for TimeMap.init()
+ };
+ 
+ // get state settings from the URL, e.g.:
+ // http://www.example.com/mytimemap.html#zoom=4&selected=1
+ TimeMap.state.setConfigFromUrl(config);
+ 
+ // initialize TimeMap object
+ var tm = TimeMap.init(config);
      *
      * @param {Object} config       Config object for TimeMap.init()
      */
