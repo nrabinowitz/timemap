@@ -18,7 +18,7 @@
  *
  * @name timemap.js
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
- * @version 1.6pre
+ * @version 1.6
  */
 
 // globals - for JSLint
@@ -216,7 +216,7 @@ TimeMap.prototype.initMap = function() {
  * @constant
  * @type String
  */
-TimeMap.version = "1.6pre";
+TimeMap.version = "1.6";
 
 /**
  * @name TimeMap.util

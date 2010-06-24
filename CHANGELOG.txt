@@ -18,7 +18,7 @@ cancelled, a default loader to be used, and even easier creation of new loaders
 - Support for loading arbitrary tags in XML (KML, GeoRSS)
 - Templating support for info window data
 - Timestamp support in TimeMapDataset.hybridParser
-- Additions and tweaks to documentation
+- Additions and tweaks to documentation, including new template
 - Some tweaks for improved performance
 
 Version 1.5
