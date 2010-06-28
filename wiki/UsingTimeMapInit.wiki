@@ -47,7 +47,7 @@ TimeMap.init({
 
 === !TimeMap Options ===
 
-The top-level `options` object is used to initialize the `TimeMap` object itself. This object is not required, but you can use it to set configuration options for the map and global theme settings for the timemap. You can check out the `options` parameter in the `TimeMap` constructor for the full details (link to the documentation coming once I've figured out the best way to post it); some of the most pertinent options below:
+The top-level `options` object is used to initialize the `TimeMap` object itself. This object is not required, but you can use it to set configuration options for the map and global theme settings for the timemap. You can check out the `options` parameter in the [http://timemap.googlecode.com/svn/tags/1.6/docs/symbols/TimeMap.html#constructor TimeMap constructor] for the full details; some of the most pertinent options below:
 
 {{{
     options: {
@@ -68,5 +68,97 @@ The top-level `options` object is used to initialize the `TimeMap` object itself
 Each dataset you want to load should have its own configuration object in the `datasets` array. Loading multiple datasets is a good idea if you are loading data from different sources or want to apply different themes to different datasets.
 
 The only required element in a dataset configuration object is the `type` attribute. This is the string name of the desired loader, usually one of the classes in `TimeMap.loaders`. Each loader has its own set of required options.
+
+For example, this is the minimal dataset definition for a `json_string` dataset, which loads JSON as a string from a static file:
+{{{
+{
+    // name of class in TimeMap.loaders
+    type: "json_string",
+    options: {
+        url: "mydata.json"
+    }
+}
+}}}
+
+See the code documentation for configuration examples for each type of loader in the library:
+  * [http://timemap.googlecode.com/svn/tags/1.6/docs/symbols/TimeMap.loaders.basic.html Basic loader]
+  * [http://timemap.googlecode.com/svn/tags/1.6/docs/symbols/TimeMap.loaders.json_string.html JSON string loader]
+  * [http://timemap.googlecode.com/svn/tags/1.6/docs/symbols/TimeMap.loaders.jsonp.html JSONP loader]
+  * [http://timemap.googlecode.com/svn/tags/1.6/docs/symbols/TimeMap.loaders.kml.html KML loader]
+  * [http://timemap.googlecode.com/svn/tags/1.6/docs/symbols/TimeMap.loaders.georss.html GeoRSS loader]
+  * [http://timemap.googlecode.com/svn/tags/1.6/docs/symbols/TimeMap.loaders.gss.html Google Spreadsheet loader]
+  * [http://timemap.googlecode.com/svn/tags/1.6/docs/symbols/TimeMap.loaders.flickr.html Flickr loader]
+  * [http://timemap.googlecode.com/svn/tags/1.6/docs/symbols/TimeMap.loaders.metaweb.html Metaweb loader]
+  * [http://timemap.googlecode.com/svn/tags/1.6/docs/symbols/TimeMap.loaders.progressive.html Progressive loader]
+
+===Timeline Band Configuration===
+
+There are three ways to specify the timeline band properties in `TimeMap.init()`, going from the simplest, which isn't particularly flexible, to the more complicated, which is as flexible as Timeline allows: 
+
+*The `bandIntervals` parameter.* 
+
+In this case, you're just specifying the  time intervals (day, year, etc) of the top and bottom bands, and using the  default settings (80%/20%, 70px/100px, etc) for the rest. You can specify  the bandIntervals parameter as either an array, referencing the 
+Timeline.Datetime constants (as in the [http://timemap.googlecode.com/svn/trunk/examples/basic.html Basic Example]): 
+{{{
+TimeMap.init({ 
+    bandIntervals: [ 
+            Timeline.DateTime.DECADE, 
+            Timeline.DateTime.CENTURY 
+    ], 
+    // etc... 
+});
+}}} 
+
+or using a string, which should be one of the members of [http://timemap.googlecode.com/svn/tags/1.6/docs/symbols/TimeMap.intervals.html TimeMap.intervals] (e.g. "sec", "min", "hr", etc): 
+{{{
+TimeMap.init({ 
+    bandIntervals: "yr",  // year/decade 
+    // etc... 
+});
+}}} 
+
+*The `bandInfo` parameter.* 
+
+This allows you to pass in an array of config objects that get passed to `Timeline.createBandInfo()`. See the [http://timemap.googlecode.com/svn/trunk/examples/earthquake_georss.html GeoRSS example] for a timemap.js example and the [http://code.google.com/p/simile-widgets/wiki/Timeline_GettingStarted Timeline tutorial] for more information on the options Timeline supports here. This should handle anything `Timeline.createBandInfo()` can; don't worry about the `eventSource`, as this will be filled in by `TimeMap.init()`. 
+
+This is the best option when you  want more control over the bands, but you want to keep everything fairly simple and deal mostly with config settings, not instantiating and  manipulating objects.
+{{{
+TimeMap.init({ 
+       bandInfo: [ 
+            { 
+               width:          "85%", 
+               intervalUnit:   Timeline.DateTime.DAY, 
+               intervalPixels: 210 
+            }, 
+            { 
+               width:          "15%", 
+               intervalUnit:   Timeline.DateTime.WEEK, 
+               intervalPixels: 150, 
+               showEventText:  false, 
+               trackHeight:    0.2, 
+               trackGap:       0.2 
+            } 
+       ], 
+       // etc... 
+}); 
+}}}
+
+*The `bands` parameter.*
+
+Use the `bands` parameter when you want to pass in fully instantiated band objects instead of config variables. You'll need to use this for example to use `Timeline.createHotZoneBandInfo()` (see 
+[http://code.google.com/p/simile-widgets/wiki/Timeline_CreatingHotzones Creating Hotzones]) or to do some other fancy stuff with the bands.
+
+{{{
+var myBands = Timeline.createHotZoneBandInfo({
+    // your special configuration settings here
+});
+// maybe you could add some decorators here, etc...
+
+TimeMap.init({ 
+    bands: myBands, 
+    // etc... 
+});
+}}}
+
 
 _more coming soon_
