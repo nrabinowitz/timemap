@@ -23,7 +23,7 @@ If you would like your site included on this list, please email the [http://grou
 
   * [http://darwin.zoology.gla.ac.uk/~rpage/flu/ H1N1 Swine Flu TimeMap] - Timemap of H1N1 cases.
 
-  * [http://drupal.org/project/timelinemap Timelinemap] - Drupal plugin using timemap.js.
+  * [http://www.dataviz.org/ VIDI] and [http://drupal.org/project/timelinemap Timelinemap] - Suite of Drupal data visualization plugins, including one using timemap.js.
  
   * [http://itn.co.uk/earth.html ITN Story Map] - Timemap of news items from the ITN website.
 
