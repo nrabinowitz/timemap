@@ -1884,9 +1884,9 @@ TimeMapTheme = function(options) {
 /**
  * Create a theme, based on an optional new or pre-set theme
  *
- * @param {TimeMapTheme} [theme]    Existing theme to clone
- * @param {Object} [options]        Optional settings to overwrite - see {@link TimeMapTheme}
- * @return {TimeMapTheme}           Configured theme
+ * @param {TimeMapTheme|String} [theme]     Existing theme to clone
+ * @param {Object} [options]                Optional settings to overwrite - see {@link TimeMapTheme}
+ * @return {TimeMapTheme}                   Configured theme
  */
 TimeMapTheme.create = function(theme, options) {
     // test for string matches and missing themes
