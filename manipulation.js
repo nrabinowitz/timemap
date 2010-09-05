@@ -185,7 +185,7 @@ TimeMap.prototype.changeTimeIntervals = function (intervals) {
 TimeMapDataset.prototype.clear = function() {
     var ds = this;
     ds.each(function(item) {
-        item.clear();
+        item.clear(true);
     });
     ds.items = [];
     ds.timemap.timeline.layout();
@@ -205,7 +205,6 @@ TimeMapDataset.prototype.deleteItem = function(item) {
             break;
         }
     }
-    ds.timemap.timeline.layout();
 };
 
 /**
@@ -218,7 +217,6 @@ TimeMapDataset.prototype.show = function() {
         ds.visible = true;
         tm.filter("map");
         tm.filter("timeline");
-        tm.timeline.layout();
     }
 };
 
@@ -238,13 +236,14 @@ TimeMapDataset.prototype.hide = function() {
  /**
  * Change the theme for every item in a dataset
  *
- * @param {TimeMapTheme} theme       New theme settings
+ * @param {TimeMapTheme|String} theme   New theme, or string key in {@link TimeMap.themes}
  */
  TimeMapDataset.prototype.changeTheme = function(newTheme) {
     var ds = this;
+    newTheme = TimeMap.util.lookup(newTheme, TimeMap.themes);
     ds.opts.theme = newTheme;
     ds.each(function(item) {
-        item.changeTheme(newTheme);
+        item.changeTheme(newTheme, true);
     });
     ds.timemap.timeline.layout();
  };
@@ -276,14 +275,19 @@ TimeMapItem.prototype.hide = function() {
 
 /**
  * Delete placemark from map and event from timeline
+ * @param [suppressLayout]      Whether to suppress laying out the timeline 
+ *                              (e.g. for batch operations)
  */
-TimeMapItem.prototype.clear = function() {
+TimeMapItem.prototype.clear = function(suppressLayout) {
     var item = this,
         i;
     if (item.event) {
         // this is just ridiculous
         item.dataset.timemap.timeline.getBand(0)
             .getEventSource()._events._events.remove(item.event);
+        if (!suppressLayout) {
+            item.timeline.layout();
+        }
     }
     if (item.placemark) {
         item.hidePlacemark();
@@ -306,34 +310,38 @@ TimeMapItem.prototype.clear = function() {
  /**
  * Create a new event for the item.
  * 
- * @param {Date} s      Start date for the event
- * @param {Date} e      (Optional) End date for the event
+ * @param {Date} start      Start date for the event
+ * @param {Date} [end]      End date for the event
  */
-TimeMapItem.prototype.createEvent = function(s, e) {
+TimeMapItem.prototype.createEvent = function(start, end) {
     var item = this,
         theme = item.opts.theme,
-        instant = (e === undefined),
+        instant = (end === undefined),
         title = item.getTitle();
     // create event
-    var event = new Timeline.DefaultEventSource.Event(s, e, null, null, instant, title, 
+    var event = new Timeline.DefaultEventSource.Event(start, end, null, null, instant, title, 
         null, null, null, theme.eventIcon, theme.eventColor, null);
     // add references
     event.item = item;
     item.event = event;
     item.dataset.eventSource.add(event);
+    item.timeline.layout();
 };
  
  /**
  * Change the theme for an item
  *
- * @param {TimeMapTheme} theme   New theme settings
+ * @param {TimeMapTheme|String} theme   New theme, or string key in {@link TimeMap.themes}
+ * @param [suppressLayout]      Whether to suppress laying out the timeline 
+ *                              (e.g. for batch operations)
  */
- TimeMapItem.prototype.changeTheme = function(newTheme) {
+ TimeMapItem.prototype.changeTheme = function(newTheme, suppressLayout) {
     var item = this,
         type = item.getType(),
         event = item.event,
         placemark = item.placemark,
         i;
+    newTheme = TimeMap.util.lookup(newTheme, TimeMap.themes);
     item.opts.theme = newTheme;
     // change placemark
     if (placemark) {
@@ -371,8 +379,12 @@ TimeMapItem.prototype.createEvent = function(s, e) {
     if (event) {
         event._color = newTheme.eventColor;
         event._icon = newTheme.eventIcon;
+        if (!suppressLayout) {
+            item.timeline.layout();
+        }
     }
-};
+};
+
 
 /** 
  * Find the next or previous item chronologically
