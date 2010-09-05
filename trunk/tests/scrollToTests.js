@@ -6,7 +6,8 @@ function exposeTestFunctionNames() {
         'testScrollToEarliest',
         'testScrollToLatest',
         'testScrollToStringDate',
-        'testScrollToDateObject'
+        'testScrollToDateObject',
+        'testScrollToItem'
     ];
 }
 
@@ -26,13 +27,23 @@ function testScrollToStringDate() {
 }
 
 function testScrollToDateObject() {
-    loadWithScrollTo(new Date(1980, 1, 1), 1980);
+    loadWithScrollTo(new Date(1990, 1, 1), 1990);
+}
+
+function testScrollToItem() {
+    var x, d, item, years=[1980,2000];
+    for (x=0; x<1; x++) {
+        item = tm.getItems()[x];
+        item.scrollToStart();
+        d = tm.timeline.getBand(0).getCenterVisibleDate();
+        assertEquals('Failed scrolling to item ' + item.getTitle(), years[x], d.getUTCFullYear());
+    }
 }
 
 var items = [
     {
         "start" : "1980-01-02",
-        "title" : "Test Event",
+        "title" : "Test Event 1980",
         "point" : {
             "lat" : 23.456,
             "lon" : 12.345
@@ -40,7 +51,7 @@ var items = [
     },
     {
         "start" : "2000-01-02",
-        "title" : "Test Event",
+        "title" : "Test Event 2000",
         "point" : {
             "lat" : 23.456,
             "lon" : 12.345

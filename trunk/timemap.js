@@ -521,22 +521,35 @@ TimeMap.prototype.parseDate = function(s) {
  *                                  by TimeMap#parseDate)
  * @param {Boolean} [lazyLayout]    Whether to call timeline.layout() if not
  *                                  required by the scroll.
+ * @param {Boolean} [animated]      Whether to do an animated scroll, rather than a jump.
  */
-TimeMap.prototype.scrollToDate = function(d, lazyLayout) {
+TimeMap.prototype.scrollToDate = function(d, lazyLayout, animated) {
     var d = this.parseDate(d), 
-        timeline = this.timeline, x,
-        layouts = [],
+        timeline = this.timeline,
+        topband = timeline.getBand(0),
+        x, time, layouts = [],
         band, minTime, maxTime;
     if (d) {
+        time = d.getTime();
         // check which bands will need layout after scroll
         for (x=0; x < timeline.getBandCount(); x++) {
             band = timeline.getBand(x);
             minTime = band.getMinDate().getTime();
             maxTime = band.getMaxDate().getTime();
-            layouts[x] = (lazyLayout && d.getTime() > minTime && d.getTime() < maxTime);
+            layouts[x] = (lazyLayout && time > minTime && time < maxTime);
         }
         // do scroll
-        timeline.getBand(0).setCenterVisibleDate(d);
+        if (animated) {
+            // create animation
+            var provider = TimeMap.util.TimelineVersion() == '1.2' ? Timeline : SimileAjax,
+                a = provider.Graphics.createAnimation(function(abs, diff) {
+                    topband.setCenterVisibleDate(new Date(abs));
+                }, topband.getCenterVisibleDate().getTime(), time, 1000);
+            a.run();
+        }
+        else {
+            topband.setCenterVisibleDate(d);
+        }
         // layout as necessary
         for (x=0; x < layouts.length; x++) {
             if (layouts[x]) {
@@ -1873,7 +1886,7 @@ TimeMapTheme = function(options) {
         /** Full URL for instant event icons
          * @name TimeMapTheme#eventIcon 
          * @type String */
-        eventIcon:          settings.eventIconPath + settings.eventIconImage
+        eventIcon:          settings.eventIcon || settings.eventIconPath + settings.eventIconImage
     };
     settings = util.merge(settings, defaults);
     
@@ -1884,9 +1897,9 @@ TimeMapTheme = function(options) {
 /**
  * Create a theme, based on an optional new or pre-set theme
  *
- * @param {TimeMapTheme|String} [theme]     Existing theme to clone
- * @param {Object} [options]                Optional settings to overwrite - see {@link TimeMapTheme}
- * @return {TimeMapTheme}                   Configured theme
+ * @param {TimeMapTheme|String} [theme] Existing theme to clone, or string key in {@link TimeMap.themes}
+ * @param {Object} [options]            Optional settings to overwrite - see {@link TimeMapTheme}
+ * @return {TimeMapTheme}               Configured theme
  */
 TimeMapTheme.create = function(theme, options) {
     // test for string matches and missing themes
@@ -1895,30 +1908,29 @@ TimeMapTheme.create = function(theme, options) {
     } else {
         return new TimeMapTheme(options);
     }
-    
-    // see if we need to clone - guessing fewer keys in options
-    var clone = false, key;
-    for (key in options) {
-        if (theme.hasOwnProperty(key)) {
-            clone = {};
-            break;
-        }
-    }
-    // clone if necessary
-    if (clone) {
-        for (key in theme) {
+    if (options) {
+        // see if we need to clone - guessing fewer keys in options
+        var clone = false, key;
+        for (key in options) {
             if (theme.hasOwnProperty(key)) {
-                clone[key] = options[key] || theme[key];
+                clone = {};
+                break;
             }
         }
-        // fix event icon path, allowing full image path in options
-        clone.eventIcon = options.eventIcon || 
-            clone.eventIconPath + clone.eventIconImage;
-        return clone;
+        // clone if necessary
+        if (clone) {
+            for (key in theme) {
+                if (theme.hasOwnProperty(key)) {
+                    clone[key] = options[key] || theme[key];
+                }
+            }
+            // fix event icon path, allowing full image path in options
+            clone.eventIcon = options.eventIcon || 
+                clone.eventIconPath + clone.eventIconImage;
+            return clone;
+        }
     }
-    else {
-        return theme;
-    }
+    return theme;
 };
 
 
@@ -2209,12 +2221,14 @@ TimeMapItem.prototype.hidePlacemark = function() {
  * NB: Will likely require calling timeline.layout()
  */
 TimeMapItem.prototype.showEvent = function() {
-    if (this.event) {
-        if (this.eventVisible === false){
-            this.dataset.timemap.timeline.getBand(0)
-                .getEventSource()._events._events.add(this.event);
+    var item = this,
+        event = item.event;
+    if (event) {
+        if (item.eventVisible === false){
+            item.timeline.getBand(0)
+                .getEventSource()._events._events.add(event);
         }
-        this.eventVisible = true;
+        item.eventVisible = true;
     }
 };
 
@@ -2224,14 +2238,27 @@ TimeMapItem.prototype.showEvent = function() {
  * AND calling eventSource._events._index()  (ugh)
  */
 TimeMapItem.prototype.hideEvent = function() {
-    if (this.event) {
-        if (this.eventVisible){
-            this.dataset.timemap.timeline.getBand(0)
-                .getEventSource()._events._events.remove(this.event);
+    var item = this,
+        event = item.event;
+    if (event) {
+        if (item.eventVisible){
+            item.timeline.getBand(0)
+                .getEventSource()._events._events.remove(event);
         }
-        this.eventVisible = false;
+        item.eventVisible = false;
     }
-}; 
+};
+
+/** 
+ * Scroll the timeline to the start of this item's event
+ * @param {Boolean} [animated]      Whether to do an animated scroll, rather than a jump.
+ */
+TimeMapItem.prototype.scrollToStart = function(animated) {
+    var item = this;
+    if (item.event) {
+        item.dataset.timemap.scrollToDate(item.getStart(), false, animated);
+    }
+};
 
 /**
  * Standard open info window function, using static text in map window
