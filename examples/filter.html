@@ -104,25 +104,13 @@ TimeMap.filters.hasSelectedTag = function(item) {
         // not found
         return i;
     }
-    // if no tag was selected, every item should pass the filter
-    if (!window.selectedTag) {
-        return true;
-    }
-    if (item.opts.tags) {
-        // look for selected tag
-        if (indexOf(item.opts.tags, window.selectedTag) >= 0) {
-            // tag found, item passes
-            return true;
-        } 
-        else {
-            // indexOf() returned -1, so the tag wasn't found
-            return false;
-        }
-    }
-    else {
-        // item didn't have any tags
-        return false;
-    }
+    return !window.selectedTag || // if no tag was selected, everything passes
+        (
+            // item has tags?
+            item.opts.tags && 
+            // tag found?
+            indexOf(item.opts.tags, window.selectedTag) >= 0
+        );
 };
 
 // onChange handler for pulldown menu
