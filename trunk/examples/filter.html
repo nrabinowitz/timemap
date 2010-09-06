@@ -95,13 +95,22 @@ function onLoad() {
 
 // filter function for tags
 TimeMap.filters.hasSelectedTag = function(item) {
+    // backwards-compatible indexOf
+    function indexOf(arr, item) {
+        if (arr.indexOf) return arr.indexOf(item);
+        // otherwise, do it the hard way
+        var i = arr.length;
+        while (i--) if (arr[i]==item) break;
+        // not found
+        return i;
+    }
     // if no tag was selected, every item should pass the filter
     if (!window.selectedTag) {
         return true;
     }
     if (item.opts.tags) {
         // look for selected tag
-        if (item.opts.tags.indexOf(window.selectedTag) >= 0) {
+        if (indexOf(item.opts.tags, window.selectedTag) >= 0) {
             // tag found, item passes
             return true;
         } 
