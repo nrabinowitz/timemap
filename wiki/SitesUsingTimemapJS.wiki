@@ -21,6 +21,8 @@ If you would like your site included on this list, please email the [http://grou
 
   * Global Voices: [http://threatened.globalvoicesonline.org/ Threatened Voices] and [http://transparency.globalvoicesonline.org/ Technology for Transparency] - two timemaps tracking suppression of free speech and civic engagement technology, respectively.
 
+  * [http://wholemeal.co.nz/~malc/darfield-earthquake-timeline/ Timemap of the Christchurch, NZ earthquake]
+
   * [http://darwin.zoology.gla.ac.uk/~rpage/flu/ H1N1 Swine Flu TimeMap] - Timemap of H1N1 cases.
 
   * [http://www.dataviz.org/ VIDI] and [http://drupal.org/project/timelinemap Timelinemap] - Suite of Drupal data visualization plugins, including one using timemap.js.
