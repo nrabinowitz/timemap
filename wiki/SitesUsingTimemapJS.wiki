@@ -21,7 +21,7 @@ If you would like your site included on this list, please email the [http://grou
 
   * Global Voices: [http://threatened.globalvoicesonline.org/ Threatened Voices] and [http://transparency.globalvoicesonline.org/ Technology for Transparency] - two timemaps tracking suppression of free speech and civic engagement technology, respectively.
 
-  * [http://projects.latimes.com/mapping-la/neighborhoods/neighborhood/boyle-heights/crime/ L.A. Times: Mapping L.A.] - Using timemap.js to show crimes in LA neighborhoods.
+  * [http://projects.latimes.com/mapping-la/neighborhoods/neighborhood/boyle-heights/crime/ L.A. Times: Mapping L.A.] - Using timemap.js to show crimes in 200+ L.A. neighborhoods.
 
   * [http://wholemeal.co.nz/~malc/darfield-earthquake-timeline/ Timemap of the Christchurch, NZ earthquake]
 
