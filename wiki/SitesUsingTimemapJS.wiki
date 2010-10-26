@@ -19,6 +19,8 @@ If you would like your site included on this list, please email the [http://grou
 
   * [http://www.texaslegacy.org/bb/maps/maps.html The Texas Legacy Project] - A wide variety of timemaps displaying various Texas historical datasets. 
 
+  * [http://www.rihs.org/atlas/ Atlas of the Rhode Island Book Trade] - From the Rhode Island Historical Society. 
+
   * Global Voices: [http://threatened.globalvoicesonline.org/ Threatened Voices] and [http://transparency.globalvoicesonline.org/ Technology for Transparency] - two timemaps tracking suppression of free speech and civic engagement technology, respectively.
 
   * [http://projects.latimes.com/mapping-la/neighborhoods/neighborhood/boyle-heights/crime/ L.A. Times: Mapping L.A.] - Using timemap.js to show crimes in 200+ L.A. neighborhoods.
