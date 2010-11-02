@@ -13,6 +13,8 @@ If you would like your site included on this list, please email the [http://grou
 
   * [http://legacy.ushahidi.com/timeline.asp Ushahidi] - The initial deployment of Ushahidi used a timemap to display events surrounding the post-election crisis in Kenya.
 
+  *  [http://basetrack.org Basetrack 1/8] - A wordpress-based site for journalists embedded with a marine batallion in Afghanistan.
+
   * [http://www.open.ac.uk/Arts/hestia/herodotus/basic.html The Hestia Project] - Display of the History of Herodotus using the timeline to display narrative sequence, rather than chronological time.
 
   * [http://www.cannonade.net/timemap.php Cannonade.net WWII Timemap] - Displaying WWII events with a variety of filters.
