@@ -603,7 +603,7 @@ TimeMap.prototype.initTimeline = function(bands) {
     // synchronize & highlight timeline bands
     for (x=1; x < bands.length; x++) {
         if (tm.opts.syncBands) {
-            bands[x].syncWith = (x-1);
+            bands[x].syncWith = 0;
         }
         bands[x].highlight = true;
     }
