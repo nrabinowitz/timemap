@@ -18,7 +18,7 @@
  *
  * @name timemap.js
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
- * @version 1.6.1pre
+ * @version 2.0pre
  */
 
 // globals - for JSLint
@@ -96,9 +96,10 @@ TimeMap = function(tElement, mElement, options) {
     var tm = this,
         // set defaults for options
         defaults = {
-            mapCenter:          new GLatLng(0,0),
+            mapProvider:        'google',
+            mapCenter:          new mxn.LatLonPoint(0,0),
             mapZoom:            0,
-            mapType:            G_PHYSICAL_MAP,
+            mapType:            mxn.Mapstraction.SATELLITE,
             mapTypes:           [G_NORMAL_MAP, G_SATELLITE_MAP, G_PHYSICAL_MAP],
             showMapTypeCtrl:    true,
             showMapCtrl:        true,
@@ -162,53 +163,47 @@ TimeMap = function(tElement, mElement, options) {
  * Initialize the map.
  */
 TimeMap.prototype.initMap = function() {
-    var options = this.opts, map, i;
-    if (GBrowserIsCompatible()) {
+    var tm = this,
+        options = tm.opts, 
+        mapstraction, i;
     
-        /** 
-         * The associated GMap object 
-         * @type GMap2
-         */
-        this.map = map = new GMap2(this.mElement);
-        
-        // drop all existing types
-        for (i=G_DEFAULT_MAP_TYPES.length-1; i>0; i--) {
-            map.removeMapType(G_DEFAULT_MAP_TYPES[i]);
-        }
-        // you can't remove the last maptype, so add a new one first
-        map.addMapType(options.mapTypes[0]);
-        map.removeMapType(G_DEFAULT_MAP_TYPES[0]);
-        // add the rest of the new types
-        for (i=1; i<options.mapTypes.length; i++) {
-            map.addMapType(options.mapTypes[i]);
-        }
-        
-        // initialize map center, zoom, and map type
-        map.setCenter(options.mapCenter, options.mapZoom, options.mapType);
-        
-        // set basic parameters
-        map.enableDoubleClickZoom();
-        map.enableScrollWheelZoom();
-        map.enableContinuousZoom();
-        
-        // set controls
-        if (options.showMapCtrl) {
-            map.addControl(new GLargeMapControl());
-        }
-        if (options.showMapTypeCtrl) {
-            map.addControl(new GMapTypeControl());
-        }
-        
-        /** 
-         * Bounds of the map 
-         * @type GLatLngBounds
-         */
-        this.mapBounds = options.mapZoom > 0 ?
-            // if the zoom has been set, use the map bounds
-            map.getBounds() :
-            // otherwise, start from scratch
-            new GLatLngBounds();
-    }
+    /**
+     * @name TimeMap#mapstraction
+     * The Mapstraction object
+     * @type mxn.Mapstraction
+     */
+    tm.mapstraction = mapstraction = new mxn.Mapstraction(tm.mElement, options.mapProvider);
+
+    // display the map centered on a latitude and longitude (Google zoom levels)
+    mapstraction.setCenterAndZoom(options.mapCenter, options.mapZoom);
+    
+    // set control
+    mapstraction.addControls({
+        pan: options.showMapCtrl, 
+        zoom: options.showMapCtrl ? 'large' : false,
+        map_type: options.showMapTypeCtrl
+    });
+    
+    mapstraction.setMapType(options.mapType);
+    
+    /**
+     * @name TimeMap#map
+     * Reference to the native map object (specific to the map provider)
+     * @type Object
+     */
+    tm.map = mapstraction.getMap();
+    
+    /** 
+     * @name TimeMap#mapBounds
+     * Bounds of the map 
+     * @type mxn.BoundingBox
+     */
+    tm.mapBounds = options.mapZoom > 0 ?
+        // if the zoom has been set, use the map bounds
+        mapstraction.getBounds() :
+        // otherwise, start from scratch
+        new mxn.BoundingBox();
+
 };
 
 /**
@@ -577,14 +572,11 @@ TimeMap.prototype.createDataset = function(id, options) {
     tm.datasets[id] = dataset;
     // add event listener
     if (tm.opts.centerOnItems) {
-        var map = tm.map, 
+        var mapstraction = tm.mapstraction, 
             bounds = tm.mapBounds;
-        GEvent.addListener(dataset, 'itemsloaded', function() {
+        $(dataset).bind('itemsloaded', function() {
             // determine the center and zoom level from the bounds
-            map.setCenter(
-                bounds.getCenter(),
-                map.getBoundsZoomLevel(bounds)
-            );
+            mapstraction.setBounds(bounds);
         });
     }
     return dataset;
