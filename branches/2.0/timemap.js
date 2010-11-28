@@ -45,6 +45,8 @@ var
     GLatLng = window.GLatLng, 
     GLatLngBounds = window.GLatLngBounds, 
     GEvent = window.GEvent,
+    // events
+    E_ITEMS_LOADED = 'itemsloaded',
     // Google icon path
     GIP = "http://www.google.com/intl/en_us/mapfiles/ms/icons/",
     // aliases for class names, allowing munging
@@ -165,33 +167,33 @@ TimeMap = function(tElement, mElement, options) {
 TimeMap.prototype.initMap = function() {
     var tm = this,
         options = tm.opts, 
-        mapstraction, i;
+        mxMap, i;
     
     /**
      * @name TimeMap#mapstraction
      * The Mapstraction object
      * @type mxn.Mapstraction
      */
-    tm.mapstraction = mapstraction = new mxn.Mapstraction(tm.mElement, options.mapProvider);
+    tm.mxMap = mxMap = new mxn.Mapstraction(tm.mElement, options.mapProvider);
 
     // display the map centered on a latitude and longitude (Google zoom levels)
-    mapstraction.setCenterAndZoom(options.mapCenter, options.mapZoom);
+    mxMap.setCenterAndZoom(options.mapCenter, options.mapZoom);
     
     // set control
-    mapstraction.addControls({
+    mxMap.addControls({
         pan: options.showMapCtrl, 
         zoom: options.showMapCtrl ? 'large' : false,
         map_type: options.showMapTypeCtrl
     });
     
-    mapstraction.setMapType(options.mapType);
+    mxMap.setMapType(options.mapType);
     
     /**
      * @name TimeMap#map
      * Reference to the native map object (specific to the map provider)
      * @type Object
      */
-    tm.map = mapstraction.getMap();
+    tm.map = mxMap.getMap();
     
     /** 
      * @name TimeMap#mapBounds
@@ -200,7 +202,7 @@ TimeMap.prototype.initMap = function() {
      */
     tm.mapBounds = options.mapZoom > 0 ?
         // if the zoom has been set, use the map bounds
-        mapstraction.getBounds() :
+        mxMap.getBounds() :
         // otherwise, start from scratch
         new mxn.BoundingBox();
 
@@ -572,11 +574,14 @@ TimeMap.prototype.createDataset = function(id, options) {
     tm.datasets[id] = dataset;
     // add event listener
     if (tm.opts.centerOnItems) {
-        var mapstraction = tm.mapstraction, 
+        var mxMap = tm.mxMap, 
             bounds = tm.mapBounds;
-        $(dataset).bind('itemsloaded', function() {
+        $(dataset).bind(E_ITEMS_LOADED, function() {
             // determine the center and zoom level from the bounds
-            mapstraction.setBounds(bounds);
+            // XXX: mxn.BoundingBox#isEmpty is a fail here, so cludge:
+            if (!bounds.isEmpty()) {
+                mxMap.setBounds(bounds);
+            }
         });
     }
     return dataset;
@@ -1480,7 +1485,7 @@ TimeMapDataset.prototype.loadItems = function(data, transform) {
     for (var x=0; x < data.length; x++) {
         this.loadItem(data[x], transform);
     }
-    GEvent.trigger(this, 'itemsloaded');
+    $(this).trigger(E_ITEMS_LOADED);
 };
 
 /**
@@ -1510,10 +1515,10 @@ TimeMapDataset.prototype.loadItems = function(data, transform) {
  */
 TimeMapDataset.prototype.loadItem = function(data, transform) {
     // apply transformation, if any
-    if (transform !== undefined) {
+    if (transform) {
         data = transform(data);
     }
-    // transform functions can return a null value to skip a datum in the set
+    // transform functions can return a false value to skip a datum in the set
     if (!data) {
         return;
     }
@@ -1535,8 +1540,6 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
         // allow event-less placemarks - these will be always present on map
         event = null,
         instant,
-        // settings for the placemark
-        markerIcon = theme.icon,
         bounds = tm.mapBounds,
         // empty containers
         placemark = [], 
@@ -1589,81 +1592,80 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
                 // give up
                 return null;
             }
-            point = new GLatLng(
+            point = new mxn.LatLonPoint(
                 parseFloat(pdata.point.lat), 
                 parseFloat(pdata.point.lon)
             );
             // add point to visible map bounds
             if (tm.opts.centerOnItems) {
+                console.log(bounds);
                 bounds.extend(point);
             }
             // create marker
-            placemark = new GMarker(point, {
-                icon: markerIcon,
-                title: pdata.title
-            });
+            placemark = new mxn.Marker(point);
+            placemark.setLabel(pdata.title);
+            placemark.addData(theme);
             type = "marker";
-            point = placemark.getLatLng();
         }
         // polyline and polygon placemarks
         else if (pdata.polyline || pdata.polygon) {
-            var points = [], line;
-            if (pdata.polyline) {
-                line = pdata.polyline;
-            } else {
-                line = pdata.polygon;
-            }
+            var points = [],
+                pBounds = new mxn.BoundingBox(),
+                isPolygon = "polygon" in pdata,
+                line = pdata.polyline || pdata.polygon,
+                ne, sw;
             if (line && line.length) {
                 for (var x=0; x<line.length; x++) {
-                    point = new GLatLng(
+                    point = new mxn.LatLonPoint(
                         parseFloat(line[x].lat), 
                         parseFloat(line[x].lon)
                     );
                     points.push(point);
                     // add point to visible map bounds
-                    if (tm.opts.centerOnItems) {
-                        bounds.extend(point);
-                    }
+                    pBounds.extend(point);
                 }
-                if ("polyline" in pdata) {
-                    placemark = new GPolyline(points, 
-                                              theme.lineColor, 
-                                              theme.lineWeight,
-                                              theme.lineOpacity);
-                    type = "polyline";
-                    point = placemark.getVertex(Math.floor(placemark.getVertexCount()/2));
-                } else {
-                    placemark = new GPolygon(points, 
-                                             theme.polygonLineColor, 
-                                             theme.polygonLineWeight,
-                                             theme.polygonLineOpacity,
-                                             theme.fillColor,
-                                             theme.fillOpacity);
-                    type = "polygon";
-                    point = placemark.getBounds().getCenter();
+                if (tm.opts.centerOnItems) {
+                    bounds.extend(pBounds.getNorthEast());
+                    bounds.extend(pBounds.getSouthWest());
                 }
+                // make polyline or polygon
+                placemark = new mxn.Polyline(points);
+                placemark.addData({
+                    color: theme.lineColor, 
+                    width: theme.lineWeight, 
+                    opacity: theme.fillOpacity, 
+                    closed: isPolygon, 
+                    fillColor: theme.fillColor
+                });
+                // set type and point
+                type = "polyline";
+                point = isPolygon ? 
+                    points[Math.floor(points.length/2)] :
+                    util.getBoxCenter(pBounds);
             }
         } 
         // ground overlay placemark
+        // XXX: this isn't going to show/hide with mapstraction :(
         else if ("overlay" in pdata) {
-            var sw = new GLatLng(
+            var sw = new mxn.LatLonPoint(
                     parseFloat(pdata.overlay.south), 
                     parseFloat(pdata.overlay.west)
                 ),
-                ne = new GLatLng(
+                ne = new mxn.LatLonPoint(
                     parseFloat(pdata.overlay.north), 
                     parseFloat(pdata.overlay.east)
-                ),
-                // create overlay
-                overlayBounds = new GLatLngBounds(sw, ne);
+                );
             // add to visible bounds
             if (tm.opts.centerOnItems) {
                 bounds.extend(sw);
                 bounds.extend(ne);
             }
-            placemark = new GGroundOverlay(pdata.overlay.image, overlayBounds);
+            // mapstraction can only add it - there's no placemark type :(
+            tm.mxMap.addImageOverlay("img" + (new Date()).getTime(), pdata.overlay.image, 
+                sw.lon, sw.lat, ne.lon, ne.lat);
+            // placemark = new GGroundOverlay(pdata.overlay.image, overlayBounds);
             type = "overlay";
-            point = overlayBounds.getCenter();
+            point = util.getBoxCenter(pBounds);
         }
         return {
             "placemark": placemark,
@@ -1709,9 +1711,9 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
     
     options.title = title;
     options.type = type;
-    // check for custom infoPoint and convert to GLatLng
+    // check for custom infoPoint and convert to point
     if (options.infoPoint) {
-        options.infoPoint = new GLatLng(
+        options.infoPoint = new mxn.LatLonPoint(
             parseFloat(options.infoPoint.lat), 
             parseFloat(options.infoPoint.lon)
         );
@@ -1735,16 +1737,22 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
         for (i=0; i<placemark.length; i++) {
             placemark[i].item = item;
             // add listener to make placemark open when event is clicked
-            GEvent.addListener(placemark[i], "click", function() {
+            $(placemark[i]).bind("click", function() {
                 item.openInfoWindow();
             });
             // allow for custom placemark loading
             if (!ds.opts.noPlacemarkLoad) {
-                // add placemark to map
-                tm.map.addOverlay(placemark[i]);
+                // XXX: better ways to do this
+                if (util.getPlacemarkType(placemark[i]) == 'marker') {
+                    // add placemark to map
+                    tm.mxMap.addMarker(placemark[i]);
+                } else {
+                    // add polyline to map
+                    tm.mxMap.addPolyline(placemark[i]);
+                }
+                // hide placemarks until the next refresh
+                placemark[i].hide();
             }
-            // hide placemarks until the next refresh
-            placemark[i].hide();
         }
     }
     // add the item to the dataset
@@ -1824,7 +1832,23 @@ TimeMapTheme = function(options) {
         /** Icon image for marker placemarks 
          * @name TimeMapTheme#iconImage 
          * @type String */
-        iconImage:      GIP + "red-dot.png"
+        iconImage:      GIP + "red-dot.png",
+        /** Icon size for marker placemarks 
+         * @name TimeMapTheme#iconSize 
+         * @type Number[] */
+        iconSize: [32, 32],
+        /** Icon shadow image for marker placemarks 
+         * @name TimeMapTheme#iconShadow
+         * @type String */
+        iconShadow: GIP + "msmarker.shadow.png",
+        /** Icon shadow size for marker placemarks 
+         * @name TimeMapTheme#iconShadowSize 
+         * @type Number[] */
+        iconShadowSize: [59, 32],
+        /** Icon anchor for marker placemarks 
+         * @name TimeMapTheme#iconAnchor 
+         * @type Number[] */
+        iconAnchor: [16, 33]
     };
     
     // merge defaults with options
@@ -1835,18 +1859,7 @@ TimeMapTheme = function(options) {
     
     // make default map icon if not supplied
     if (!settings.icon) {
-        // make new red icon
-        var markerIcon = new GIcon(G_DEFAULT_ICON);
-        markerIcon.image = settings.iconImage;
-        markerIcon.iconSize = new GSize(32, 32);
-        markerIcon.shadow = GIP + "msmarker.shadow.png";
-        markerIcon.shadowSize = new GSize(59, 32);
-        markerIcon.iconAnchor = new GPoint(16, 33);
-        markerIcon.infoWindowAnchor = new GPoint(18, 3);
-        /** Marker icon for placemarks 
-         * @name TimeMapTheme#icon 
-         * @type GIcon */
-        settings.icon = markerIcon;
+        settings.icon = settings.iconImage;
     } 
     
     // cascade some settings as defaults
@@ -2179,13 +2192,15 @@ TimeMapItem = function(placemark, event, dataset, options) {
 TimeMapItem.prototype.showPlacemark = function() {
     var item = this, i;
     if (item.placemark) {
-        if (item.getType() == "array") {
-            for (i=0; i<item.placemark.length; i++) {
-                item.placemark[i].show();
+        try {
+            if (item.getType() == "array") {
+                for (i=0; i<item.placemark.length; i++) {
+                    item.placemark[i].show();
+                }
+            } else {
+                item.placemark.show();
             }
-        } else {
-            item.placemark.show();
-        }
+        } catch(e) {}
         item.placemarkVisible = true;
     }
 };
@@ -2196,13 +2211,15 @@ TimeMapItem.prototype.showPlacemark = function() {
 TimeMapItem.prototype.hidePlacemark = function() {
     var item = this, i;
     if (item.placemark) {
-        if (item.getType() == "array") {
-            for (i=0; i<item.placemark.length; i++) {
-                item.placemark[i].hide();
+        try {
+            if (item.getType() == "array") {
+                for (i=0; i<item.placemark.length; i++) {
+                    item.placemark[i].hide();
+                }
+            } else {
+                item.placemark.hide();
             }
-        } else {
-            item.placemark.hide();
-        }
+        } catch(e) {}
         item.placemarkVisible = false;
     }
     item.closeInfoWindow();
@@ -2315,13 +2332,14 @@ TimeMapItem.openInfoWindowAjax = function() {
  * Standard close window function, using the map window
  */
 TimeMapItem.closeInfoWindowBasic = function() {
-    if (this.getType() == "marker") {
-        this.placemark.closeInfoWindow();
+    var item = this;
+    if (item.getType() == "marker") {
+        item.placemark.closeBubble();
     } else {
-        var infoWindow = this.map.getInfoWindow();
+        var infoWindow = item.map.getInfoWindow();
         // close info window if its point is the same as this item's point
-        if (infoWindow.getPoint() == this.getInfoPoint() && !infoWindow.isHidden()) {
-            this.map.closeInfoWindow();
+        if (infoWindow.getPoint() == item.getInfoPoint() && !infoWindow.isHidden()) {
+            item.map.closeInfoWindow();
         }
     }
 };
@@ -2553,18 +2571,16 @@ TimeMap.util.TimelineVersion = function() {
     }
 };
 
-
 /** 
  * Identify the placemark type. 
- * XXX: Not 100% happy with this implementation, which relies heavily on duck-typing.
  *
  * @param {Object} pm       Placemark to identify
  * @return {String}         Type of placemark, or false if none found
  */
 TimeMap.util.getPlacemarkType = function(pm) {
-    return 'getIcon' in pm ? 'marker' :
-        'getVertex' in pm ? 
-            ('setFillStyle' in pm ? 'polygon' : 'polyline') :
+    return pm.constructor == mxn.Marker ? 'marker' :
+        pm.constructor == mxn.Polyline ?
+            (pm.closed ? 'polygon' : 'polyline') :
         false;
 };
 
@@ -2819,6 +2835,55 @@ TimeMap.themes = {
         color: "#E14E9D",
         eventIconImage: "pink-circle.png"
     })
+};
+
+// Mapstraction Monkey Patch - eventually this will be moved into Mapstraction on github
+
+/** 
+ * Calculate the center of a bounding box. 
+ *
+ * @param {BoundingBox} box         Bounding box 
+ * @return {LatLonPoint}            Center point
+ */
+mxn.BoundingBox.prototype.getCenter = function() {
+    var box = this,
+        ne = box.getNorthEast(),
+        sw = box.getSouthWest();
+    return new mxn.LatLonPoint(
+        sw.lat + (ne.lat - sw.lat)/2,
+        sw.lon + (ne.lon - sw.lon)/2
+    );
+};
+
+/** 
+ * Calculate the center of a bounding box. 
+ *
+ * @param {BoundingBox} box         Bounding box 
+ * @return {LatLonPoint}            Center point
+ */
+mxn.BoundingBox.prototype.isEmpty = function() {
+    var box = this;
+    return box.ne.lat == box.sw.lat && box.ne.lon == box.sw.lon;
+};
+
+/**
+ * extend extends the bounding box to include the new point
+ */
+mxn.BoundingBox.prototype.extend = function(point) {
+    var box = this;
+	if (box.sw.lat === undefined || box.sw.lat > point.lat) {
+		box.sw.lat = point.lat;
+	}
+	if (box.sw.lon === undefined || box.sw.lon > point.lon) {
+		box.sw.lon = point.lon;
+	}
+	if (box.ne.lat === undefined || box.ne.lat < point.lat) {
+		box.ne.lat = point.lat;
+	}
+	if (box.ne.lon === undefined || box.ne.lon < point.lon) {
+		box.ne.lon = point.lon;
+	}
+	return;
 };
 
 // save to window
