@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<project name="timemap" default="build">
+<!--
+You will need to create your own build.properties file. Sample file contents:
+
+mxn.dir=../mxn
+yuicompressor.jar=C:/Program Files/yuicompressor/build/yuicompressor.jar
+jsdoc-toolkit.dir=C:/Program Files/jsdoc-toolkit
+
+-->
+    <property name="props" value="build.properties"/>
+    <property file="${props}"/>
+    
+    <taskdef resource="net/sf/antcontrib/antlib.xml">
+		<classpath>
+			<pathelement location="lib/ant-contrib-1.0b3.jar"/>
+		</classpath>
+	</taskdef>
+    
+    <target name="build-mxn">
+    
+        <echo>Timemap.js: Building Mapstraction</echo>
+        <property name="mxn.target" location="lib/mxn"/>
+        <property name="mxn.build.base" location="${mxn.target}/build"/>
+        
+        <!-- delete old builds -->
+        <delete dir="${mxn.build.base}" />
+        <delete dir="${mxn.target}" />
+        
+        <!-- run the Mapstraction build with a custom version -->
+        <ant dir="${mxn.dir}">
+            <property name="build.ver" value="timemap"/>
+            <property name="build.base" value="${mxn.build.base}"/>
+        </ant>
+        <!-- unzip new build to the lib directory -->
+        <unzip src="${mxn.dir}/build/mxn-timemap.zip" dest="${mxn.target}" />
+        
+    </target>
+    
+    <target name="docs">
+    
+        <echo>Timemap.js: Creating Documentation</echo>
+        <property name="docs.dir" value="docs"/>
+        
+        <!-- define fileset -->
+        <fileset dir="." id="doc.files">
+            <include name="*.js"/>
+            <include name="loaders/*.js"/>
+            <exclude name="*.pack.*"/>
+        </fileset>
+        <pathconvert 
+            property="doc.files" 
+            refid="doc.files"
+            pathsep="' '"/>
+        <!-- create documentation -->
+		<java jar="${jsdoc-toolkit.dir}/jsrun.jar" fork="true" failonerror="true">
+			<arg value="${jsdoc-toolkit.dir}/app/run.js"/>
+			<arg line="'${doc.files}'"/>
+			<arg value="-c=${docs.dir}/jsdoc-toolkit/timemap.conf"/>
+			<arg value="-d=${docs.dir}"/>
+		</java>
+        
+    </target>
+    
+    <target name="compress-core">
+        <property name="core.packfile" value="timemap.pack.js"/>
+        
+        <echo>Timemap.js: Compressing Javascript to ${core.packfile}</echo>
+        <java jar="${yuicompressor.jar}" fork="true" failonerror="true">
+            <arg line="-o ${core.packfile} timemap.js"/>
+        </java>
+        
+    </target>
+    
+    <target name="compress-full">
+        <property name="full.packfile" value="timemap_full.pack.js"/>
+        
+        <echo>Timemap.js: Compressing Javascript to ${full.packfile}</echo>
+        
+        <delete file="${full.packfile}"/>
+        
+        <for param="file">
+			<path id="compress.files">
+                <fileset file="timemap.js"/>
+                <fileset dir="." id="doc.files">
+                    <include name="*.js"/>
+                    <include name="loaders/*.js"/>
+                    <exclude name="*.pack.*"/>
+                </fileset>
+            </path>
+            <sequential>
+                <!-- compress -->
+                <java jar="${yuicompressor.jar}" fork="true" failonerror="true">
+                    <arg line="-o @{file}.pack.tmp @{file}"/>
+                </java>
+                <!-- add to file -->
+                <concat destfile="${full.packfile}" append="yes">
+                    <fileset file="@{file}.pack.tmp"/>
+                </concat>
+                <!-- clean up -->
+                <delete file="@{file}.pack.tmp"/>
+            </sequential>
+		</for>
+        
+    </target>
+
+    <target name="compress" depends="compress-core,compress-full"/>
+
+    <target name="build" depends="build-mxn,docs,compress"/>
+
+</project>
