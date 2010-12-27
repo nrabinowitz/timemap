@@ -17,7 +17,7 @@ jsdoc-toolkit.dir=C:/Program Files/jsdoc-toolkit
 		</classpath>
 	</taskdef>
     
-    <target name="build-mxn">
+    <target name="mxn">
     
         <echo>Timemap.js: Building Mapstraction</echo>
         <property name="mxn.target" location="lib/mxn"/>
@@ -106,6 +106,6 @@ jsdoc-toolkit.dir=C:/Program Files/jsdoc-toolkit
 
     <target name="compress" depends="compress-core,compress-full"/>
 
-    <target name="build" depends="build-mxn,docs,compress"/>
+    <target name="build" depends="mxn,docs,compress"/>
 
 </project>
