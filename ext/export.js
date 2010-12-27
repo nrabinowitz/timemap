@@ -10,7 +10,8 @@
  * <p>Functions in this file allow TimeMap, TimeMapDataset, and TimeMapItem
  * objects to be serialized to a JSON string suitable for loading back into
  * TimeMap.init(). This allows for a range of server-side options for
- * data persistence and management.</p>
+ * data persistence and management.NOTE: I haven't looked at this recently! It
+ * may well need to be updated.<p>
  * 
  * @requires json2: lib/json2.pack.js
  *
