@@ -255,13 +255,13 @@ TimeMap.state.params = {
                     // give up
                     return null;
                 }
-                return new GLatLng(
+                return new mxn.LatLonPoint(
                     parseFloat(params[0]),
                     parseFloat(params[1])
                 );
             },
             toStr: function(value) {
-                return value.lat() + "," + value.lng();
+                return value.lat + "," + value.lng;
             }
         }),
         

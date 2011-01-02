@@ -76,7 +76,7 @@ TimeMap.loaders.gss = function(options) {
     // use key if no URL was supplied
     if (!loader.opts.url && options.key) {
         loader.opts.url = "http://spreadsheets.google.com/feeds/list/" + 
-            options.key + "/1/public/values?alt=json-in-script&callback=";
+            options.key + "/1/public/values?alt=json-in-script&callback=?";
     }
     
     // Set up additional columns

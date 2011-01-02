@@ -34,7 +34,7 @@ TimeMap.init({
             options: {
                 // This is just the latest geotagged photo stream - try adding
                 // an "id" or "tag" or "photoset" parameter to get what you want
-                url: "http://www.flickr.com/services/feeds/geo/?format=json&jsoncallback="
+                url: "http://www.flickr.com/services/feeds/geo/?format=json&jsoncallback=?"
             }
         }
     ],
@@ -48,6 +48,9 @@ TimeMap.init({
  */
 TimeMap.loaders.flickr = function(options) {
     var loader = new TimeMap.loaders.jsonp(options);
+    
+    // set ajax settings for loader
+    loader.opts.jsonp = 'jsoncallback';
     
     /**
      * Preload function for Flickr feeds

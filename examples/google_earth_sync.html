@@ -6,6 +6,8 @@
     <title>Timemap Synchronized with Google Earth</title>
     <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w"
       type="text/javascript"></script>
+    <script type="text/javascript" src="../lib/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript" src="../../mxn/source/mxn.js?(google)"></script>
     <script src="../lib/timeline-2.3.0.js" type="text/javascript"></script>
     <script src="../timemap.js" type="text/javascript"></script>
     <script src="http://www.google.com/jsapi?key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w"></script>
@@ -39,7 +41,7 @@ function setEarthView(ge, map) {
             suppressMapListener = false;
         }, 500);
         // set view
-        var latlng = map.getCenter();
+        var latlng = map.getCenter().toProprietary('google');
         var la = ge.getView().copyAsLookAt(ge.ALTITUDE_ABSOLUTE);
         la.setLatitude(latlng.lat());
         la.setLongitude(latlng.lng());
@@ -49,7 +51,7 @@ function setEarthView(ge, map) {
     }
 }
 
-// set a Google Map to look at Google Earth
+// set the map to look at Google Earth
 function setMapView(ge, map) {
     if (!suppressMapListener) {
         // to stop cyclical dependencies
@@ -60,7 +62,7 @@ function setMapView(ge, map) {
         // set view
         var lookAt = ge.getView().copyAsLookAt(ge.ALTITUDE_CLAMP_TO_GROUND);
         mapzoom = getMapZoom(lookAt.getRange());
-        map.setCenter(new GLatLng(lookAt.getLatitude(),lookAt.getLongitude()), mapzoom);
+        map.setCenter(new mxn.LatLonPoint(lookAt.getLatitude(),lookAt.getLongitude()), mapzoom);
     }
 }
 
@@ -74,8 +76,8 @@ function onLoad() {
         // set earth view manually for the first time
         setEarthView(ge, map);
         // Add listeners
-        GEvent.addListener(map, "move", function() {setEarthView(ge, map);});
-        //GEvent.addListener(map, "zoomend", function() {setEarthView(ge, map);});
+        map.endPan.addHandler(function() {setEarthView(ge, map);});
+        //map.endZoom.addHandler(function() {setEarthView(ge, map);});
         google.earth.addEventListener(ge.getView(), 'viewchange', function() {setMapView(ge, map)});
         // tilt, because it looks cool :)
         var lookAt = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);

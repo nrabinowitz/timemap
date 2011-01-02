@@ -382,12 +382,12 @@ TimeMap.prototype = {
         map.setMapType(options.mapType);
         
         /**
-         * Reference to the native map object (specific to the map provider)
-         * @name TimeMap#_map
-         * @public
-         * @type Object
+         * Return the native map object (specific to the map provider)
+         * @name TimeMap#getNativeMap
+         * @function
+         * @return {Object}     The native map object (e.g. GMap2)
          */
-        tm._map = map.getMap();
+        tm.getNativeMap = function() { return map.getMap(); }
         
         /** 
          * Bounds of the map 
@@ -1683,7 +1683,7 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
                     fillOpacity: theme.fillOpacity
                 });
                 // set type and point
-                type = "polyline";
+                type = isPolygon ? "polygon" : "polyline";
                 point = isPolygon ? 
                     points[Math.floor(points.length/2)] :
                     pBounds.getCenter();
@@ -1833,7 +1833,6 @@ TimeMapDataset.prototype.loadItem = function(data, transform) {
  * @param {Boolean} [options.classicTape=false]         Whether to use the "classic" style timeline event tape
  *                                                      (needs additional css to work - see examples/artists.html).
  */
-// XXX: Namespace within TimeMap
 TimeMapTheme = function(options) {
 
     // work out various defaults - the default theme is Google's reddish color
@@ -2009,6 +2008,9 @@ TimeMapItem = function(placemark, event, dataset, options) {
             infoPoint: null,
             infoHtml: '',
             infoUrl: '',
+            openInfoWindow: options.infoUrl ? 
+                TimeMapItem.openInfoWindowAjax :
+                TimeMapItem.openInfoWindowBasic,
             infoTemplate: '<div class="infotitle">{{title}}</div>' + 
                           '<div class="infodescription">{{description}}</div>',
             templatePattern: /{{([^}]+)}}/g,
@@ -2065,30 +2067,18 @@ TimeMapItem = function(placemark, event, dataset, options) {
      */
     item.placemark = placemark;
     
-    /**
-     * This item's native placemark object (specific to map provider;
-     * undefined if this item has more than one placemark)
-     * @name TimeMapItem#_placemark
-     * @public
-     * @type Object
-     */
-    item._placemark = placemark.proprietary_marker || placemark.proprietary_polyline;
-    
-    // select default open function
-	// XXX: move to defaults with a terniary statement
-    if (!options.openInfoWindow) {
-        if (options.infoUrl !== "") {
-            // load via AJAX if URL is provided
-            options.openInfoWindow = TimeMapItem.openInfoWindowAjax;
-        } else {
-            // otherwise default to basic window
-            options.openInfoWindow = TimeMapItem.openInfoWindowBasic;
-        }
-    }
-    
-	
-	// XXX: is all of this better in a prototype definition?
     // getter functions
+    
+    /**
+     * Return this item's native placemark object (specific to map provider;
+     * undefined if this item has more than one placemark)
+     * @name TimeMapItem#getNativePlacemark
+     * @function
+     * @return {Object}     The native placemark object (e.g. GMarker)
+     */
+    item.getNativePlacemark = function() {
+        return placemark.proprietary_marker || placemark.proprietary_polyline;
+    };
     
     /**
      * Return the placemark type for this item
