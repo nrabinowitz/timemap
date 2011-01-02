@@ -21,4 +21,8 @@ The majority of the library should work with your existing code - the `TimeMap.i
 
   * `TimeMap#map` and `TimeMapItem#placemark` now refer to the corresponding Mapstraction objects, not to the native map provider objects. Native map and placemark objects can be accessed through `TimeMap#_map` and `TimeMapItem#_placemark`.
 
+  * `TimeMap.loaders.json_string` is now `TimeMap.loaders.json`.
+
+  * `TimeMap.loaders.jsonp` now uses jQuery handling of JSONP requests. This means that urls are expected to have a "callback" parameter, and the name of the callback function should be replaced with "?" (in timemap.js v1.x, the name was simply left off the end of the URL). See the [http://api.jquery.com/jQuery.ajax/ jQuery.ajax documentation] for more details.
+
   * _(more to come)_
