@@ -288,15 +288,7 @@ TimeMap.state.params = {
          * Index of selected/open item, if any
          * @type TimeMap.params.Param
          */
-        selected: new paramNS.Param("selected", {
-            get: function(tm) {
-                var items = tm.getItems(),
-                    i = items.length-1;
-                while (i >= 0 && i--) {
-                    if (items[i].selected) break;
-                }
-                return i;
-            },
+        selected: new paramNS.OptionParam("selected", {
             set: function(tm, value) {
                 if (value >= 0) {
                     var item = tm.getItems()[value];

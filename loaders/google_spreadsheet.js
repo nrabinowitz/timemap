@@ -74,8 +74,8 @@ TimeMap.loaders.gss = function(options) {
         extraColumns = options.extraColumns || [];
     
     // use key if no URL was supplied
-    if (!loader.url) {
-        loader.url = "http://spreadsheets.google.com/feeds/list/" + 
+    if (!loader.opts.url && options.key) {
+        loader.opts.url = "http://spreadsheets.google.com/feeds/list/" + 
             options.key + "/1/public/values?alt=json-in-script&callback=";
     }
     
@@ -141,10 +141,7 @@ TimeMap.loaders.gss.setParamField = function(param, fieldName) {
     var getField = function(data, fieldName) {
         // get element, converting field name to GSS format
         var el = data['gsx$' + fieldName.toLowerCase().replace(" ", "")];
-        if (el) {
-            return el.$t;
-        }
-        return null;
+        return el ? el.$t : null;
     };
     // set the method on the parameter
     param.setConfigGSS = function(config, data) {

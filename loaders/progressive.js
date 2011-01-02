@@ -1,4 +1,4 @@
-    /* 
+/* 
  * Timemap.js Copyright 2010 Nick Rabinowitz.
  * Licensed under the MIT License (see LICENSE.txt)
  */
@@ -83,23 +83,16 @@ TimeMap.loaders.progressive = function(options) {
         loader = new loaderClass(options);
     }
     
-    // quick string/date check
-    function cleanDate(d) {
-        if (typeof(d) == "string") {
-            d = TimeMapDataset.hybridParser(d);
-        }
-        return d;
-    }
-    
     // save loader attributes
-    var baseUrl = loader.url, 
+    var baseUrl = loader.opts.url, 
         baseLoadFunction = loader.load,
         interval = options.interval,
         formatDate = options.formatDate || TimeMap.util.formatDate,
         formatUrl =  options.formatUrl,
-        zeroDate = cleanDate(options.start), 
-        dataMinDate = cleanDate(options.dataMinDate), 
-        dataMaxDate = cleanDate(options.dataMaxDate),
+        parseDate = TimeMapDataset.hybridParser,
+        zeroDate = parseDate(options.start), 
+        dataMinDate = parseDate(options.dataMinDate), 
+        dataMaxDate = parseDate(options.dataMaxDate),
         loaded = {};
     
     if (!formatUrl) {
@@ -167,7 +160,7 @@ TimeMap.loaders.progressive = function(options) {
      */
     loader.load = function(dataset, callback, start, currBlock) {
         // set start date, defaulting to zero date
-        start = cleanDate(start) || zeroDate;
+        start = parseDate(start) || zeroDate;
         // set current block, defaulting to 0
         currBlock = currBlock || 0;
         // set end by interval
@@ -179,8 +172,7 @@ TimeMap.loaders.progressive = function(options) {
         loaded[currBlock] = true;
         
         // put dates into URL
-        loader.url = formatUrl(baseUrl, start, end);
-        // console.log(loader.url);
+        loader.opts.url = formatUrl(baseUrl, start, end);
         
         // load data
         baseLoadFunction.call(loader, dataset, function() {

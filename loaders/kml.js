@@ -10,7 +10,7 @@
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
  */
 
-/*globals GXml, TimeMap */
+/*globals TimeMap */
 
 /**
  * @class
@@ -71,12 +71,11 @@ TimeMap.loaders.kml = function(options) {
 /**
  * Static function to parse KML with time data.
  *
- * @param {XML string} kml      KML to be parsed
+ * @param {XML} kml      KML node to be parsed
  * @return {TimeMapItem Array}  Array of TimeMapItems
  */
-TimeMap.loaders.kml.parse = function(kml) {
-    var items = [], data, kmlnode, placemarks, pm, i, j;
-    kmlnode = GXml.parse(kml);
+TimeMap.loaders.kml.parse = function(kmlnode) {
+    var items = [], data, placemarks, pm, i, j;
     
     // get TimeMap utilty functions
     // assigning to variables should compress better

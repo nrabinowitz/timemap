@@ -21,7 +21,7 @@ jsdoc-toolkit.dir=C:/Program Files/jsdoc-toolkit
     
         <echo>Timemap.js: Building Mapstraction</echo>
         <property name="mxn.target" location="lib/mxn"/>
-        <property name="mxn.build.base" location="${mxn.target}/build"/>
+        <property name="mxn.build.base" location="${mxn.dir}/build"/>
         
         <!-- delete old builds -->
         <delete dir="${mxn.build.base}" />

@@ -13,17 +13,21 @@
 // for JSLint
 /*global TimeMap */
 
+(function() {
+    var loaders = TimeMap.loaders;
+
 /**
  * @class
  * JSONP loader - expects a service that takes a callback function name as
  * the last URL parameter.
  *
- * <p>The jsonp loader assumes that the JSON can be loaded from a url to which a 
- * callback function name can be appended, e.g. "http://www.test.com/getsomejson.php?callback="
- * The loader then appends a nonce function name which the JSON should include.
+ * <p>The jsonp loader assumes that the JSON can be loaded from a url with a "?" instead of
+ * the callback function name, e.g. "http://www.test.com/getsomejson.php?callback=?". See
+ * <a href="http://api.jquery.com/jQuery.ajax/">the jQuery.ajax documentation</a> for more
+ * details on how to format the url, especially if the parameter is not called "callback".
  * This works for services like Google Spreadsheets, etc., and accepts remote URLs.</p>
  *
- * @augments TimeMap.loaders.remote
+ * @augments loaders.remote
  *
  * @example
 TimeMap.init({
@@ -32,7 +36,7 @@ TimeMap.init({
             title: "JSONP Dataset",
             type: "jsonp",
             options: {
-                url: "http://www.example.com/getsomejson.php?callback="
+                url: "http://www.example.com/getsomejson.php?callback=?"
             }
         }
     ],
@@ -41,30 +45,16 @@ TimeMap.init({
  *
  * @constructor
  * @param {Object} options          All options for the loader:
- * @param {String} options.url          URL of JSON service to load, callback name left off
- * @param {mixed} [options[...]]        Other options (see {@link TimeMap.loaders.remote})
+ * @param {String} options.url          URL of JSON service to load, callback name replaced with "?"
+ * @param {mixed} [options[...]]        Other options (see {@link loaders.remote})
  */
-TimeMap.loaders.jsonp = function(options) {
-    var loader = new TimeMap.loaders.remote(options);
+loaders.jsonp = function(options) {
+    var loader = new loaders.remote(options);
     
-    /**
-     * JSONP load function. Creates a callback function and adds a script tag
-     * with the appropriate URL to the document, triggering the HTTP request.
-     * @name TimeMap.loaders.jsonp#load
-     * @function
-     *
-     * @param {TimeMapDataset} dataset  Dataset to load data into
-     * @param {Function} callback       Function to call once data is loaded
-     */
-     loader.load = function(dataset, callback) {
-        // get loader callback name
-        var callbackName = this.getCallbackName(dataset, callback),
-            // create a script tag
-            script = document.createElement("script");
-        // set the src attribute and add to the document
-        script.src = this.url + "TimeMap.loaders.cb." + callbackName;
-        document.body.appendChild(script);
-    };
+    // set ajax settings for loader
+    $.extend(loader.opts, {
+        dataType: 'jsonp'
+    });
     
     return loader;
 };
@@ -75,11 +65,8 @@ TimeMap.loaders.jsonp = function(options) {
  *
  * <p>The json_string loader assumes an array of items in plain JSON, with no
  * callback function - this will require a local URL.</p>
- * <p>Note that this loader requires lib/json2.pack.js.</p>
  *
- * @augments TimeMap.loaders.remote
- *
- * @requires lib/json2.pack.js
+ * @augments loaders.remote
  *
  * @example
 TimeMap.init({
@@ -97,24 +84,20 @@ TimeMap.init({
  *
  * @param {Object} options          All options for the loader
  * @param {String} options.url          URL of JSON file to load
- * @param {mixed} [options[...]]        Other options (see {@link TimeMap.loaders.remote})
+ * @param {mixed} [options[...]]        Other options (see {@link loaders.remote})
  */
-TimeMap.loaders.json_string = function(options) {
-    var loader = new TimeMap.loaders.remote(options);
+loaders.json = function(options) {
+    var loader = new loaders.remote(options);
     
-    /**
-     * Parse a JSON string into a JavaScript object, using the json2.js library.
-     * @name TimeMap.loaders.json_string#parse
-     * @function
-     * @param {String} json     JSON string to parse
-     * @returns {Object}        Parsed JavaScript object
-     */
-    loader.parse = JSON.parse;
+    // set ajax settings for loader
+    $.extend(loader.opts, {
+        dataType: 'json'
+    });
     
     return loader;
 };
 
-// Probably the default json loader should be json_string, not
-// jsonp. I may change this in the future, so I'd encourage you to use
-// the specific one you want.
-TimeMap.loaders.json = TimeMap.loaders.jsonp;
+// For backwards compatibility
+loaders.json_string = loaders.json;
+
+})();
