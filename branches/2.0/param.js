@@ -209,7 +209,7 @@ var params = TimeMap.params = {
             }
             
         };
-        options = TimeMap.util.merge(options, defaults);
+        options = $.extend(defaults, options);
         return new params.Param(paramName, options);
     }
 };

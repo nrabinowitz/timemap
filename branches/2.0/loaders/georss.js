@@ -10,7 +10,7 @@
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
  */
 
-/*globals GXml, TimeMap, TimeMapDataset */
+/*globals TimeMap, TimeMapDataset */
 
 /**
  * @class
@@ -64,12 +64,11 @@ TimeMap.loaders.georss = function(options) {
 /**
  * Static function to parse GeoRSS
  *
- * @param {String} rss      GeoRSS string to be parsed
+ * @param {XML} node      GeoRSS node to be parsed
  * @return {TimeMapItem[]}  Array of TimeMapItems
  */
-TimeMap.loaders.georss.parse = function(rss) {
+TimeMap.loaders.georss.parse = function(node) {
     var items = [], data, node, placemarks, pm, i;
-    node = GXml.parse(rss);
     
     // get TimeMap utilty functions
     // assigning to variables should compress better

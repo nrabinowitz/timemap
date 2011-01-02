@@ -61,27 +61,12 @@ TimeMap.loaders.metaweb = function(options) {
     var loader = new TimeMap.loaders.jsonp(options),
         q = options.query || {},
         // format the query URL for Metaweb
-        querytext = encodeURIComponent(JSON.stringify({qname: {query: q}}));
+        querytext = encodeURIComponent(JSON.stringify({qname: {query: q}})),
+        host = options.host || "http://www.freebase.com",
+        service = options.service || "/api/service/mqlread";
     
-    /**
-     * Host url - default to freebase.com
-     * @name TimeMap.loaders.metaweb#HOST
-     * @type {String}
-     */
-    loader.HOST = options.host || "http://www.freebase.com";
-    /**
-     * Service path - default to freebase.com default
-     * @name TimeMap.loaders.metaweb#QUERY_SERVICE
-     * @type {String}
-     */
-    loader.QUERY_SERVICE = options.service || "/api/service/mqlread";
-
-    /**
-     * URL built using encoded query text and the callback name
-     * @name TimeMap.loaders.metaweb#url
-     * @type {String}
-     */
-    loader.url = loader.HOST + loader.QUERY_SERVICE + "?queries=" + querytext + "&callback=";
+    // set url
+    loader.opts.url = host + service + "?queries=" + querytext + "&callback=?";
     
     /**
      * Preload function for Metaweb
