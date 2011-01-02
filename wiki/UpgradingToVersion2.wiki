@@ -17,9 +17,9 @@ Version 2.0 moves to an [http://ant.apache.org/ Apache Ant]-based build system (
 
 == API Changes ==
 
-The majority of the library should work with your existing code - the `TimeMap.init` API is largely unchanged. A few other differences:
+The majority of the library should work with your existing code - the new version is largely backwards-compatible. A few changes that are not:
 
-  * `TimeMap#map` and `TimeMapItem#placemark` now refer to the corresponding Mapstraction objects, not to the native map provider objects. Native map and placemark objects can be accessed through `TimeMap#_map` and `TimeMapItem#_placemark`.
+  * `TimeMap#map` and `TimeMapItem#placemark` now refer to the corresponding Mapstraction objects, not to the native map provider objects. Native map and placemark objects can be accessed through `TimeMap#getNativeMap` and `TimeMapItem#getNativePlacemark`.
 
   * `TimeMap.loaders.json_string` is now `TimeMap.loaders.json`.
 
