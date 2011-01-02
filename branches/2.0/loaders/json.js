@@ -52,9 +52,7 @@ loaders.jsonp = function(options) {
     var loader = new loaders.remote(options);
     
     // set ajax settings for loader
-    $.extend(loader.opts, {
-        dataType: 'jsonp'
-    });
+    loader.opts.dataType = 'jsonp';
     
     return loader;
 };
@@ -90,9 +88,7 @@ loaders.json = function(options) {
     var loader = new loaders.remote(options);
     
     // set ajax settings for loader
-    $.extend(loader.opts, {
-        dataType: 'json'
-    });
+    loader.opts.dataType =  'json';
     
     return loader;
 };

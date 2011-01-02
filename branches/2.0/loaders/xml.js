@@ -35,9 +35,7 @@ TimeMap.loaders.xml = function(options) {
         paramName, tagName, x;
     
     // set ajax settings for loader
-    $.extend(loader.opts, {
-        dataType: 'xml'
-    });
+    loader.opts.dataType =  'xml';
     
     /**
      * Additional parameters to load
