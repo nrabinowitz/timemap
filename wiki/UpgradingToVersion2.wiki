@@ -25,4 +25,6 @@ The majority of the library should work with your existing code - the new versio
 
   * `TimeMap.loaders.jsonp` now uses jQuery handling of JSONP requests. This means that urls are expected to have a "callback" parameter, and the name of the callback function should be replaced with "?" (in timemap.js v1.x, the name was simply left off the end of the URL). See the [http://api.jquery.com/jQuery.ajax/ jQuery.ajax documentation] for more details.
 
+  * The date parser functions are now defined in `TimeMap.dateParsers`, rather than as static functions in the `TimeMapDataset` class.
+
   * _(more to come)_
