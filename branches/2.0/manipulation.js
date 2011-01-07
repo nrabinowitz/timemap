@@ -23,6 +23,8 @@
 /*----------------------------------------------------------------------------
  * TimeMap manipulation: stuff affecting every dataset
  *---------------------------------------------------------------------------*/
+
+// XXX: This should $.extend the prototype, I think
  
 /**
  * Delete all datasets, clearing them from map and timeline. Note
@@ -33,7 +35,8 @@ TimeMap.prototype.clear = function() {
     tm.eachItem(function(item) {
         item.event = item.placemark = null;
     });
-    tm.map.clearOverlays();
+    tm.map.removeAllPolylines();
+    tm.map.removeAllMarkers();
     tm.eventSource.clear();
     tm.datasets = [];
 };
@@ -55,7 +58,7 @@ TimeMap.prototype.deleteDataset = function(id) {
  */
 TimeMap.prototype.hideDataset = function (id){
     if (id in this.datasets) {
-    	this.datasets[id].hide();
+        this.datasets[id].hide();
     }
 };
 
@@ -64,9 +67,9 @@ TimeMap.prototype.hideDataset = function (id){
  */
 TimeMap.prototype.hideDatasets = function(){
     var tm = this;
-	tm.each(function(ds) {
-		ds.visible = false;
-	});
+    tm.each(function(ds) {
+        ds.visible = false;
+    });
     tm.filter("map");
     tm.filter("timeline");
 };
@@ -78,7 +81,7 @@ TimeMap.prototype.hideDatasets = function(){
  */
 TimeMap.prototype.showDataset = function(id) {
     if (id in this.datasets) {
-	    this.datasets[id].show();
+        this.datasets[id].show();
     }
 };
 
@@ -87,9 +90,9 @@ TimeMap.prototype.showDataset = function(id) {
  */
 TimeMap.prototype.showDatasets = function() {
     var tm = this;
-	tm.each(function(ds) {
-		ds.visible = true;
-	});
+    tm.each(function(ds) {
+        ds.visible = true;
+    });
     tm.filter("map");
     tm.filter("timeline");
 };
@@ -97,7 +100,7 @@ TimeMap.prototype.showDatasets = function() {
 /**
  * Change the default map type
  *
- * @param {String|Object} mapType   New map type If string, looks up in TimeMap.mapTypes.
+ * @param {String} mapType   The maptype for the map (see {@link TimeMap.mapTypes} for options)
  */
 TimeMap.prototype.changeMapType = function (mapType) {
     var tm = this;
@@ -293,7 +296,12 @@ TimeMapItem.prototype.clear = function(suppressLayout) {
         item.hidePlacemark();
         function removeOverlay(p) {
             try {
-                item.map.removeOverlay(p);
+                if (item.getType() == 'marker') {
+                    item.map.removeMarker(p);
+                } 
+                else {
+                    item.map.removePolyline(p);
+                }
             } catch(e) {}
         };
         if (item.getType() == "array") {
@@ -346,6 +354,7 @@ TimeMapItem.prototype.createEvent = function(start, end) {
     // change placemark
     if (placemark) {
         // internal function - takes type, placemark
+        // XXX: Need to update this for mapstraction - some implementations not available
         function changePlacemark(pm, type, theme) {
             type = type || TimeMap.util.getPlacemarkType(pm);
             switch (type) {

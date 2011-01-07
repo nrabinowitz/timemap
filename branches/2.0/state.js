@@ -277,7 +277,7 @@ TimeMap.state.params = {
                 tm.scrollToDate(value);
             },
             fromStr: function(s) {
-                return TimeMapDataset.hybridParser(s);
+                return TimeMap.dateParsers.hybrid(s);
             },
             toStr: function(value) {
                 return TimeMap.util.formatDate(value);

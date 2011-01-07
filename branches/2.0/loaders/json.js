@@ -17,7 +17,6 @@
     var loaders = TimeMap.loaders;
 
 /**
- * @class
  * JSONP loader - expects a service that takes a callback function name as
  * the last URL parameter.
  *
@@ -26,8 +25,9 @@
  * <a href="http://api.jquery.com/jQuery.ajax/">the jQuery.ajax documentation</a> for more
  * details on how to format the url, especially if the parameter is not called "callback".
  * This works for services like Google Spreadsheets, etc., and accepts remote URLs.</p>
- *
- * @augments loaders.remote
+ * @name TimeMap.loaders.jsonp
+ * @class
+ * @augments TimeMap.loaders.remote
  *
  * @example
 TimeMap.init({
@@ -58,13 +58,14 @@ loaders.jsonp = function(options) {
 };
 
 /**
- * @class
  * JSON string loader factory - expects a plain JSON array.
  *
  * <p>The json_string loader assumes an array of items in plain JSON, with no
  * callback function - this will require a local URL.</p>
+ * @name TimeMap.loaders.json
+ * @class
  *
- * @augments loaders.remote
+ * @augments TimeMap.loaders.remote
  *
  * @example
 TimeMap.init({

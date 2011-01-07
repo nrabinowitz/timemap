@@ -3,19 +3,42 @@
 <!--
 You will need to create your own build.properties file. Sample file contents:
 
+# core settings
 mxn.dir=../mxn
 yuicompressor.jar=C:/Program Files/yuicompressor/build/yuicompressor.jar
 jsdoc-toolkit.dir=C:/Program Files/jsdoc-toolkit
+
+# api settings for tests
+mxn.test.url.base=../lib/mxn/mxn.js
+timeline.test.url.12=../lib/timeline-1.2.js
+timeline.test.url.230=../lib/timeline-2.3.0.js
+map.test.url.google=http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w
+map.test.url.googlev3=http://maps.google.com/maps/api/js?sensor=false
+map.test.url.openlayers=openlayers': 'http://openlayers.org/api/OpenLayers.js
+map.test.url.yahoo=http://api.maps.yahoo.com/ajaxymap?v=3.8&appid=MJmMF_XV34Fbt9iTJluolVk7T80lw8lD.lykqztF7S9F8szGFR01um.Rg5Svbsg.eMmZ
+map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=6
 
 -->
     <property name="props" value="build.properties"/>
     <property file="${props}"/>
     
     <taskdef resource="net/sf/antcontrib/antlib.xml">
-		<classpath>
-			<pathelement location="lib/ant-contrib-1.0b3.jar"/>
-		</classpath>
-	</taskdef>
+        <classpath>
+            <pathelement location="lib/ant-contrib-1.0b3.jar"/>
+        </classpath>
+    </taskdef>
+    
+    <!-- define timemap.js source files -->
+    <path id="source.files">
+        <fileset file="timemap.js"/>
+        <fileset dir=".">
+            <include name="*.js"/>
+            <exclude name="*.pack.*"/>
+        </fileset>
+        <fileset file="loaders/json.js"/>
+        <fileset file="loaders/xml.js"/>
+        <fileset dir="loaders" includes="*.js"/>
+    </path>
     
     <target name="mxn">
     
@@ -43,29 +66,27 @@ jsdoc-toolkit.dir=C:/Program Files/jsdoc-toolkit
         <property name="docs.dir" value="docs"/>
         
         <!-- define fileset -->
-        <fileset dir="." id="doc.files">
-            <include name="*.js"/>
-            <include name="loaders/*.js"/>
-            <exclude name="*.pack.*"/>
-        </fileset>
         <pathconvert 
+            refid="source.files"
             property="doc.files" 
-            refid="doc.files"
             pathsep="' '"/>
+            
         <!-- create documentation -->
-		<java jar="${jsdoc-toolkit.dir}/jsrun.jar" fork="true" failonerror="true">
-			<arg value="${jsdoc-toolkit.dir}/app/run.js"/>
-			<arg line="'${doc.files}'"/>
-			<arg value="-c=${docs.dir}/jsdoc-toolkit/timemap.conf"/>
-			<arg value="-d=${docs.dir}"/>
-		</java>
+        <java jar="${jsdoc-toolkit.dir}/jsrun.jar" fork="true" failonerror="true">
+            <arg value="${jsdoc-toolkit.dir}/app/run.js"/>
+            <arg line="'${doc.files}'"/>
+            <arg value="-c=${docs.dir}/jsdoc-toolkit/timemap.conf"/>
+            <arg value="-d=${docs.dir}"/>
+        </java>
         
     </target>
     
     <target name="compress-core">
+        
         <property name="core.packfile" value="timemap.pack.js"/>
         
         <echo>Timemap.js: Compressing Javascript to ${core.packfile}</echo>
+        
         <java jar="${yuicompressor.jar}" fork="true" failonerror="true">
             <arg line="-o ${core.packfile} timemap.js"/>
         </java>
@@ -73,6 +94,7 @@ jsdoc-toolkit.dir=C:/Program Files/jsdoc-toolkit
     </target>
     
     <target name="compress-full">
+        
         <property name="full.packfile" value="timemap_full.pack.js"/>
         
         <echo>Timemap.js: Compressing Javascript to ${full.packfile}</echo>
@@ -80,15 +102,9 @@ jsdoc-toolkit.dir=C:/Program Files/jsdoc-toolkit
         <delete file="${full.packfile}"/>
         
         <for param="file">
-			<path id="compress.files">
-                <fileset file="timemap.js"/>
-                <fileset dir="." id="doc.files">
-                    <include name="*.js"/>
-                    <include name="loaders/*.js"/>
-                    <exclude name="*.pack.*"/>
-                </fileset>
-            </path>
+            <path refid="source.files"/>
             <sequential>
+                <echo>Compressing @{file}</echo>
                 <!-- compress -->
                 <java jar="${yuicompressor.jar}" fork="true" failonerror="true">
                     <arg line="-o @{file}.pack.tmp @{file}"/>
@@ -100,8 +116,144 @@ jsdoc-toolkit.dir=C:/Program Files/jsdoc-toolkit
                 <!-- clean up -->
                 <delete file="@{file}.pack.tmp"/>
             </sequential>
-		</for>
+        </for>
         
+    </target>
+    
+    <target name="create-tests">
+        
+        <echo>Timemap.js: Creating Tests</echo>
+        
+        <!-- set properties -->
+        <property name="test.dir" value="tests"/>
+        <property name="template.dir" value="${test.dir}/templates"/>
+        <property name="test.page.template" value="${template.dir}/testTemplate.html"/>
+        <property name="test.suite.template" value="${template.dir}/testSuiteTemplate.html"/>
+        <property name="test.page.placeholder" value="&lt;!--SCRIPTS--&gt;"/>
+        <property name="test.suite.placeholder" value="// TESTPAGES"/>
+        <property name="build.suffix" value="_bld"/>
+        <var name="test.suites" value=""/>
+        
+        <!-- delete previous build -->
+        <delete>
+            <fileset dir="${test.dir}" includes="*${build.suffix}.html"/>
+        </delete>
+        
+        <!-- do combinatorix -->
+        <for list="${map.apis}" param="map.api">
+            <sequential>
+                <for list="${timeline.apis}" param="timeline.api">
+                    <sequential>
+                    
+                        <!-- create test pages for this api combo -->
+                        <var name="test.pages" value=""/>
+                        <for list="${test.names}" param="test.name">
+                            <sequential>
+                                <!-- set page variables -->
+                                <var name="test.page" value="@{test.name}_@{map.api}_tl@{timeline.api}${build.suffix}.html"/>
+                                <var name="test.pages" value="${test.pages}${test.page},"/>
+                                
+                                <!-- create the test page -->
+                                <ant target="create-test-page">
+                                    <property name="test.page" value="${test.page}"/>
+                                    <property name="test.name" value="@{test.name}"/>
+                                    <property name="map.api" value="@{map.api}"/>
+                                    <property name="timeline.api" value="@{timeline.api}"/>
+                                </ant>
+                            </sequential>
+                        </for>
+                        
+                        <!-- set suite variables -->
+                        <var name="test.suite" value="suite_@{map.api}_tl@{timeline.api}${build.suffix}.html"/>
+                        <var name="test.suites" value="${test.suites}${test.suite},"/>
+                        
+                        <!-- create the test suite -->
+                        <propertyregex property="test.page.list"
+                            input="${test.pages}"
+                            regexp="(.*),$"
+                            select="\1"
+                            override="true"/>
+                        <ant target="create-test-suite">
+                            <property name="test.suite" value="${test.suite}"/>
+                        </ant>
+                        
+                    </sequential>
+                </for>
+            </sequential>
+        </for>
+        
+        <!-- create the master test suite -->
+        <propertyregex property="test.suite.list"
+            input="${test.suites}"
+            regexp="(.*),$"
+            select="\1"/>
+        <var name="test.suite" unset="true"/>
+        <ant target="create-test-suite">
+            <property name="test.suite" value="suite_master${build.suffix}.html"/>
+            <property name="test.page.list" value="${test.suite.list}"/>
+        </ant>
+    </target>
+    
+    <target name="create-test-page">
+        <echo>Creating test page: ${test.page}</echo>
+        <!-- create file from template -->
+        <property name="test.file" value="${test.dir}/${test.page}"/>
+        <copy file="${test.page.template}" tofile="${test.file}"/>
+        <!-- define api scripts -->
+        <propertycopy property="map.test.url" from="map.test.url.${map.api}" />
+        <property name="mxn.test.url" value="${mxn.test.url.base}?(${map.api})" />
+        <propertycopy property="timeline.test.url" from="timeline.test.url.${timeline.api}" />
+        <!-- get timemap.js scripts from source path -->
+        <pathconvert 
+            refid="source.files"
+            property="source.test.urls" 
+            pathsep=",">
+            <mapper type="glob" from="${basedir}*" to="..*"/>
+        </pathconvert>
+        <!-- fix path seps -->
+        <propertyregex property="source.test.urls"
+            input="${source.test.urls}"
+            override="true"
+            regexp="\\"
+            replace="/"
+            global="true"/>
+        <!-- special case for dependencies -->
+        <condition property="dependency.url" value="loadTests.js," else="">
+            <contains string="${test.name}" substring="LoadTests"/>
+        </condition>
+        <!-- put in script tags -->
+        <property name="script.url.list" value="${map.test.url},${mxn.test.url},${timeline.test.url},${source.test.urls},${dependency.url}${test.name}.js"/>
+        <for list="${script.url.list}" param="script.url">
+            <sequential>
+                <replace file="${test.file}" 
+                    token="${test.page.placeholder}"
+                    value="&lt;script type=&quot;text/javascript&quot; src=&quot;@{script.url}&quot;&gt;&lt;/script&gt;${test.page.placeholder}"/>
+            </sequential>
+        </for>
+    </target>
+    
+    <target name="create-test-suite">
+        <echo>Creating test suite: ${test.suite}</echo>
+        <!-- create file from template -->
+        <property name="suite.file" value="${test.dir}/${test.suite}"/>
+        <copy file="${test.suite.template}" tofile="${suite.file}"/>
+        <!-- put in test names -->
+        <for list="${test.page.list}" param="test.page">
+            <sequential>
+                <replace file="${suite.file}" 
+                    token="${test.suite.placeholder}"
+                    value="'@{test.page}',${test.suite.placeholder}"/>
+            </sequential>
+        </for>
+        <!-- kill trailing comma -->
+        <replace file="${suite.file}" 
+            token=",${test.suite.placeholder}"
+            value=""/>
+        <!-- put in current directory -->
+        <basename property="curr.dir" file="${basedir}"/>
+        <replace file="${suite.file}" 
+            token="timemapdir;"
+            value="timemapdir='${curr.dir}';"/>
     </target>
 
     <target name="compress" depends="compress-core,compress-full"/>
