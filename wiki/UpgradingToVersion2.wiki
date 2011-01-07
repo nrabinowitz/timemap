@@ -27,6 +27,6 @@ The majority of the library should work with your existing code - the new versio
 
   * The date parser functions are now defined in `TimeMap.dateParsers`, rather than as static functions in the `TimeMapDataset` class.
 
-  * You can no longer set `icon` in the options object for an item. Icon settings are given individually as `iconImage`, `iconSize`, `iconShadow`, `iconShadowSize`, and `iconAnchor`.
+  * The `icon` setting in a TimeMapTheme or in the options object for an item now refers only to the image, not to a fully configured icon object. Icon settings are given individually as `icon`, `iconSize`, `iconShadow`, `iconShadowSize`, and `iconAnchor`.
 
   * _(more to come)_
