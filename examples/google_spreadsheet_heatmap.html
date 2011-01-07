@@ -33,7 +33,7 @@ TimeMap.loaders.custom_gss = function(options) {
         // basic preload: get rows
         var rows = data.feed.entry,
             counties = {}, items = [],
-            parser = TimeMapDataset.hybridParser,
+            parser = TimeMap.dateParsers.hybrid,
             item, i;
         for (i=0; i < rows.length; i++) {
             // call the original loader transform to get the formatted object

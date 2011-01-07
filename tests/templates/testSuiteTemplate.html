@@ -3,28 +3,25 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>TimeMap Test Suite: Packed Version</title>
+    <title>TimeMap Test Suite</title>
     <link rel="stylesheet" type="text/css" href="../../jsUnit/css/jsUnitStyle.css">
     <script language="JavaScript" type="text/javascript" src="../../jsunit/app/jsUnitCore.js"></script>
     <script language="JavaScript" type="text/javascript">
-
-function loadSuite_pack() {
-    var result = new top.jsUnitTestSuite();
-    result.addTestPage("../timemap/tests/basicLoadTests_pack.html");
-    result.addTestPage("../timemap/tests/kmlLoadTests_pack.html");
-    result.addTestPage("../timemap/tests/jsonLoadTests_pack.html");
-    result.addTestPage("../timemap/tests/jsonStringLoadTests_pack.html");
-    result.addTestPage("../timemap/tests/geoRSSLoadTests_pack.html");
-    return result;
-}
-
+    
+var allTestPages = [
+    // gets replaced by build script
+    // TESTPAGES
+];
+    
 function suite() {
-    var newsuite = new top.jsUnitTestSuite();
-    newsuite.addTestSuite(loadSuite_pack());
+    var newsuite = new top.jsUnitTestSuite(),
+        // gets replaced by build script
+        timemapdir;
+    for (var x=0; x<allTestPages.length; x++) {
+        newsuite.addTestPage("../" + timemapdir + "/tests/" + allTestPages[x]);
+    }
     return newsuite;
 }
-
-
 
     </script>
 </head>

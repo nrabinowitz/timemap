@@ -139,7 +139,7 @@ function kmlLoadTestSetup() {
 }
 
 // page setup function - jsonp
-function jsonLoadTestSetup() {
+function jsonpLoadTestSetup() {
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
         timelineId: "timeline",     // Id of timeline div element (required) 
@@ -158,7 +158,7 @@ function jsonLoadTestSetup() {
 }
 
 // page setup function - json string
-function jsonStringLoadTestSetup() {
+function jsonLoadTestSetup() {
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
         timelineId: "timeline",     // Id of timeline div element (required) 
