@@ -88,20 +88,16 @@ TimeMap.loaders.progressive = function(options) {
         baseLoadFunction = loader.load,
         interval = options.interval,
         formatDate = options.formatDate || TimeMap.util.formatDate,
-        formatUrl =  options.formatUrl,
+        formatUrl = options.formatUrl || function(url, start, end) {
+            return url
+                .replace('[start]', formatDate(start))
+                .replace('[end]', formatDate(end));
+        },
         parseDate = TimeMap.dateParsers.hybrid,
         zeroDate = parseDate(options.start), 
         dataMinDate = parseDate(options.dataMinDate), 
         dataMaxDate = parseDate(options.dataMaxDate),
         loaded = {};
-    
-    if (!formatUrl) {
-        formatUrl = function(url, start, end) {
-            return url
-                .replace('[start]', formatDate(start))
-                .replace('[end]', formatDate(end));
-        }
-    }
     
     // We don't start with a TimeMap reference, so we need
     // to stick the listener in on the first load() call
@@ -112,7 +108,7 @@ TimeMap.loaders.progressive = function(options) {
             // determine relevant blocks
             var now = band.getCenterVisibleDate(),
                 currBlock = Math.floor((now.getTime() - zeroDate.getTime()) / interval),
-                currBlockTime = zeroDate.getTime() + (interval * currBlock)
+                currBlockTime = zeroDate.getTime() + (interval * currBlock),
                 nextBlockTime = currBlockTime + interval,
                 prevBlockTime = currBlockTime - interval,
                 // no callback necessary?

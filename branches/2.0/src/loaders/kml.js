@@ -75,7 +75,7 @@ TimeMap.loaders.kml = function(options) {
  * @return {TimeMapItem Array}  Array of TimeMapItems
  */
 TimeMap.loaders.kml.parse = function(kmlnode) {
-    var items = [], data, placemarks, pm, i, j;
+    var items = [], data, placemarks;
     
     // get TimeMap utilty functions
     // assigning to variables should compress better
@@ -118,8 +118,7 @@ TimeMap.loaders.kml.parse = function(kmlnode) {
     
     // look for placemarks
     placemarks = getNodeList(kmlnode, "Placemark");
-    for (i=0; i<placemarks.length; i++) {
-        pm = placemarks[i];
+    placemarks.forEach(function(pm) {
         data = { options: {} };
         // get title & description
         data.title = getTagValue(pm, "name");
@@ -131,42 +130,40 @@ TimeMap.loaders.kml.parse = function(kmlnode) {
         data.placemarks = [];
         // look for marker
         nList = getNodeList(pm, "Point");
-        for (j=0; j<nList.length; j++) {
+        nList.forEach(function(n) {
             pmobj = { point: {} };
             // get lat/lon
-            coords = getTagValue(nList[j], "coordinates");
+            coords = getTagValue(n, "coordinates");
             pmobj.point = makePoint(coords, 1);
             data.placemarks.push(pmobj);
-        }
+        });
         // look for polylines
         nList = getNodeList(pm, "LineString");
-        for (j=0; j<nList.length; j++) {
+        nList.forEach(function(n) {
             pmobj = { polyline: [] };
             // get lat/lon
-            coords = getTagValue(nList[j], "coordinates");
+            coords = getTagValue(n, "coordinates");
             pmobj.polyline = makePoly(coords, 1);
             data.placemarks.push(pmobj);
-        }
+        });
         // look for polygons
         nList = getNodeList(pm, "Polygon");
-        for (j=0; j<nList.length; j++) {
+        nList.forEach(function(n) {
             pmobj = { polygon: [] };
             // get lat/lon
-            coords = getTagValue(nList[j], "coordinates");
+            coords = getTagValue(n, "coordinates");
             pmobj.polygon = makePoly(coords, 1);
-            // XXX: worth closing unclosed polygons?
             data.placemarks.push(pmobj);
-        }
+        });
         // look for any extra tags and/or ExtendedData specified
         this.parseExtra(data, pm);
         
         items.push(data);
-    }
+    });
     
     // look for ground overlays
     placemarks = getNodeList(kmlnode, "GroundOverlay");
-    for (i=0; i<placemarks.length; i++) {
-        pm = placemarks[i];
+    placemarks.forEach(function(pm) {
         data = { options: {}, overlay: {} };
         // get title & description
         data.title = getTagValue(pm, "name");
@@ -185,7 +182,7 @@ TimeMap.loaders.kml.parse = function(kmlnode) {
         // look for any extra tags and/or ExtendedData specified
         this.parseExtra(data, pm);
         items.push(data);
-    }
+    });
     
     // clean up
     kmlnode = placemarks = pm = nList = null;
@@ -216,13 +213,12 @@ TimeMap.params.ExtendedDataParam = function(paramName, tagName) {
          */
         setConfigXML: function(config, node) {
             var util = TimeMap.util,
-                nList = util.getNodeList(node, "Data"),
-                i;
-            for (i=0; i<nList.length; i++) {
-                if (nList[i].getAttribute("name") == tagName) {
-                    this.setConfig(config, util.getTagValue(nList[i], "value"))
+                nList = util.getNodeList(node, "Data");
+            nList.forEach(function(n) {
+                if (n.getAttribute("name") == tagName) {
+                    this.setConfig(config, util.getTagValue(n, "value"));
                 }
-            }
+            });
             node = nList = null;
         },
         

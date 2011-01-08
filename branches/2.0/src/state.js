@@ -39,16 +39,16 @@ var paramNS = TimeMap.params,
     fromUrl: function() {
         var pairs = location.hash.substring(1).split('&'),
             params = stateNS.params,
-            state = {}, x, pair, key;
-        for (x=0; x < pairs.length; x++) {
-            if (pairs[x] != "") {
-                pair = pairs[x].split('=');
-                key = pair[0];
+            state = {};
+        pairs.forEach(function(pair) {
+            var kv = pair.split('=');
+            if (kv.length > 1) {
+                key = kv[0];
                 if (key && key in params) {
-                    state[key] = params[key].fromString(decodeURI(pair[1]));
+                    state[key] = params[key].fromString(decodeURI(kv[1]));
                 }
             }
-        }
+        });
         return state;
     },
     
@@ -234,7 +234,7 @@ TimeMap.state.params = {
                 tm.map.setZoom(value);
             },
             fromStr: function(s) {
-                return parseInt(s);
+                return parseInt(s, 10);
             }
         }),
         
@@ -298,7 +298,7 @@ TimeMap.state.params = {
                 }
             },
             fromStr: function(s) {
-                return parseInt(s);
+                return parseInt(s, 10);
             }
         })
 };

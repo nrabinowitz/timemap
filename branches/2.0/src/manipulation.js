@@ -11,14 +11,13 @@
  *
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
  */
-
-/*globals TimeMap, TimeMapDataset, TimeMapItem, Timeline */
  
 (function(){
     var window = this,
         TimeMap = window.TimeMap, 
         TimeMapDataset = window.TimeMapDataset, 
-        TimeMapItem = window.TimeMapItem;
+        TimeMapItem = window.TimeMapItem,
+        util = TimeMap.util;
         
 /*----------------------------------------------------------------------------
  * TimeMap manipulation: stuff affecting every dataset
@@ -131,7 +130,7 @@ TimeMap.prototype.changeMapType = function (mapType) {
 TimeMap.prototype.refreshTimeline = function () {
     var topband = this.timeline.getBand(0);
     var centerDate = topband.getCenterVisibleDate();
-    if (TimeMap.util.TimelineVersion() == "1.2") {
+    if (util.TimelineVersion() == "1.2") {
         topband.getEventPainter().getLayout()._laidout = false;
     }
     this.timeline.layout();
@@ -162,7 +161,7 @@ TimeMap.prototype.changeTimeIntervals = function (intervals) {
     function changeInterval(band, interval) {
         band.getEther()._interval = Timeline.DateTime.gregorianUnitLengths[interval];
         band.getEtherPainter()._unit = interval;
-    };
+    }
     // grab date
     var topband = tm.timeline.getBand(0),
         centerDate = topband.getCenterVisibleDate(),
@@ -243,7 +242,7 @@ TimeMapDataset.prototype.hide = function() {
  */
  TimeMapDataset.prototype.changeTheme = function(newTheme) {
     var ds = this;
-    newTheme = TimeMap.util.lookup(newTheme, TimeMap.themes);
+    newTheme = util.lookup(newTheme, TimeMap.themes);
     ds.opts.theme = newTheme;
     ds.each(function(item) {
         item.changeTheme(newTheme, true);
@@ -284,6 +283,7 @@ TimeMapItem.prototype.hide = function() {
 TimeMapItem.prototype.clear = function(suppressLayout) {
     var item = this,
         i;
+    // remove event
     if (item.event) {
         // this is just ridiculous
         item.dataset.timemap.timeline.getBand(0)
@@ -292,22 +292,21 @@ TimeMapItem.prototype.clear = function(suppressLayout) {
             item.timeline.layout();
         }
     }
+    // remove placemark
+    function removeOverlay(p) {
+        try {
+            if (item.getType() == 'marker') {
+                item.map.removeMarker(p);
+            } 
+            else {
+                item.map.removePolyline(p);
+            }
+        } catch(e) {}
+    }
     if (item.placemark) {
         item.hidePlacemark();
-        function removeOverlay(p) {
-            try {
-                if (item.getType() == 'marker') {
-                    item.map.removeMarker(p);
-                } 
-                else {
-                    item.map.removePolyline(p);
-                }
-            } catch(e) {}
-        };
         if (item.getType() == "array") {
-            for (i=0; i<item.placemark.length; i++) {
-                removeOverlay(item.placemark[i]);
-            }
+            item.placemark.forEach(removeOverlay);
         } else {
             removeOverlay(item.placemark);
         }
@@ -349,39 +348,20 @@ TimeMapItem.prototype.createEvent = function(start, end) {
         event = item.event,
         placemark = item.placemark,
         i;
-    newTheme = TimeMap.util.lookup(newTheme, TimeMap.themes);
+    newTheme = util.lookup(newTheme, TimeMap.themes);
     item.opts.theme = newTheme;
+    // internal function - takes type, placemark
+    function changePlacemark(pm) {
+        pm.addData(newTheme);
+        // XXX: Need to update this in Mapstraction - most implementations not available
+        pm.update();
+    }
     // change placemark
     if (placemark) {
-        // internal function - takes type, placemark
-        // XXX: Need to update this for mapstraction - some implementations not available
-        function changePlacemark(pm, type, theme) {
-            type = type || TimeMap.util.getPlacemarkType(pm);
-            switch (type) {
-                case "marker":
-                    pm.setImage(theme.icon.image);
-                    break;
-                case "polygon":
-                    pm.setFillStyle({
-                        'color': newTheme.fillColor,
-                        'opacity': newTheme.fillOpacity
-                    });
-                    // no break to get stroke style too
-                case "polyline":
-                    pm.setStrokeStyle({
-                        'color': newTheme.lineColor,
-                        'weight': newTheme.lineWeight,
-                        'opacity': newTheme.lineOpacity
-                    });
-                    break;
-            }
-        };
         if (type == 'array') {
-            for (i=0; i<placemark.length; i++) {
-                changePlacemark(placemark[i], false, newTheme);
-            }
+            placemark.forEach(changePlacemark);
         } else {
-            changePlacemark(placemark, type, newTheme);
+            changePlacemark(placemark);
         }
     }
     // change event
@@ -439,7 +419,7 @@ TimeMapItem.prototype.getNextPrev = function(backwards, inDataset) {
  */
 TimeMapItem.prototype.getNext = function(inDataset) {
     return this.getNextPrev(false, inDataset);
-}
+};
 
 /** 
  * Find the previous item chronologically
@@ -451,6 +431,6 @@ TimeMapItem.prototype.getNext = function(inDataset) {
  */
 TimeMapItem.prototype.getPrev = function(inDataset) {
     return this.getNextPrev(true, inDataset);
-}
+};
 
 })();

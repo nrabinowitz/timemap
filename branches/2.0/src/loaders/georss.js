@@ -68,7 +68,7 @@ TimeMap.loaders.georss = function(options) {
  * @return {TimeMapItem[]}  Array of TimeMapItems
  */
 TimeMap.loaders.georss.parse = function(node) {
-    var items = [], data, node, placemarks, pm, i;
+    var items = [], data, placemarks, pm, i;
     
     // get TimeMap utilty functions
     // assigning to variables should compress better

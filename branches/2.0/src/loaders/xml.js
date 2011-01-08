@@ -34,8 +34,34 @@ TimeMap.loaders.xml = function(options) {
         params = loader.params, 
         paramName, tagName, x;
     
-    // set ajax settings for loader
-    loader.opts.dataType =  'xml';
+    /**
+     * Load function for remote XML files.
+     * @name TimeMap.loaders.xml#load
+     * @function
+     *
+     * @param {TimeMapDataset} dataset  Dataset to load data into
+     * @param {Function} callback       Function to call once data is loaded
+     */
+    loader.load = function(dataset, callback) {
+        // get loader callback name (allows cancellation)
+        loader.callbackName = loader.getCallbackName(dataset, callback);
+        // set the callback function
+        // see http://docs.jquery.com/Specifying_the_Data_Type_for_AJAX_Requests
+        loader.opts.dataType =  $.browser.msie ? "text" : "xml";
+        loader.opts.success = function(data) {
+            var xml;
+            if (typeof data == "string") {
+                xml = new ActiveXObject("Microsoft.XMLDOM");
+                xml.async = false;
+                xml.loadXML(data);
+            } else {
+                xml = data;
+            }
+            TimeMap.loaders.cb[loader.callbackName](xml);
+        };
+        // download remote data
+        $.ajax(loader.opts);
+    };
     
     /**
      * Additional parameters to load
@@ -45,14 +71,13 @@ TimeMap.loaders.xml = function(options) {
     loader.extraParams = [];
     
     // set up extra params
-    for (x=0; x < extraTags.length; x++) {
-        tagName = extraTags[x];
+    extraTags.forEach(function(tagName) {
         loader.extraParams.push(
             new TimeMap.params.OptionParam(tagMap[tagName] || tagName, {
                 sourceName: tagName
             })
         );
-    }
+    });
     
     /**
      * Parse any extra tags that have been specified into the config object

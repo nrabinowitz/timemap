@@ -60,7 +60,7 @@ TimeMap.loaders.flickr = function(options) {
      * @return {Array} data         Array of item data
      */
     loader.preload = function(data) {
-        return data["items"];
+        return data.items;
     };
     
     /**

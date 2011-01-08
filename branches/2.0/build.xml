@@ -29,24 +29,25 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
     </taskdef>
     
     <!-- common properties -->
+    <property name="src.dir" value="src"/>
+    <property name="docs.dir" value="docs"/>
+    <property name="test.dir" value="tests"/>
     <property name="core.packfile" value="timemap.pack.js"/>
     <property name="full.packfile" value="timemap_full.pack.js"/>
     <property name="mxn.target" location="lib/mxn"/>
     <property name="mxn.build.base" location="${mxn.dir}/build"/>
-    <property name="docs.dir" value="docs"/>
-    <property name="test.dir" value="tests"/>
     <property name="build.suffix" value="_bld"/>
     
     <!-- define timemap.js source files -->
     <path id="source.files">
-        <fileset file="timemap.js"/>
-        <fileset dir=".">
+        <fileset file="${src.dir}/timemap.js"/>
+        <fileset dir="${src.dir}">
             <include name="*.js"/>
             <exclude name="*.pack.*"/>
         </fileset>
-        <fileset file="loaders/json.js"/>
-        <fileset file="loaders/xml.js"/>
-        <fileset dir="loaders" includes="*.js"/>
+        <fileset file="${src.dir}/loaders/json.js"/>
+        <fileset file="${src.dir}/loaders/xml.js"/>
+        <fileset dir="${src.dir}/loaders" includes="*.js"/>
     </path>
     <path id="source.packfiles">
         <fileset file="${full.packfile}"/>
@@ -59,7 +60,8 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
         <for param="file">
             <path refid="source.files"/>
             <sequential>
-                <java jar="${rhino.jar}" fork="true" failonerror="true">
+                <echo>Linting @{file}</echo>
+                <java jar="${rhino.jar}" fork="true" failonerror="false">
                     <arg value="${jslint.js}"/>
                     <arg value="@{file}"/>
                 </java>
@@ -127,7 +129,7 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
         <echo>Timemap.js: Compressing Javascript to ${core.packfile}</echo>
         
         <java jar="${yuicompressor.jar}" fork="true" failonerror="true">
-            <arg line="-o ${core.packfile} timemap.js"/>
+            <arg line="-o ${core.packfile} ${src.dir}/timemap.js"/>
         </java>
         
     </target>
