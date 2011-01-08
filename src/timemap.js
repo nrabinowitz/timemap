@@ -7,8 +7,7 @@
  * @overview
  *
  * <p>Timemap.js is intended to sync a SIMILE Timeline with a Google Map. 
-   XXX: update dependency list.
- * Depends on: Google Maps API v2, SIMILE Timeline v1.2 - 2.3.1. 
+ * Depends on: Mapstraction 2.x, a map provider of your choice, SIMILE Timeline v1.2 - 2.3.1. 
  * Thanks to Jorn Clausen (http://www.oe-files.de) for initial concept and code. 
  * Timemap.js is licensed under the MIT License (see <a href="../LICENSE.txt">LICENSE.txt</a>).</p>
  * <ul>
@@ -21,6 +20,9 @@
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
  * @version 2.0pre
  */
+
+// for jslint
+/*global console: false */
 
 (function(){
 // borrowing some space-saving devices from jquery
@@ -385,7 +387,7 @@ TimeMap.prototype = {
          * @function
          * @return {Object}     The native map object (e.g. GMap2)
          */
-        tm.getNativeMap = function() { return map.getMap(); }
+        tm.getNativeMap = function() { return map.getMap(); };
         
         /** 
          * Bounds of the map 
@@ -411,11 +413,11 @@ TimeMap.prototype = {
             opts = tm.opts,
             // filter: hide when item is hidden
             itemVisible = function(item) {
-                return item.visible
+                return item.visible;
             },
             // filter: hide when dataset is hidden
             datasetVisible = function(item) {
-                return item.dataset.visible
+                return item.dataset.visible;
             },
             resizeTimerID, x, painter;
         
@@ -560,11 +562,11 @@ TimeMap.prototype = {
      * @param {Boolean} [animated]      Whether to do an animated scroll, rather than a jump.
      */
     scrollToDate: function(d, lazyLayout, animated) {
-        var d = this.parseDate(d), 
-            timeline = this.timeline,
+        var timeline = this.timeline,
             topband = timeline.getBand(0),
             x, time, layouts = [],
             band, minTime, maxTime;
+        d = this.parseDate(d);
         if (d) {
             time = d.getTime();
             // check which bands will need layout after scroll
@@ -818,13 +820,17 @@ TimeMap.loadManager = new function() {
         else {
             tm.scrollToDate(opts.scrollTo, true);
             // check for state support
-            if (tm.initState) tm.initState();
+            if (tm.initState) {
+                tm.initState();
+            }
             // custom function to be called when data is loaded
             func = opts.dataDisplayedFunction;
-            if (func) func(tm);
+            if (func) {
+                func(tm);
+            }
         }
     };
-};
+}();
 
 /*----------------------------------------------------------------------------
  * Loader namespace and base classes
@@ -953,11 +959,11 @@ TimeMap.loaders = {
         loader.getCallbackName = function(dataset, callback) {
             var callbacks = TimeMap.loaders.cb,
                 // Define a unique function name
-                callbackName = "_" + TimeMap.loaders.counter++,
-                // Define default callback
-                callback = callback || function() {
-                    dataset.timemap.scrollToDate(loader.scrollTo, true);
-                };
+                callbackName = "_" + TimeMap.loaders.counter++;
+            // Define default callback
+            callback = callback || function() {
+                dataset.timemap.scrollToDate(loader.scrollTo, true);
+            };
             
             // create callback
             callbacks[callbackName] = function(result) {
@@ -1518,7 +1524,6 @@ TimeMapTheme = function(options) {
         /** Opacity for polylines/polygons
          * @name TimeMapTheme#lineOpacity 
          * @type Number */
-        // XXX: Does Mapstraction support this separate from fill opacity?
         lineOpacity:    1,
         /** Line weight in pixels for polylines/polygons
          * @name TimeMapTheme#lineWeight 
@@ -1690,7 +1695,7 @@ TimeMapItem = function(data, dataset) {
                     TimeMapItem.openInfoWindowBasic,
                 infoTemplate: '<div class="infotitle">{{title}}</div>' + 
                               '<div class="infodescription">{{description}}</div>',
-                templatePattern: /{{([^}]+)}}/g,
+                templatePattern: /\{\{([^}]+)\}\}/g,
                 closeInfoWindow: TimeMapItem.closeInfoWindowBasic
             }, data.options),
         tm = dataset.timemap,
@@ -1859,14 +1864,14 @@ TimeMapItem = function(data, dataset) {
         // ground overlay placemark
         // XXX: this isn't going to show/hide with mapstraction :(
         else if ("overlay" in pdata) {
-            var sw = new LatLonPoint(
-                    parseFloat(pdata.overlay.south), 
-                    parseFloat(pdata.overlay.west)
-                ),
-                ne = new LatLonPoint(
-                    parseFloat(pdata.overlay.north), 
-                    parseFloat(pdata.overlay.east)
-                );
+            sw = new LatLonPoint(
+                parseFloat(pdata.overlay.south), 
+                parseFloat(pdata.overlay.west)
+            );
+            ne = new LatLonPoint(
+                parseFloat(pdata.overlay.north), 
+                parseFloat(pdata.overlay.east)
+            );
             // add to visible bounds
             if (tm.opts.centerOnItems) {
                 bounds.extend(sw);
@@ -1941,7 +1946,6 @@ TimeMapItem = function(data, dataset) {
         });
         // allow for custom placemark loading
         if (!options.noPlacemarkLoad) {
-            // XXX: better ways to do this
             if (util.getPlacemarkType(placemark) == 'marker') {
                 // add placemark to map
                 tm.map.addMarker(placemark);
@@ -2109,8 +2113,6 @@ TimeMapItem = function(data, dataset) {
         options.closeInfoWindow.call(item);
         tm.setSelected(null);
     };
-    
-    // XXX: Do we need to capture window closing on the map and figure out whether it's this item?
 };
 
 TimeMapItem.prototype = {
@@ -2152,8 +2154,9 @@ TimeMapItem.prototype = {
             } catch(e) {}
             item.placemarkVisible = false;
         }
-        // XXX: Check a tm-level var here to find out whether this is necessary
-        item.closeInfoWindow();
+        if (item.isSelected()) {
+            item.closeInfoWindow();
+        }
     },
 
     /** 
@@ -2274,7 +2277,7 @@ TimeMapItem.closeInfoWindowBasic = function() {
     if (item.getType() == "marker") {
         item.placemark.closeBubble();
     } else {
-        console.log("If Mapstraction supported polylines, I'd be closing a window now")
+        // console.log("If Mapstraction supported polylines, I'd be closing a window now");
         /* XXX: this depends on a map-based info window, not available from mxn
         var infoWindow = item.map.getInfoWindow();
         // close info window if its point is the same as this item's point
@@ -2403,7 +2406,9 @@ TimeMap.util.makePoly = function(coords, reversed) {
     var poly = [], 
         latlon,
         coordArr = $.trim(coords).split(/[\r\n\f ]+/);
-    if (coordArr.length === 0) return [];
+    if (coordArr.length === 0) { 
+        return []; 
+    }
     // loop through coordinates
     for (var x=0; x<coordArr.length; x++) {
         latlon = (coordArr[x].indexOf(',') > 0) ?
@@ -2425,7 +2430,7 @@ TimeMap.util.makePoly = function(coords, reversed) {
         });
     }
     return poly;
-}
+};
 
 /**
  * Format a date as an ISO 8601 string
@@ -2515,14 +2520,16 @@ TimeMap.util.lookup = function(key, map) {
 
 // add indexOf support for older browsers (simple version, no "from" support)
 if (!([].indexOf)) {
-    Array.prototype.indexOf || function(el) {
+    Array.prototype.indexOf = function(el) {
         var a = this,
             i = a.length;
         while (--i) {
-            if (a[i] === el) break;
+            if (a[i] === el) {
+                break;
+            }
         }
         return i;
-    }
+    };
 }
 
 /*----------------------------------------------------------------------------
@@ -2671,7 +2678,7 @@ TimeMap.dateParsers = {
                 }
                 // look for timestamps
                 if (!d && s.match(/^\d{7,}$/)) {
-                    d = new Date(parseInt(s));
+                    d = new Date(parseInt(s, 10));
                 }
             } else {
                 return null;
