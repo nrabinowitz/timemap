@@ -57,30 +57,26 @@ function testMarkerIconPath() {
     var dsThemeC3 = customTheme;
     // go through the items one by one
     var item = tm.datasets["testA"].getItems()[0];
-    assertEquals(item.getTitle() + " inherits Dataset A marker icon", dsThemeA.icon.image, item.placemark.getIcon().image);
+    console.log(item.placemark);
+    assertEquals(item.getTitle() + " inherits Dataset A marker icon", dsThemeA.icon, item.placemark.iconUrl);
     var item = tm.datasets["testA"].getItems()[1];
-    assertEquals(item.getTitle() + " overrides Dataset A marker icon", dsThemeA2.icon.image, item.placemark.getIcon().image);
+    assertEquals(item.getTitle() + " overrides Dataset A marker icon", dsThemeA2.icon, item.placemark.iconUrl);
     var item = tm.datasets["testB"].getItems()[0];
-    assertEquals(item.getTitle() + " inherits Timemap marker icon", tmTheme.icon.image, item.placemark.getIcon().image);
+    assertEquals(item.getTitle() + " inherits Timemap marker icon", tmTheme.icon, item.placemark.iconUrl);
     var item = tm.datasets["testB"].getItems()[1];
-    assertEquals(item.getTitle() + " overrides Timemap marker icon", dsThemeB2.icon.image, item.placemark.getIcon().image);
+    assertEquals(item.getTitle() + " overrides Timemap marker icon", dsThemeB2.icon, item.placemark.iconUrl);
     var item = tm.datasets["testC"].getItems()[0];
-    assertEquals(item.getTitle() + " inherits Dataset C marker icon", dsThemeC.icon.image, item.placemark.getIcon().image);
+    assertEquals(item.getTitle() + " inherits Dataset C marker icon", dsThemeC.icon, item.placemark.iconUrl);
     var item = tm.datasets["testC"].getItems()[1];
-    assertEquals(item.getTitle() + " overrides Dataset C marker icon", customIcon.image, item.placemark.getIcon().image);
+    assertEquals(item.getTitle() + " overrides Dataset C marker icon", customIcon, item.placemark.iconUrl);
     var item = tm.datasets["testC"].getItems()[2];
-    assertEquals(item.getTitle() + " uses custom theme marker icon", dsThemeC3.icon.image, item.placemark.getIcon().image);
+    assertEquals(item.getTitle() + " uses custom theme marker icon", dsThemeC3.icon, item.placemark.iconUrl);
 }
 
 var tm = null, customIcon, customTheme;
 
 function setUpPage() {
-    // set up custom icon
-    customIcon = new GIcon(G_DEFAULT_ICON);
-    customIcon.image = "fakeimg.png";
-    customIcon.iconSize = new GSize(32, 32);
-    customIcon.shadow = "http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png";
-    customIcon.shadowSize = new GSize(59, 32);
+    customIcon = "fakeimg.png";
     
     customTheme = new TimeMapTheme({
         "color": "#0000FF",

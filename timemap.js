@@ -1483,9 +1483,16 @@ TimeMapDataset.prototype = {
  *
  * @constructor
  * @param {Object} [options]        A container for optional arguments
- * @param {GIcon} [options.icon=G_DEFAULT_ICON]         Icon for marker placemarks.
- * @param {String} [options.iconImage=red-dot.png]      Icon image for marker placemarks 
- *                                                      (assumes G_MARKER_ICON for the rest of the icon settings)
+ * @param {String} [options.icon=http://www.google.com/intl/en_us/mapfiles/ms/icons/red-dot.png]
+ *                                                      Icon image for marker placemarks
+ * @param {Number[]} [options.iconSize=[32,32]]         Array of two integers indicating marker icon size as
+ *                                                      [width, height] in pixels
+ * @param {String} [options.iconShadow=http://www.google.com/intl/en_us/mapfiles/ms/icons/msmarker.shadow.png]
+ *                                                      Icon image for marker placemarks
+ * @param {Number[]} [options.iconShadowSize=[59,32]]   Array of two integers indicating marker icon shadow
+ *                                                      size as [width, height] in pixels
+ * @param {Number[]} [options.iconAnchor=[16,33]]       Array of two integers indicating marker icon anchor
+ *                                                      point as [xoffset, yoffset] in pixels
  * @param {String} [options.color=#FE766A]              Default color in hex for events, polylines, polygons.
  * @param {String} [options.lineColor=color]            Color for polylines/polygons.
  * @param {Number} [options.lineOpacity=1]              Opacity for polylines/polygons.
@@ -1538,10 +1545,9 @@ TimeMapTheme = function(options) {
          * @type Boolean */
         classicTape:    false,
         /** Icon image for marker placemarks 
-         * @name TimeMapTheme#iconImage 
+         * @name TimeMapTheme#icon 
          * @type String */
-        // XXX: Are these settings still a good idea with Mapstraction?
-        iconImage:      GIP + "red-dot.png",
+        icon:      GIP + "red-dot.png",
         /** Icon size for marker placemarks 
          * @name TimeMapTheme#iconSize 
          * @type Number[] */
@@ -1562,12 +1568,6 @@ TimeMapTheme = function(options) {
     
     // merge defaults with options
     var settings = $.extend(defaults, options);
-    
-    // make default map icon if not supplied
-    if (!settings.icon) {
-        // XXX: is this right with Mapstraction?
-        settings.icon = settings.iconImage;
-    } 
     
     // cascade some settings as defaults
     defaults = {
@@ -1851,9 +1851,9 @@ TimeMapItem = function(data, dataset) {
                 });
                 // set type and point
                 type = isPolygon ? "polygon" : "polyline";
-                point = isPolygon ? 
-                    points[Math.floor(points.length/2)] :
-                    pBounds.getCenter();
+                point = isPolygon ?
+                    pBounds.getCenter() :
+                    points[Math.floor(points.length/2)];
             }
         } 
         // ground overlay placemark
@@ -1898,7 +1898,7 @@ TimeMapItem = function(data, dataset) {
         for (i=0; i<types.length; i++) {
             if (types[i] in data) {
                 // put in title (only used for markers)
-                pdata = {title: title};
+                pdata = {};
                 pdata[types[i]] = data[types[i]];
                 pdataArr.push(pdata);
             }
@@ -1906,8 +1906,11 @@ TimeMapItem = function(data, dataset) {
     }
     // Create placemark objects
     for (i=0; i<pdataArr.length; i++) {
+        pdata = pdataArr[i];
+        // put in title if necessary
+        pdata.title = pdata.title || title;
         // create the placemark
-        var p = createPlacemark(pdataArr[i]);
+        var p = createPlacemark(pdata);
         // check that the placemark was valid
         if (p && p.placemark) {
             // take the first point and type as a default
@@ -2649,19 +2652,19 @@ TimeMap.dateParsers = {
         if (s instanceof Date) {
             return s;
         }
-        // try native date parse and timestamp
-        // XXX: Should I correct for Chrome bug? http://code.google.com/p/timemap/issues/detail?id=77
-        var d = new Date(typeof(s) == "number" ? s : Date.parse(s));
+        var parsers = TimeMap.dateParsers,
+            // try native date parse and timestamp
+            d = new Date(typeof(s) == "number" ? s : Date.parse(parsers.fixChromeBug(s)));
         if (isNaN(d)) {
             if (typeof(s) == "string") {
                 // look for Gregorian dates
                 if (s.match(/^-?\d{1,6} ?(a\.?d\.?|b\.?c\.?e?\.?|c\.?e\.?)?$/i)) {
-                    d = TimeMap.dateParsers.gregorian(s);
+                    d = parsers.gregorian(s);
                 } 
                 // try ISO 8601 parse
                 else {
                     try {
-                        d = DateTime.parseIso8601DateTime(s);
+                        d = parsers.iso8601(s);
                     } catch(e) {
                         d = null;
                     }
@@ -2682,7 +2685,17 @@ TimeMap.dateParsers = {
      * ISO8601 parser: parse ISO8601 datetime strings 
      * @function
      */
-    iso8601: DateTime.parseIso8601DateTime
+    iso8601: DateTime.parseIso8601DateTime,
+    
+    /** 
+     * Clunky fix for Chrome bug: http://code.google.com/p/chromium/issues/detail?id=46703
+     * @private
+     */
+    fixChromeBug: function(s) {
+        return Date.parse("-200") == Date.parse("200") ? 
+            (typeof(s) == "string" && s.substr(0,1) == "-" ? null : s) :
+            s;
+    }
 };
  
 /**
@@ -2722,7 +2735,7 @@ TimeMap.themes = {
      * @type TimeMapTheme
      */
     blue: new TimeMapTheme({
-        iconImage: GIP + "blue-dot.png",
+        icon: GIP + "blue-dot.png",
         color: "#5A7ACF",
         eventIconImage: "blue-circle.png"
     }),
@@ -2733,7 +2746,7 @@ TimeMap.themes = {
      * @type TimeMapTheme
      */
     green: new TimeMapTheme({
-        iconImage: GIP + "green-dot.png",
+        icon: GIP + "green-dot.png",
         color: "#19CF54",
         eventIconImage: "green-circle.png"
     }),
@@ -2744,7 +2757,7 @@ TimeMap.themes = {
      * @type TimeMapTheme
      */
     ltblue: new TimeMapTheme({
-        iconImage: GIP + "ltblue-dot.png",
+        icon: GIP + "ltblue-dot.png",
         color: "#5ACFCF",
         eventIconImage: "ltblue-circle.png"
     }),
@@ -2755,7 +2768,7 @@ TimeMap.themes = {
      * @type TimeMapTheme
      */
     purple: new TimeMapTheme({
-        iconImage: GIP + "purple-dot.png",
+        icon: GIP + "purple-dot.png",
         color: "#8E67FD",
         eventIconImage: "purple-circle.png"
     }),
@@ -2766,7 +2779,7 @@ TimeMap.themes = {
      * @type TimeMapTheme
      */
     orange: new TimeMapTheme({
-        iconImage: GIP + "orange-dot.png",
+        icon: GIP + "orange-dot.png",
         color: "#FF9900",
         eventIconImage: "orange-circle.png"
     }),
@@ -2777,7 +2790,7 @@ TimeMap.themes = {
      * @type TimeMapTheme
      */
     yellow: new TimeMapTheme({
-        iconImage: GIP + "yellow-dot.png",
+        icon: GIP + "yellow-dot.png",
         color: "#ECE64A",
         eventIconImage: "yellow-circle.png"
     }),
@@ -2788,7 +2801,7 @@ TimeMap.themes = {
      * @type TimeMapTheme
      */
     pink: new TimeMapTheme({
-        iconImage: GIP + "pink-dot.png",
+        icon: GIP + "pink-dot.png",
         color: "#E14E9D",
         eventIconImage: "pink-circle.png"
     })
