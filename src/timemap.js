@@ -22,7 +22,6 @@
  */
 
 // for jslint
-/*global console: false */
 
 (function(){
 // borrowing some space-saving devices from jquery
@@ -228,8 +227,8 @@ TimeMap.init = function(config) {
         },
         state = TimeMap.state,
         intervals, tm,
-        datasets = [], x, ds, dsOptions, topOptions, dsId,
-        bands = [], eventSource, bandInfo;
+        datasets = [], x, dsOptions, topOptions, dsId,
+        bands = [], eventSource;
     
     // get DOM element selectors
     config.mapSelector = config.mapSelector || '#' + config.mapId;
@@ -272,8 +271,7 @@ TimeMap.init = function(config) {
     );
     
     // create the dataset objects
-    for (x=0; x < config.datasets.length; x++) {
-        ds = config.datasets[x];
+    config.datasets.forEach(function(ds, x) {
         // put top-level data into options
         dsOptions = $.extend({
             title: ds.title,
@@ -286,7 +284,7 @@ TimeMap.init = function(config) {
             // set all to the same eventSource
             datasets[x].eventSource = datasets[0].eventSource;
         }
-    }
+    });
     // add a pointer to the eventSource in the TimeMap
     tm.eventSource = datasets[0].eventSource;
     
@@ -295,20 +293,18 @@ TimeMap.init = function(config) {
     eventSource = (datasets[0] && datasets[0].eventSource) || new Timeline.DefaultEventSource();
     // check for pre-initialized bands (manually created with Timeline.createBandInfo())
     if (config.bands) {
-        bands = config.bands;
-        // substitute dataset event source
-        for (x=0; x < bands.length; x++) {
+        config.bands.forEach(function(band) {
+            // substitute dataset event source
             // assume that these have been set up like "normal" Timeline bands:
             // with an empty event source if events are desired, and null otherwise
-            if (bands[x].eventSource !== null) {
-                bands[x].eventSource = eventSource;
+            if (band.eventSource !== null) {
+                band.eventSource = eventSource;
             }
-        }
+        });
     }
     // otherwise, make bands from band info
     else {
-        for (x=0; x < config.bandInfo.length; x++) {
-            bandInfo = config.bandInfo[x];
+        config.bandInfo.forEach(function(bandInfo, x) {
             // if eventSource is explicitly set to null or false, ignore
             if (!(('eventSource' in bandInfo) && !bandInfo.eventSource)) {
                 bandInfo.eventSource = eventSource;
@@ -321,7 +317,7 @@ TimeMap.init = function(config) {
                 // set all to the same layout
                 bands[x].eventPainter.setLayout(bands[0].eventPainter.getLayout()); 
             }
-        }
+        });
     }
     // initialize timeline
     tm.initTimeline(bands);
@@ -329,22 +325,21 @@ TimeMap.init = function(config) {
     // initialize load manager
     var loadManager = TimeMap.loadManager;
     loadManager.init(tm, config.datasets.length, config);
+    callback = function() { loadManager.increment(); };
     
     // load data!
-    for (x=0; x < config.datasets.length; x++) {
-        (function(x) { // deal with closure issues
-            var data = config.datasets[x], options, type, callback, loaderClass, loader;
-            // support some older syntax
-            options = data.data || data.options || {};
-            type = data.type || options.type;
-            callback = function() { loadManager.increment(); };
-            // get loader class
-            loaderClass = (typeof(type) == 'string') ? TimeMap.loaders[type] : type;
-            // load with appropriate loader
-            loader = new loaderClass(options);
-            loader.load(datasets[x], callback);
-        })(x);
-    }
+    config.datasets.forEach(function(data, x) {
+        var dataset = datasets[x], 
+            options, type, callback, loaderClass, loader;
+        // support some older syntax
+        options = data.data || data.options || {};
+        type = data.type || options.type;
+        // get loader class
+        loaderClass = (typeof type == 'string') ? TimeMap.loaders[type] : type;
+        // load with appropriate loader
+        loader = new loaderClass(options);
+        loader.load(dataset, callback);
+    });
     // return timemap object for later manipulation
     return tm;
 };
@@ -419,15 +414,19 @@ TimeMap.prototype = {
             datasetVisible = function(item) {
                 return item.dataset.visible;
             },
+            // handler to open item window
+            eventClickHandler = function(x, y, evt) {
+                evt.item.openInfoWindow();
+            },
             resizeTimerID, x, painter;
         
         // synchronize & highlight timeline bands
-        for (x=1; x < bands.length; x++) {
+        bands.forEach(function(band) {
             if (opts.syncBands) {
-                bands[x].syncWith = 0;
+                band.syncWith = 0;
             }
-            bands[x].highlight = true;
-        }
+            band.highlight = true;
+        });
         
         /** 
          * The associated timeline object 
@@ -435,16 +434,11 @@ TimeMap.prototype = {
          * @type Timeline 
          */
         tm.timeline = timeline = Timeline.create(tm.tElement, bands);
-        
-        // set event listeners
-        
 
         // hijack timeline popup window to open info window
         for (x=0; x < timeline.getBandCount(); x++) {
             painter = timeline.getBand(x).getEventPainter().constructor;
-            painter.prototype._showBubble = function(xx, yy, evt) {
-                evt.item.openInfoWindow();
-            };
+            painter.prototype._showBubble = eventClickHandler;
         }
         
         // filter chain for map placemarks
@@ -867,19 +861,29 @@ TimeMap.loaders = {
     cb: {},
     
     /**
-     * Cancel all current load requests. In practice, this is really only
+     * Cancel a specific load request. In practice, this is really only
      * applicable to remote asynchronous loads. Note that this doesn't cancel 
      * the download of data, just the callback that loads it.
+     * @param {String} callbackName     Name of the callback function to cancel
+     */
+    cancel: function(callbackName) {
+        var namespace = TimeMap.loaders.cb;
+        // replace with self-cancellation function
+        namespace[callbackName] = function() {
+            delete namespace[callbackName];
+        };
+    },
+    
+    /**
+     * Cancel all current load requests.
      */
     cancelAll: function() {
-        var namespace = TimeMap.loaders.cb,
+        var loaderNS = TimeMap.loaders,
+            namespace = loaderNS.cb,
             callbackName;
         for (callbackName in namespace) {
             if (namespace.hasOwnProperty(callbackName)) {
-                // replace with self-cancellation function
-                namespace[callbackName] = function() {
-                    delete namespace[callbackName];
-                };
+                loaderNS.cancel(callbackName);
             }
         }
     },
@@ -1006,14 +1010,7 @@ TimeMap.loaders = {
          * @function
          */
         loader.cancel = function() {
-            var namespace = TimeMap.loaders.cb,
-                callbackName = loader.callbackName;
-            if (callbackName) {
-                // replace with self-cancellation function
-                namespace[callbackName] = function() {
-                    delete namespace[callbackName];
-                };
-            }
+            TimeMap.loaders.cancel(loader.callbackName);
         };
         
     }, 
@@ -1429,9 +1426,7 @@ TimeMapDataset.prototype = {
      * @param {Function} f    The function to run
      */
     each: function(f) {
-        for (var x=0; x < this.items.length; x++) {
-            f(this.items[x]);
-        }
+        this.items.forEach(f);
     },
 
     /**
@@ -1442,10 +1437,11 @@ TimeMapDataset.prototype = {
      * @see TimeMapDataset#loadItem
      */
     loadItems: function(data, transform) {
-        for (var x=0; x < data.length; x++) {
-            this.loadItem(data[x], transform);
-        }
-        $(this).trigger(E_ITEMS_LOADED);
+        var ds = this;
+        data.forEach(function(item) {
+            ds.loadItem(item, transform);
+        });
+        $(ds).trigger(E_ITEMS_LOADED);
     },
 
     /**
@@ -1713,7 +1709,6 @@ TimeMapItem = function(data, dataset) {
         instant,
         bounds = tm.mapBounds,
         // empty containers
-        placemark,
         placemarks = [], 
         pdataArr = [], 
         pdata = null, 
@@ -1829,9 +1824,9 @@ TimeMapItem = function(data, dataset) {
                 pBounds = new BoundingBox(),
                 isPolygon = "polygon" in pdata,
                 line = pdata.polyline || pdata.polygon,
-                ne, sw;
+                x, ne, sw;
             if (line && line.length) {
-                for (var x=0; x<line.length; x++) {
+                for (x=0; x<line.length; x++) {
                     point = new LatLonPoint(
                         parseFloat(line[x].lat), 
                         parseFloat(line[x].lon)
@@ -1899,19 +1894,17 @@ TimeMapItem = function(data, dataset) {
         pdataArr = data.placemarks;
     } else {
         // we have one or more single placemarks
-        var types = ["point", "polyline", "polygon", "overlay"];
-        for (i=0; i<types.length; i++) {
-            if (types[i] in data) {
-                // put in title (only used for markers)
+        ["point", "polyline", "polygon", "overlay"].forEach(function(type) {
+            if (type in data) {
+                // push placemarks into array
                 pdata = {};
-                pdata[types[i]] = data[types[i]];
+                pdata[type] = data[type];
                 pdataArr.push(pdata);
             }
-        }
+        });
     }
     // Create placemark objects
-    for (i=0; i<pdataArr.length; i++) {
-        pdata = pdataArr[i];
+    pdataArr.forEach(function(pdata) {
         // put in title if necessary
         pdata.title = pdata.title || title;
         // create the placemark
@@ -1923,7 +1916,7 @@ TimeMapItem = function(data, dataset) {
             type = type || p.type;
             placemarks.push(p.placemark);
         }
-    }
+    });
     // set type, overriding for arrays
     options.type = placemarks.length > 1 ? "array" : type;
     
@@ -1937,7 +1930,7 @@ TimeMapItem = function(data, dataset) {
         point;
     
     // create cross-reference(s) and add placemark(s) if any exist
-    for (i=0; i<placemarks.length; i++) {
+    placemarks.forEach(function(placemark) {
         placemark = placemarks[i];
         placemark.item = item;
         // add listener to make placemark open when event is clicked
@@ -1956,7 +1949,7 @@ TimeMapItem = function(data, dataset) {
             // hide placemarks until the next refresh
             placemark.hide();
         }
-    }
+    });
     
     /**
      * This item's placemark(s)
@@ -2121,17 +2114,16 @@ TimeMapItem.prototype = {
      */
     showPlacemark: function() {
         // XXX: Special case for overlay image (support for some providers)?
-        var item = this, i;
+        var item = this,
+            f = function(placemark) {
+                placemark.show();
+            };
         if (item.placemark && !item.placemarkVisible) {
-            try {
-                if (item.getType() == "array") {
-                    for (i=0; i<item.placemark.length; i++) {
-                        item.placemark[i].show();
-                    }
-                } else {
-                    item.placemark.show();
-                }
-            } catch(e) {}
+            if (item.getType() == "array") {
+                item.placemark.forEach(f);
+            } else {
+                f(item.placemark);
+            }
             item.placemarkVisible = true;
         }
     },
@@ -2141,17 +2133,16 @@ TimeMapItem.prototype = {
      */
     hidePlacemark: function() {
         // XXX: Special case for overlay image (support for some providers)?
-        var item = this, i;
+        var item = this,
+            f = function(placemark) {
+                placemark.hide();
+            };
         if (item.placemark && item.placemarkVisible) {
-            try {
-                if (item.getType() == "array") {
-                    for (i=0; i<item.placemark.length; i++) {
-                        item.placemark[i].hide();
-                    }
-                } else {
-                    item.placemark.hide();
-                }
-            } catch(e) {}
+            if (item.getType() == "array") {
+                item.placemark.forEach(f);
+            } else {
+                f(item.placemark);
+            }
             item.placemarkVisible = false;
         }
         if (item.isSelected()) {
@@ -2406,9 +2397,6 @@ TimeMap.util.makePoly = function(coords, reversed) {
     var poly = [], 
         latlon,
         coordArr = $.trim(coords).split(/[\r\n\f ]+/);
-    if (coordArr.length === 0) { 
-        return []; 
-    }
     // loop through coordinates
     for (var x=0; x<coordArr.length; x++) {
         latlon = (coordArr[x].indexOf(',') > 0) ?
@@ -2514,7 +2502,7 @@ TimeMap.util.getPlacemarkType = function(pm) {
  * @return {Object}             Value, undefined, or key
  */
 TimeMap.util.lookup = function(key, map) {
-    return typeof(key) == 'string' ? map[key] : key;
+    return typeof key == 'string' ? map[key] : key;
 };
 
 
@@ -2529,6 +2517,19 @@ if (!([].indexOf)) {
             }
         }
         return i;
+    };
+}
+
+// add forEach support for older browsers (simple version, no "this" support)
+if (!([].forEach)) {
+    Array.prototype.forEach = function(f) {
+        var a = this,
+            i;
+        for (i=0; i < a.length; i++) {
+            if (i in a) {
+                f(a[i], i, a);
+            }
+        }
     };
 }
 
@@ -2618,7 +2619,7 @@ TimeMap.dateParsers = {
      * @return {Date}       Parsed date or null
      */
     gregorian: function(s) {
-        if (!s || typeof(s) != "string") {
+        if (!s || typeof s != "string") {
             return null;
         }
         // look for BC
@@ -2661,9 +2662,9 @@ TimeMap.dateParsers = {
         }
         var parsers = TimeMap.dateParsers,
             // try native date parse and timestamp
-            d = new Date(typeof(s) == "number" ? s : Date.parse(parsers.fixChromeBug(s)));
+            d = new Date(typeof s == "number" ? s : Date.parse(parsers.fixChromeBug(s)));
         if (isNaN(d)) {
-            if (typeof(s) == "string") {
+            if (typeof s == "string") {
                 // look for Gregorian dates
                 if (s.match(/^-?\d{1,6} ?(a\.?d\.?|b\.?c\.?e?\.?|c\.?e\.?)?$/i)) {
                     d = parsers.gregorian(s);
@@ -2700,7 +2701,7 @@ TimeMap.dateParsers = {
      */
     fixChromeBug: function(s) {
         return Date.parse("-200") == Date.parse("200") ? 
-            (typeof(s) == "string" && s.substr(0,1) == "-" ? null : s) :
+            (typeof s == "string" && s.substr(0,1) == "-" ? null : s) :
             s;
     }
 };

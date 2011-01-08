@@ -35,8 +35,8 @@ var params = TimeMap.params = {
      * @param {Function} [options.setConfigXML] Function to parse the value from an XML node and set to config
      */
     Param: function(paramName, options) {
-        var param = this,
-            options = options || {};
+        var param = this;
+        options = options || {};
         
         /**
          * String name of this param

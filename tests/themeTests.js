@@ -57,7 +57,6 @@ function testMarkerIconPath() {
     var dsThemeC3 = customTheme;
     // go through the items one by one
     var item = tm.datasets["testA"].getItems()[0];
-    console.log(item.placemark);
     assertEquals(item.getTitle() + " inherits Dataset A marker icon", dsThemeA.icon, item.placemark.iconUrl);
     var item = tm.datasets["testA"].getItems()[1];
     assertEquals(item.getTitle() + " overrides Dataset A marker icon", dsThemeA2.icon, item.placemark.iconUrl);
