@@ -29,7 +29,7 @@ TimeMapTheme.createCircleTheme = function(opts) {
         };
     opts = $.extend(defaults, opts);
     return new TimeMapTheme({
-        iconImage: TimeMapTheme.getCircleUrl(opts.size, opts.color, opts.alpha),
+        icon: TimeMapTheme.getCircleUrl(opts.size, opts.color, opts.alpha),
         iconShadow: null,
         iconShadowSize: [0,0],
         iconSize: [opts.size, opts.size],
