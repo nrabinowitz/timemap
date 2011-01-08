@@ -52,6 +52,22 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
         <fileset file="${full.packfile}"/>
     </path>
     
+    <target name="jslint">
+    
+        <echo>Timemap.js: Running JSLint</echo>
+        
+        <for param="file">
+            <path refid="source.files"/>
+            <sequential>
+                <java jar="${rhino.jar}" fork="true" failonerror="true">
+                    <arg value="${jslint.js}"/>
+                    <arg value="@{file}"/>
+                </java>
+            </sequential>
+        </for>
+    
+    </target>
+    
     <target name="mxn-clean">
         <!-- delete old builds -->
         <delete dir="${mxn.build.base}" />
