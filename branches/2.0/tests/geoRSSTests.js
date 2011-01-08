@@ -38,7 +38,7 @@ function testRSSItemAttributes() {
     var item = items[0];
     assertEquals("title matches", item.getTitle(), "Test Event");
     assertEquals("placemark type matches", item.getType(), "marker");
-    var point = new GLatLng(23.456, 12.345);
+    var point = new mxn.LatLonPoint(23.456, 12.345);
     assertTrue("point matches", item.getInfoPoint().equals(point));
 }
 
@@ -60,7 +60,7 @@ function testAtomItemAttributes() {
     var item = items[0];
     assertEquals("title matches", item.getTitle(), "Test Event");
     assertEquals("placemark type matches", item.getType(), "marker");
-    var point = new GLatLng(23.456, 12.345);
+    var point = new mxn.LatLonPoint(23.456, 12.345);
     assertTrue("point matches", item.getInfoPoint().equals(point));
 }
 
@@ -76,33 +76,41 @@ function testMixedPlacemarksFound() {
     for (x=0; x<pmTypes.length; x++) {
         var item = items[x];
         assertEquals(pmTypes[x] + ": placemark type matches", item.getType(), "marker");
-        var point = new GLatLng(23.456, 12.345);
+        var point = new mxn.LatLonPoint(23.456, 12.345);
         assertTrue(pmTypes[x] + ": point matches", item.getInfoPoint().equals(point));
     }
     pmTypes = ['Polyline Simple','Polyline GML'];
     offset = 4;
-    var points = [new GLatLng(45.256, -110.45), new GLatLng(46.46, -109.48), new GLatLng(43.84, -109.86)];
+    var points = [
+        new mxn.LatLonPoint(45.256, -110.45), 
+        new mxn.LatLonPoint(46.46, -109.48), 
+        new mxn.LatLonPoint(43.84, -109.86)
+    ];
     for (x=0; x<pmTypes.length; x++) {
         var item = items[x + offset];
-        assertEquals(pmTypes[x] + ": placemark type matches", item.getType(), "polyline");
-        assertEquals(pmTypes[x] + ": vertex count matches", item.placemark.getVertexCount(), 3);
+        assertEquals(pmTypes[x] + ": item type matches", "polyline", item.getType());
+        assertEquals(pmTypes[x] + ": placemark type matches", "polyline", TimeMap.util.getPlacemarkType(item.placemark));
+        assertNotUndefined("polyline points undefined", item.placemark.points);
+        assertEquals(pmTypes[x] + ": vertex count matches", 3, item.placemark.points.length);
         assertTrue(pmTypes[x] + ": info point matches middle point", item.getInfoPoint().equals(points[1]));
         for (var y=0; y<points.length; y++) {
-            assertTrue("vertex " + y + " matches", item.placemark.getVertex(y).equals(points[y]));
+            assertTrue("vertex " + y + " matches", item.placemark.points[y].equals(points[y]));
         }
     }
     pmTypes = ['Polygon Simple','Polygon GML'];
     offset = 6;
     // polygon bounds center
-    var point = new GLatLng(45.150000000000006, -109.965);
+    var point = new mxn.LatLonPoint(45.150000000000006, -109.965);
     for (x=0; x<pmTypes.length; x++) {
         var item = items[x + offset];
-        assertEquals(pmTypes[x] + ": placemark type matches", item.getType(), "polygon");
+        assertEquals(pmTypes[x] + ": placemark type matches", "polygon", item.getType());
+        assertEquals(pmTypes[x] + ": placemark type matches", "polygon", TimeMap.util.getPlacemarkType(item.placemark));
         // Google seems to count the last vertex of a closed polygon
-        assertEquals(pmTypes[x] + ": vertex count matches", item.placemark.getVertexCount(), 4);
+        assertNotUndefined("polyline points undefined", item.placemark.points);
+        assertEquals(pmTypes[x] + ": vertex count matches", 4, item.placemark.points.length);
         assertTrue(pmTypes[x] + ": info point matches middle point", item.getInfoPoint().equals(point));
         for (var y=0; y<points.length; y++) {
-            assertTrue("vertex " + y + " matches", item.placemark.getVertex(y).equals(points[y]));
+            assertTrue("vertex " + y + " matches", item.placemark.points[y].equals(points[y]));
         }
     }
 }

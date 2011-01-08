@@ -28,6 +28,15 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
         </classpath>
     </taskdef>
     
+    <!-- common properties -->
+    <property name="core.packfile" value="timemap.pack.js"/>
+    <property name="full.packfile" value="timemap_full.pack.js"/>
+    <property name="mxn.target" location="lib/mxn"/>
+    <property name="mxn.build.base" location="${mxn.dir}/build"/>
+    <property name="docs.dir" value="docs"/>
+    <property name="test.dir" value="tests"/>
+    <property name="build.suffix" value="_bld"/>
+    
     <!-- define timemap.js source files -->
     <path id="source.files">
         <fileset file="timemap.js"/>
@@ -39,16 +48,19 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
         <fileset file="loaders/xml.js"/>
         <fileset dir="loaders" includes="*.js"/>
     </path>
+    <path id="source.packfiles">
+        <fileset file="${full.packfile}"/>
+    </path>
     
-    <target name="mxn">
-    
-        <echo>Timemap.js: Building Mapstraction</echo>
-        <property name="mxn.target" location="lib/mxn"/>
-        <property name="mxn.build.base" location="${mxn.dir}/build"/>
-        
+    <target name="mxn-clean">
         <!-- delete old builds -->
         <delete dir="${mxn.build.base}" />
         <delete dir="${mxn.target}" />
+    </target>
+    
+    <target name="mxn" depends="mxn-clean">
+    
+        <echo>Timemap.js: Building Mapstraction</echo>
         
         <!-- run the Mapstraction build with a custom version -->
         <ant dir="${mxn.dir}">
@@ -60,10 +72,18 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
         
     </target>
     
-    <target name="docs">
+    <target name="docs-clean">
+        <delete includeemptydirs="true">
+            <fileset dir="${docs.dir}">
+                <include name="**/*"/>
+                <exclude name="jsdoc-toolkit/*"/>
+            </fileset>
+        </delete>
+    </target>
+    
+    <target name="docs" depends="docs-clean">
     
         <echo>Timemap.js: Creating Documentation</echo>
-        <property name="docs.dir" value="docs"/>
         
         <!-- define fileset -->
         <pathconvert 
@@ -81,9 +101,12 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
         
     </target>
     
+    <target name="compress-clean">
+        <delete file="${core.packfile}"/>
+        <delete file="${full.packfile}"/>
+    </target>
+    
     <target name="compress-core">
-        
-        <property name="core.packfile" value="timemap.pack.js"/>
         
         <echo>Timemap.js: Compressing Javascript to ${core.packfile}</echo>
         
@@ -95,11 +118,7 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
     
     <target name="compress-full">
         
-        <property name="full.packfile" value="timemap_full.pack.js"/>
-        
         <echo>Timemap.js: Compressing Javascript to ${full.packfile}</echo>
-        
-        <delete file="${full.packfile}"/>
         
         <for param="file">
             <path refid="source.files"/>
@@ -120,24 +139,37 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
         
     </target>
     
-    <target name="create-tests">
+    <target name="tests-clean">
+        <!-- delete previous build -->
+        <delete>
+            <fileset dir="${test.dir}" includes="*${build.suffix}.html"/>
+        </delete>
+    </target>
+    
+    <target name="tests" depends="tests-clean">
         
         <echo>Timemap.js: Creating Tests</echo>
         
-        <!-- set properties -->
-        <property name="test.dir" value="tests"/>
         <property name="template.dir" value="${test.dir}/templates"/>
         <property name="test.page.template" value="${template.dir}/testTemplate.html"/>
         <property name="test.suite.template" value="${template.dir}/testSuiteTemplate.html"/>
         <property name="test.page.placeholder" value="&lt;!--SCRIPTS--&gt;"/>
         <property name="test.suite.placeholder" value="// TESTPAGES"/>
-        <property name="build.suffix" value="_bld"/>
         <var name="test.suites" value=""/>
         
-        <!-- delete previous build -->
-        <delete>
-            <fileset dir="${test.dir}" includes="*${build.suffix}.html"/>
-        </delete>
+        
+        <!-- check for packed files if necessary -->
+        <if>
+            <and>
+                <istrue value="${tests.use.packed}"/>
+                <not>
+                    <available file="${full.packfile}"/>
+                </not>
+            </and>
+            <then>
+                <ant target="compress-full"/>
+            </then>
+        </if>
         
         <!-- do combinatorix -->
         <for list="${map.apis}" param="map.api">
@@ -204,8 +236,12 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
         <property name="mxn.test.url" value="${mxn.test.url.base}?(${map.api})" />
         <propertycopy property="timeline.test.url" from="timeline.test.url.${timeline.api}" />
         <!-- get timemap.js scripts from source path -->
+        <condition property="source.files.refid" value="source.packfiles" else="source.files">
+            <istrue value="${tests.use.packed}"/>
+        </condition>
+        <!-- munge source path into urls -->
         <pathconvert 
-            refid="source.files"
+            refid="${source.files.refid}"
             property="source.test.urls" 
             pathsep=",">
             <mapper type="glob" from="${basedir}*" to="..*"/>
@@ -217,10 +253,14 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
             regexp="\\"
             replace="/"
             global="true"/>
-        <!-- special case for dependencies -->
-        <condition property="dependency.url" value="loadTests.js," else="">
+        <!-- special cases for dependencies -->
+        <condition property="dependency.url" value="loadTests.js,">
             <contains string="${test.name}" substring="LoadTests"/>
         </condition>
+        <condition property="dependency.url" value="placemarkTests.js,">
+            <contains string="${test.name}" substring="PlacemarkTests"/>
+        </condition>
+        <property name="dependency.url" value=""/>
         <!-- put in script tags -->
         <property name="script.url.list" value="${map.test.url},${mxn.test.url},${timeline.test.url},${source.test.urls},${dependency.url}${test.name}.js"/>
         <for list="${script.url.list}" param="script.url">
@@ -255,9 +295,13 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
             token="timemapdir;"
             value="timemapdir='${curr.dir}';"/>
     </target>
+    
+    <!-- target suites -->
+    
+    <target name="compress" depends="compress-clean,compress-core,compress-full"/>
 
-    <target name="compress" depends="compress-core,compress-full"/>
-
-    <target name="build" depends="mxn,docs,compress"/>
+    <target name="clean" depends="compress-clean,mxn-clean,tests-clean,docs-clean"/>
+    
+    <target name="build" depends="mxn,docs,compress,tests"/>
 
 </project>
