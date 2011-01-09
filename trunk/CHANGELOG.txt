@@ -6,6 +6,15 @@
 CHANGELOG (see the SVN commit log for more detail)
 -------------------------------------------------------------------------------
 
+Version 2.0
+-----------
+- Removed dependency on Google Maps v2
+- Added dependencies on jQuery and Mapstraction
+- Refactored code to take advantage of jQuery
+- Added customized fork of Mapstraction library
+- Added support and tests for Google v2, Google v3, OpenLayers, and Bing Maps
+- Added ant build script
+
 Version 1.6
 -----------
 - Added progressive loader to easily load large datasets a little bit at a
