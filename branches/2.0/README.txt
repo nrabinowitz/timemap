@@ -6,8 +6,10 @@
 Timemap.js
 By Nick Rabinowitz (www.nickrabinowitz.com)
 
-The timemap.js library is intended to sync a SIMILE Timeline with a Google Map.
-Dependencies: Google Maps API v2, SIMILE Timeline v1.2 or later
+Timemap.js is intended to sync a SIMILE Timeline with a web-based map. 
+Depends on: jQuery, Mapstraction 2.x, a map provider of your choice, SIMILE Timeline v1.2 - 2.3.1. 
+Tested browsers: Firefox 3.x, Google Chrome, IE7, IE8
+Tested map providers: Google v2, Google v3, OpenLayers, Bing Maps
 Thanks to Jörn Clausen (http://www.oe-files.de) for initial concept and code.
 -------------------------------------------------------------------------------
 
@@ -30,20 +32,32 @@ Packed files (YUI Compressor)
   * timemap_full.pack.js:  The library and all helper files. This is the recommended file to use in production.
   * timemap.pack.js:       Just the core library file
 
+Examples (in examples/)
+  * I recommend starting with index.html, which describes each example.          
+  
 Documentation
   * docs/             Code documentation produced by jsdoc-toolkit
   * examples/         Example HTML code
   * LICENSE.txt       The MIT license
   * README.txt        This file
 
-Source files
+Supporting Libraries (in lib/)
+  * timeline-1.2.js     Packed version of Timeline v1.2 - smaller and faster than SIMILE version
+  * timeline-2.3.0.js   Packed version of Timeline v2.3.0 - *required* to use this version of Timeline,
+                        as the SIMILE version removes jQuery from the global namespace.
+  * mxn/*               Mapstraction library - fork found here: https://github.com/nrabinowitz/mxn
+                        This version is *required* for timemap.js, until my changes get pulled into the
+                        official library
+  * jquery-1.4.4.min.js jQuery. Just for convenience - use a CDN version if you prefer
+  * json2.pack.js       JSON library - usually not required
+  
+Source files (in src/)
   * timemap.js:       The core timemap.js library
   * param.js          Abstraction layer for parameters
   * state.js          Functions for loading and serializing timemap state
   * manipulation.js:  Additional functions to manipulate a timemap after loading
-  * export.js         Additional functions to help export a timemap as serialized JSON
 
-Loaders (in loaders/ directory)
+Loaders (in src/loaders/)
   * flickr.js         Loader for geotagged Flickr feeds
   * kml.js            Loader for KML files
   * georss.js         Loader for GeoRSS files
@@ -54,9 +68,8 @@ Loaders (in loaders/ directory)
   * metaweb.js        Loader for Metaweb data from freebase.com
 
 Other stuff
-  * edit/             Semi-experimental editing UI - depends on jQuery, may no longer work
+  * src/ext/          A couple of extension files I didn't think were worth being in the core library
   * images/           Simple icons for timeline events
-  * lib/              External libraries that may be useful, including compressed local versions of Timeline
   * tests/            jsUnit tests
   
 Comments welcomed at nick (at) nickrabinowitz (dot) com.

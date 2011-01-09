@@ -17,6 +17,7 @@
     var loaders = TimeMap.loaders;
 
 /**
+ * @class
  * JSONP loader - expects a service that takes a callback function name as
  * the last URL parameter.
  *
@@ -26,7 +27,6 @@
  * details on how to format the url, especially if the parameter is not called "callback".
  * This works for services like Google Spreadsheets, etc., and accepts remote URLs.</p>
  * @name TimeMap.loaders.jsonp
- * @class
  * @augments TimeMap.loaders.remote
  *
  * @example
@@ -58,7 +58,8 @@ loaders.jsonp = function(options) {
 };
 
 /**
- * JSON string loader factory - expects a plain JSON array.
+ * @class
+ * JSON string loader - expects a plain JSON array.
  *
  * <p>The json_string loader assumes an array of items in plain JSON, with no
  * callback function - this will require a local URL.</p>
