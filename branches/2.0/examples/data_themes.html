@@ -14,7 +14,7 @@
     <script type="text/javascript">
 
 var tm;
-function onLoad() {
+$(function() {
     // make some fake data
     var items = [], x;
     for (x=0; x<30; x++) {
@@ -68,16 +68,16 @@ function onLoad() {
         bandIntervals: 'dec'
     });
     // manipulate the timemap further here if you like
-}
+});
     </script>
-	<link href="examples.css" type="text/css" rel="stylesheet"/>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
     <style>
     div#timelinecontainer{ height: 250px; }
     div#mapcontainer{ height: 350px; }
     </style>
   </head>
 
-  <body onload="onLoad();" onunload="GUnload();">
+  <body onload="onLoad();">
     <div id="help">
     <h1>Data Themes Example</h1>
     In this example, we're setting the theme of each item based on data points in the item options. Note that this uses the ext/circle_icons.js script, not included in the packed files - but you could use the same techniques to set markers without it.

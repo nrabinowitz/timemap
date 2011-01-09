@@ -67,7 +67,7 @@ function setMapView(ge, map) {
 }
 
 var tm, ge;
-function onLoad() {
+$(function() {
 
     // this is our callback, for whichever initializes last
     function setListeners() { 
@@ -177,9 +177,9 @@ function onLoad() {
             if (ge) setListeners();
         }
     });
-}
+});
     </script>
-	<link href="examples.css" type="text/css" rel="stylesheet"/>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
     <link href="http://gmaps-utility-library-dev.googlecode.com/svn/trunk/extinfowindow/examples/css/simpleExampleWindow.css" type="text/css" rel="stylesheet"/>
     <style>
     div#timelinecontainer{ height: 100px; }
@@ -189,7 +189,7 @@ function onLoad() {
     </style>
   </head>
 
-  <body onload="onLoad();" onunload="GUnload();">
+  <body onload="onLoad();">
     <div id="help">
     <h1>Timemap Synchronized with Google Earth</h1>
     This example syncs a timemap with the Google Earth browser plugin. You have to do some timeout juggling in order to avoid a cyclical listener setup, but it seems to work reasonably well.</div>

@@ -16,7 +16,7 @@
 	<script type="text/javascript">
 
 var tm;
-function onLoad() {
+$(function() {
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
         timelineId: "timeline",     // Id of timeline div element (required) 
@@ -59,16 +59,16 @@ function onLoad() {
             }
         ]
     });
-}
+});
     </script>
-	<link href="examples.css" type="text/css" rel="stylesheet"/>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
     <style>
     div#timelinecontainer{ height: 200px; }
     div#mapcontainer{ height: 400px; }
     </style>
   </head>
 
-  <body onload="onLoad();" onunload="GUnload();">
+  <body onload="onLoad();">
     <div id="help">
     <h1>KML Example: Loading ExtendedData</h1>
     In this example, we're loading a KML file of meteorite impact structures with ExtendedData elements and using a custom template for the info window to display the loaded data. We're also using ExtendedData to load different themes for each item. <a href="http://code.google.com/apis/kml/documentation/extendeddata.html">Learn more about ExtendedData here.</a> (Okay, so the dates here are a little arbitrary - sometime soon I'll figure out a good way to display dates in the negative millions of years...)

@@ -12,7 +12,7 @@
     <script type="text/javascript">
 
 var tm;
-function onLoad() {
+$(function() {
 
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
@@ -83,16 +83,16 @@ function onLoad() {
         ]
     });
     // manipulate the timemap further here if you like
-}
+});
     </script>
-	<link href="examples.css" type="text/css" rel="stylesheet"/>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
     <style>
     div#timelinecontainer{ height: 300px; }
     div#mapcontainer{ height: 300px; }
     </style>
   </head>
 
-  <body onload="onLoad();" onunload="GUnload();">
+  <body onload="onLoad();">
     <div id="help">
     <h1>Basic Example, Google v2, Timeline v1.2</h1>
     In this example, we're just directly entering the data in the javascript, loading content into the info window in several different ways. (Note that Leonardo's window, which loads content via AJAX, may throw an error or not show up if you're viewing this locally, due to cross-site scripting restrictions.) This example uses the 1.2 version of the SIMILE Timeline API included with the timemap.js distribution, which has less functionality than later versions but is a much smaller download.

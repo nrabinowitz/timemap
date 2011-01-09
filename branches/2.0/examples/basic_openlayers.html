@@ -11,7 +11,7 @@
     <script type="text/javascript">
 
 var tm;
-function onLoad() {
+$(function() {
     
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
@@ -80,16 +80,16 @@ function onLoad() {
             Timeline.DateTime.CENTURY
         ]
     });
-}
+});
     </script>
-	<link href="examples.css" type="text/css" rel="stylesheet"/>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
     <style>
     div#timelinecontainer{ height: 300px; }
     div#mapcontainer{ height: 300px; }
     </style>
   </head>
 
-  <body onload="onLoad();" onunload="GUnload();">
+  <body onload="onLoad();">
     <div id="help">
     <h1>Basic Example, OpenLayers</h1>
     This is the basic example using the OpenLayers API. OpenLayers is (in my opinion) neither as robust nor as fast as some of the commercial map providers, but it's very flexible and you can run it locally if you have your own tilesets.

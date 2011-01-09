@@ -12,7 +12,7 @@
     <script type="text/javascript">
 
 var tm;
-function onLoad() {
+$(function() {
 
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
@@ -83,7 +83,7 @@ function onLoad() {
         ]
     });
     // manipulate the timemap further here if you like
-}
+});
     </script>
     <link href="examples.css" type="text/css" rel="stylesheet"/>
     <style>
@@ -99,7 +99,7 @@ function onLoad() {
     </style>
   </head>
 
-  <body onload="onLoad();" onunload="GUnload();">
+  <body onload="onLoad();">
     <div id="help">
     <h1>Basic Example, Bing Maps</h1>
     Same basic example, but using Microsoft's Bing Maps API. This behaves a little differently than the other APIs in Mapstraction, and info windows and click events might not be exactly what you expect. Also note that the CSS for the map container seems to be a little trickier here. To be honest, I haven't played around with this API much, but it seems to work okay.

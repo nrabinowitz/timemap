@@ -12,7 +12,7 @@
     <script type="text/javascript">
 
 var tm;
-function onLoad() {
+$(function() {
     
     // make a custom map style
     var styledMapType = new google.maps.StyledMapType([
@@ -107,16 +107,16 @@ function onLoad() {
     var gmap = tm.getNativeMap();
     gmap.mapTypes.set("white", styledMapType);
     gmap.setMapTypeId("white");
-}
+});
     </script>
-	<link href="examples.css" type="text/css" rel="stylesheet"/>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
     <style>
     div#timelinecontainer{ height: 300px; }
     div#mapcontainer{ height: 300px; }
     </style>
   </head>
 
-  <body onload="onLoad();" onunload="GUnload();">
+  <body onload="onLoad();">
     <div id="help">
     <h1>Basic Example, Google Maps v3</h1>
     This is the basic example using version 3 of the Google Maps API. This example demostrates how to set additional options on the map - in this case, a custom map style.

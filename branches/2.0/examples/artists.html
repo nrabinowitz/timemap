@@ -18,7 +18,7 @@
 
 var tm;
 
-function onLoad() {
+$(function() {
 
     // These two queries are in the Metaweb Query Language syntax.
     // See http://www.freebase.com/view/freebase/api for more details.
@@ -104,20 +104,20 @@ function onLoad() {
         ],
         bandInfo: [    
             {
-		             width:          "85%", 
-		             intervalUnit:   Timeline.DateTime.DECADE, 
-		             intervalPixels: 200,
-		             theme:          theme
-		    },
-		    {
-		             width:          "15%", 
-		             intervalUnit:   Timeline.DateTime.CENTURY, 
-		             intervalPixels: 300,
-		             overview:       true
+                     width:          "85%", 
+                     intervalUnit:   Timeline.DateTime.DECADE, 
+                     intervalPixels: 200,
+                     theme:          theme
+            },
+            {
+                     width:          "15%", 
+                     intervalUnit:   Timeline.DateTime.CENTURY, 
+                     intervalPixels: 300,
+                     overview:       true
             }
         ]
     });
-}
+});
 
 
 function transformPersonData(data) {
@@ -202,7 +202,7 @@ function toggleDataset(dsid, toggle) {
     </style>
   </head>
 
-  <body onload="onLoad();" onunload="GUnload();">
+  <body onload="onLoad();">
   
     <div id="fblicense"> <img src="http://www.freebase.com/api/trans/raw/freebase/attribution" style="float:left; margin-right: 5px" /> <div style="margin-left:30px"> Source: <a href="http://www.freebase.com" title="Freebase &ndash; The World's Database">Freebase</a> - The World's Database <br/> Freely licensed under <a href="http://www.freebase.com/view/common/license/cc_attribution_25">CC-BY</a>. </div> </div>
     

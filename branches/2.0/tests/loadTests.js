@@ -135,8 +135,8 @@ function testPolylinePlacemark() {
         new mxn.LatLonPoint(43.84, -109.86)
     ];
     assertNotUndefined("polyline points undefined", item.placemark.points);
-    assertEquals("vertex count matches", item.placemark.points.length, 3);
-    assertTrue("info point matches middle point", item.getInfoPoint().equals(points[1]));
+    assertEquals("vertex count wrong", 3, item.placemark.points.length);
+    assertTrue("info point doesn't match middle point", item.getInfoPoint().equals(points[1]));
     for (var x=0; x<points.length; x++) {
         assertTrue("vertex " + x + " matches", item.placemark.points[x].equals(points[x]));
     }

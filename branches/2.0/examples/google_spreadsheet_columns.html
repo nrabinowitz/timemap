@@ -16,7 +16,7 @@
 	<script type="text/javascript">
 
 var tm;
-function onLoad() {
+$(function() {
     
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
@@ -54,15 +54,15 @@ function onLoad() {
                                   "</table>"
                 }
             }
-        ], 
+        ],
         bandIntervals: [
             Timeline.DateTime.YEAR, 
             Timeline.DateTime.DECADE
         ]
     });
-};
+});
     </script>
-	<link href="examples.css" type="text/css" rel="stylesheet"/>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
     <style>
     div#timelinecontainer{
     width: 100%;
@@ -109,7 +109,7 @@ function onLoad() {
     </style>
   </head>
 
-  <body onload="onLoad();" onunload="GUnload();">
+  <body onload="onLoad();">
     <div id="help">
     <h1>Google Spreadsheet, Arbitrary Columns</h1>
     In this example, we're loading items from a Google Spreadsheet (<a href="http://spreadsheets.google.com/pub?key=tu0AB_xb1LtMTuQwIn_ExSQ" target=_blank>published here</a>). Additional arbitrary columns are loaded using the "extraColumns" setting, and displayed in the info window.
