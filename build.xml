@@ -32,6 +32,7 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
     <property name="src.dir" value="src"/>
     <property name="docs.dir" value="docs"/>
     <property name="test.dir" value="tests"/>
+    <property name="distro.dir" value="distro"/>
     <property name="core.packfile" value="timemap.pack.js"/>
     <property name="full.packfile" value="timemap_full.pack.js"/>
     <property name="mxn.target" location="lib/mxn"/>
@@ -174,8 +175,11 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
         <property name="test.suite.template" value="${template.dir}/testSuiteTemplate.html"/>
         <property name="test.page.placeholder" value="&lt;!--SCRIPTS--&gt;"/>
         <property name="test.suite.placeholder" value="// TESTPAGES"/>
-        <var name="test.suites" value=""/>
+        <!-- can be overridden in distro -->
+        <property name="tests.used.packed" value="${tests.used.packed.dev}"/>
+        <property name="mxn.test.url.base" value="${mxn.test.url.base.dev}"/>
         
+        <var name="test.suites" value=""/>
         
         <!-- check for packed files if necessary -->
         <if>
@@ -315,11 +319,56 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
             value="timemapdir='${curr.dir}';"/>
     </target>
     
+    
+    <target name="distro-clean">
+        <delete dir="${distro.dir}"/>
+    </target>
+    
+    <target name="distro" depends="distro-clean">
+        
+        <echo>Timemap.js: Creating Distribution Packages</echo>
+        
+        <!-- set distro-specific properties -->
+        <property name="tests.used.packed" value="${tests.used.packed.dev}"/>
+        <property name="mxn.test.url.base" value="${mxn.test.url.base.dev}"/>
+        <property name="distro.zip" value="${distro.dir}/timemap.${distro.version}.zip"/>
+        <property name="distro.tgz" value="${distro.dir}/timemap.${distro.version}.tar.gz"/>
+        <property name="distro.tmp.dir" value="${distro.dir}/tmp"/>
+        
+        <!-- update version. This may require an svn commit afterwards -->
+        <replaceregexp file="${src.dir}/timemap.js"
+               match="@version (.*)"
+               replace="@version ${distro.version}"
+               byline="true"/>
+        <replaceregexp file="${src.dir}/timemap.js"
+               match="TimeMap.version = &quot;(.*)&quot;;"
+               replace="TimeMap.version = &quot;${distro.version}&quot;;"
+               byline="true"/>
+               
+        <!-- run build -->
+        <ant target="build"/>
+        
+        <!-- make our build directory and copy files -->
+        <mkdir dir="${distro.dir}"/>
+        <mkdir dir="${distro.tmp.dir}"/>
+        
+        <copy todir="${distro.tmp.dir}">
+            <fileset dir=".">
+                <exclude name="distro/"/>
+                <exclude name="build.*"/>
+            </fileset>
+        </copy>
+        
+        <zip destfile="${distro.zip}" basedir="${distro.tmp.dir}"/>
+        <tar destfile="${distro.tgz}" basedir="${distro.tmp.dir}" compression="gzip"/>
+        
+    </target>
+    
     <!-- target suites -->
     
     <target name="compress" depends="compress-clean,compress-core,compress-full"/>
 
-    <target name="clean" depends="compress-clean,mxn-clean,tests-clean,docs-clean"/>
+    <target name="clean" depends="compress-clean,mxn-clean,tests-clean,docs-clean,distro-clean"/>
     
     <target name="build" depends="mxn,docs,compress,tests"/>
 

@@ -6,10 +6,21 @@
 /**
  * @overview
  *
- * <p>Timemap.js is intended to sync a SIMILE Timeline with a Google Map. 
- * Depends on: Mapstraction 2.x, a map provider of your choice, SIMILE Timeline v1.2 - 2.3.1. 
- * Thanks to Jorn Clausen (http://www.oe-files.de) for initial concept and code. 
+ * <p>Timemap.js is intended to sync a SIMILE Timeline with a web-based map. 
+ * Thanks to Jorn Clausen (http://www.oe-files.de) for initial concept and code.
  * Timemap.js is licensed under the MIT License (see <a href="../LICENSE.txt">LICENSE.txt</a>).</p>
+ * <p><strong>Depends on:</strong> 
+ *         <a href="http://jquery.com">jQuery</a>, 
+ *         <a href="https://github.com/nrabinowitz/mxn"> a customized version of Mapstraction 2.x<a>, 
+ *          a map provider of your choice, <a href="code.google.com/p/simile-widgets">SIMILE Timeline v1.2 - 2.3.1.</a>
+ * </p>
+ * <p><strong>Tested browsers:</strong> Firefox 3.x, Google Chrome, IE7, IE8</p>
+ * <p><strong>Tested map providers:</strong> 
+ *          <a href="http://code.google.com/apis/maps/documentation/javascript/v2/reference.html">Google v2</a>, 
+ *          <a href="http://code.google.com/apis/maps/documentation/javascript/reference.html">Google v3</a>, 
+ *          <a href="http://openlayers.org">OpenLayers</a>, 
+ *          <a href="http://msdn.microsoft.com/en-us/library/bb429565.aspx">Bing Maps</a>
+ * </p>
  * <ul>
  *     <li><a href="http://code.google.com/p/timemap/">Project Homepage</a></li>
  *     <li><a href="http://groups.google.com/group/timemap-development">Discussion Group</a></li>
@@ -18,7 +29,7 @@
  *
  * @name timemap.js
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
- * @version 2.0pre
+ * @version 2.0
  */
 
 // for jslint
@@ -155,7 +166,7 @@ TimeMap = function(tElement, mElement, options) {
  * @constant
  * @type String
  */
-TimeMap.version = "2.0pre";
+TimeMap.version = "2.0";
 
 /**
  * @name TimeMap.util
@@ -1102,7 +1113,7 @@ TimeMap.init({
          * Object to hold optional settings. Any setting for 
          * <a href="http://api.jquery.com/jQuery.ajax/">jQuery.ajax</a> should be set on this
          * object before load() is called.
-         * @name TimeMap.loaders.remote#url
+         * @name TimeMap.loaders.remote#opts
          * @type String
          */
         loader.opts = $.extend({}, options, {
