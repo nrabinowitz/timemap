@@ -1,6 +1,8 @@
 #summary Basic usage for the timemap.js library.
 #labels Featured
 
+*This page describes usage for version 1.x. Until I can update it, see the [http://timemap.googlecode.com/svn/tags/2.0/examples/index.html basic examples] for version 2.x usage.*
+
 This page outlines the basic usage of the timemap.js library. I've tried to make the API both as simple and as flexible as possible, though it's still geared towards developers who know Javascript fairly well. Make sure to check out the [http://code.google.com/p/timemap/source/browse/#svn/trunk/examples examples] - you may well get further faster by starting with the example code than by starting from scratch.
 
 *How to make a timemap*
@@ -74,4 +76,3 @@ function onLoad() {
 }}}
 
 And that's it! There are a ton of different possible options for the `TimeMap.init()` function - you can find a reference in the [http://code.google.com/p/timemap/source/browse/trunk/examples/timemapinit_usage.js examples/timemapinit_usage.js file] and the various example files. If you find you can't do what you want with `TimeMap.init()`, you can [CustomInitScript write your own initialization script] - but you can probably do a lot of what you want without going that far. If you run into problems, check out some thoughts on [TroubleShooting] or ask on the [http://groups.google.com/group/timemap-development Google Group].
-
