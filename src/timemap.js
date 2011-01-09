@@ -323,21 +323,21 @@ TimeMap.init = function(config) {
     tm.initTimeline(bands);
     
     // initialize load manager
-    var loadManager = TimeMap.loadManager;
+    var loadManager = TimeMap.loadManager,
+        callback = function() { 
+            loadManager.increment(); 
+        };
     loadManager.init(tm, config.datasets.length, config);
-    callback = function() { loadManager.increment(); };
     
     // load data!
     config.datasets.forEach(function(data, x) {
         var dataset = datasets[x], 
-            options, type, callback, loaderClass, loader;
-        // support some older syntax
-        options = data.data || data.options || {};
-        type = data.type || options.type;
-        // get loader class
-        loaderClass = (typeof type == 'string') ? TimeMap.loaders[type] : type;
-        // load with appropriate loader
-        loader = new loaderClass(options);
+            options = data.data || data.options || {}, 
+            type = data.type || options.type,
+            // get loader class
+            loaderClass = (typeof type == 'string') ? TimeMap.loaders[type] : type,
+            // load with appropriate loader
+            loader = new loaderClass(options);
         loader.load(dataset, callback);
     });
     // return timemap object for later manipulation
@@ -421,12 +421,12 @@ TimeMap.prototype = {
             resizeTimerID, x, painter;
         
         // synchronize & highlight timeline bands
-        bands.forEach(function(band) {
+        for (x=1; x < bands.length; x++) {
             if (opts.syncBands) {
-                band.syncWith = 0;
+                bands[x].syncWith = 0;
             }
-            band.highlight = true;
-        });
+            bands[x].highlight = true;
+        }
         
         /** 
          * The associated timeline object 
@@ -1931,7 +1931,6 @@ TimeMapItem = function(data, dataset) {
     
     // create cross-reference(s) and add placemark(s) if any exist
     placemarks.forEach(function(placemark) {
-        placemark = placemarks[i];
         placemark.item = item;
         // add listener to make placemark open when event is clicked
         placemark.click.addHandler(function() {
@@ -1956,7 +1955,9 @@ TimeMapItem = function(data, dataset) {
      * @name TimeMapItem#placemark
      * @type Marker|Polyline|Array
      */
-    item.placemark = placemarks.length == 1 ? placemarks[0] : placemarks;
+    item.placemark = placemarks.length == 1 ? placemarks[0] :
+        placemarks.length ? placemarks : 
+        null;
     
     // getter functions
     
@@ -1968,7 +1969,8 @@ TimeMapItem = function(data, dataset) {
      * @return {Object}     The native placemark object (e.g. GMarker)
      */
     item.getNativePlacemark = function() {
-        return placemark.proprietary_marker || placemark.proprietary_polyline;
+        var placemark = item.placemark;
+        return placemark && (placemark.proprietary_marker || placemark.proprietary_polyline);
     };
     
     /**
@@ -2286,25 +2288,13 @@ TimeMapItem.closeInfoWindowBasic = function() {
 /**
  * Get XML tag value as a string
  *
- * @param {XML Node} n      Node in which to look for tag
+ * @param {jQuery} n        jQuery object with context
  * @param {String} tag      Name of tag to look for
  * @param {String} [ns]     XML namespace to look in
  * @return {String}         Tag value as string
  */
 TimeMap.util.getTagValue = function(n, tag, ns) {
-    //XXX: is jQuery better here?
-    var str = "",
-        nList = TimeMap.util.getNodeList(n, tag, ns);
-    if (nList.length > 0) {
-        n = nList[0].firstChild;
-        // fix for extra-long nodes
-        // see http://code.google.com/p/timemap/issues/detail?id=36
-        while(n !== null) {
-            str += n.nodeValue;
-            n = n.nextSibling;
-        }
-    }
-    return str;
+    return util.getNodeList(n, tag, ns).first().text();
 };
 
 /**
@@ -2321,25 +2311,23 @@ TimeMap.util.nsMap = {};
  * Note: Expects any applicable namespaces to be mapped in
  * {@link TimeMap.util.nsMap}.
  *
- * @param {XML Node} n      Node in which to look for tag
- * @param {String} tag      Name of tag to look for
- * @param {String} [ns]     XML namespace to look in
- * @return {XML Node List}  List of nodes with the specified tag name
+ * @param {jQuery|XML Node} n   jQuery object with context, or XML node
+ * @param {String} tag          Name of tag to look for
+ * @param {String} [ns]         XML namespace to look in
+ * @return {jQuery}             jQuery object with the list of nodes found
  */
 TimeMap.util.getNodeList = function(n, tag, ns) {
-    // XXX: pretty sure jQuery can do this better. 
-    // jQ namespaces like this: http://stackoverflow.com/questions/853740/jquery-xml-parsing-with-namespaces
     var nsMap = TimeMap.util.nsMap;
-    if (ns === undefined) {
+    // get context node
+    n = n.jquery ? n[0] : n;
+    // no context
+    return !n ? $() :
         // no namespace
-        return n.getElementsByTagName(tag);
-    }
-    if (n.getElementsByTagNameNS && nsMap[ns]) {
-        // function and namespace both exist
-        return n.getElementsByTagNameNS(nsMap[ns], tag);
-    }
-    // no function, try the colon tag name
-    return n.getElementsByTagName(ns + ':' + tag);
+        !ns ? $(tag, n) :
+        // native function exists
+        (n.getElementsByTagNameNS && nsMap[ns]) ? $(n.getElementsByTagNameNS(nsMap[ns], tag)) :
+        // no function, try the colon tag name
+        $(n.getElementsByTagName(ns + ':' + tag));
 };
 
 /**

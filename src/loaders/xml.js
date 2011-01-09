@@ -31,8 +31,7 @@ TimeMap.loaders.xml = function(options) {
     var loader = new TimeMap.loaders.remote(options),
         tagMap = options.tagMap || {},
         extraTags = options.extraTags || [],
-        params = loader.params, 
-        paramName, tagName, x;
+        params = loader.params;
     
     /**
      * Load function for remote XML files.
@@ -88,10 +87,9 @@ TimeMap.loaders.xml = function(options) {
      * @param {XML NodeList} node   Parent node to look for tags in
      */
     loader.parseExtra = function(config, node) {
-        var extraParams = loader.extraParams, x;
-        for (x=0; x<extraParams.length; x++) {
-            extraParams[x].setConfigXML(config, node);
-        }
+        loader.extraParams.forEach(function(ep) {
+            ep.setConfigXML(config, node);
+        });
         node = null;
     };
     

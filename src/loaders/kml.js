@@ -52,16 +52,14 @@ TimeMap.init({
 TimeMap.loaders.kml = function(options) {
     var loader = new TimeMap.loaders.xml(options),
         tagMap = options.tagMap || {},
-        extendedData = options.extendedData || [],
-        tagName, x;
+        extendedData = options.extendedData || [];
     
     // Add ExtendedData parameters to extra params
-    for (x=0; x < extendedData.length; x++) {
-        tagName = extendedData[x];
+    extendedData.forEach(function(tagName) {
         loader.extraParams.push(
             new TimeMap.params.ExtendedDataParam(tagMap[tagName] || tagName, tagName)
         );
-    }
+    });
     
     // set custom parser
     loader.parse = TimeMap.loaders.kml.parse;
@@ -75,7 +73,9 @@ TimeMap.loaders.kml = function(options) {
  * @return {TimeMapItem Array}  Array of TimeMapItems
  */
 TimeMap.loaders.kml.parse = function(kmlnode) {
-    var items = [], data, placemarks;
+    var loader = this,
+        items = [], 
+        data, placemarks, nList, coords, pmobj;
     
     // get TimeMap utilty functions
     // assigning to variables should compress better
@@ -87,38 +87,29 @@ TimeMap.loaders.kml.parse = function(kmlnode) {
         formatDate = util.formatDate;
     
     // recursive time data search
-    var findNodeTime = function(n, data) {
-        var check = false;
-        // look for instant timestamp
-        var nList = getNodeList(n, "TimeStamp");
-        if (nList.length > 0) {
-            data.start = getTagValue(nList[0], "when");
-            check = true;
-        }
-        // otherwise look for span
-        else {
-            nList = getNodeList(n, "TimeSpan");
-            if (nList.length > 0) {
-                data.start = getTagValue(nList[0], "begin");
-                data.end = getTagValue(nList[0], "end") ||
-                    // unbounded spans end at the present time
-                    formatDate(new Date());
-                check = true;
-            }
+    function findNodeTime(n, data) {
+        var instantStart = getTagValue(n, "TimeStamp when"),
+            spanStart = getTagValue(n, "TimeSpan begin");
+        // set start if found
+        data.start = instantStart || spanStart;
+        // set end if span
+        if (spanStart) {
+            data.end = getTagValue(n, "TimeSpan end")  ||
+                // unbounded spans end at the present time
+                formatDate(new Date());
         }
         // try looking recursively at parent nodes
-        if (!check) {
-            var pn = n.parentNode;
-            if (pn.nodeName == "Folder" || pn.nodeName=="Document") {
-                findNodeTime(pn, data);
+        if (!data.start) {
+            var $pn = $(n).parent();
+            if ($pn.is("Folder") || $pn.is("Document")) {
+                findNodeTime($pn, data);
             }
-            pn = null;
         }
-    };
+    }
     
     // look for placemarks
-    placemarks = getNodeList(kmlnode, "Placemark");
-    placemarks.forEach(function(pm) {
+    getNodeList(kmlnode, "Placemark").each(function() {
+        var pm = this;
         data = { options: {} };
         // get title & description
         data.title = getTagValue(pm, "name");
@@ -126,44 +117,40 @@ TimeMap.loaders.kml.parse = function(kmlnode) {
         // get time information
         findNodeTime(pm, data);
         // find placemark(s)
-        var nList, coords, pmobj;
         data.placemarks = [];
         // look for marker
-        nList = getNodeList(pm, "Point");
-        nList.forEach(function(n) {
+        getNodeList(pm, "Point").each(function() {
             pmobj = { point: {} };
             // get lat/lon
-            coords = getTagValue(n, "coordinates");
+            coords = getTagValue(this, "coordinates");
             pmobj.point = makePoint(coords, 1);
             data.placemarks.push(pmobj);
         });
         // look for polylines
-        nList = getNodeList(pm, "LineString");
-        nList.forEach(function(n) {
+        getNodeList(pm, "LineString").each(function() {
             pmobj = { polyline: [] };
             // get lat/lon
-            coords = getTagValue(n, "coordinates");
+            coords = getTagValue(this, "coordinates");
             pmobj.polyline = makePoly(coords, 1);
             data.placemarks.push(pmobj);
         });
         // look for polygons
-        nList = getNodeList(pm, "Polygon");
-        nList.forEach(function(n) {
+        getNodeList(pm, "Polygon").each(function() {
             pmobj = { polygon: [] };
             // get lat/lon
-            coords = getTagValue(n, "coordinates");
+            coords = getTagValue(this, "coordinates");
             pmobj.polygon = makePoly(coords, 1);
             data.placemarks.push(pmobj);
         });
         // look for any extra tags and/or ExtendedData specified
-        this.parseExtra(data, pm);
+        loader.parseExtra(data, pm);
         
         items.push(data);
     });
     
     // look for ground overlays
-    placemarks = getNodeList(kmlnode, "GroundOverlay");
-    placemarks.forEach(function(pm) {
+    getNodeList(kmlnode, "GroundOverlay").each(function() {
+        var pm = this;
         data = { options: {}, overlay: {} };
         // get title & description
         data.title = getTagValue(pm, "name");
@@ -171,21 +158,20 @@ TimeMap.loaders.kml.parse = function(kmlnode) {
         // get time information
         findNodeTime(pm, data);
         // get image
-        nList = getNodeList(pm, "Icon");
-        data.overlay.image = getTagValue(nList[0], "href");
+        data.overlay.image = getTagValue(pm, "Icon href");
         // get coordinates
         nList = getNodeList(pm, "LatLonBox");
-        data.overlay.north = getTagValue(nList[0], "north");
-        data.overlay.south = getTagValue(nList[0], "south");
-        data.overlay.east = getTagValue(nList[0], "east");
-        data.overlay.west = getTagValue(nList[0], "west");
+        data.overlay.north = getTagValue(nList, "north");
+        data.overlay.south = getTagValue(nList, "south");
+        data.overlay.east = getTagValue(nList, "east");
+        data.overlay.west = getTagValue(nList, "west");
         // look for any extra tags and/or ExtendedData specified
-        this.parseExtra(data, pm);
+        loader.parseExtra(data, pm);
         items.push(data);
     });
     
     // clean up
-    kmlnode = placemarks = pm = nList = null;
+    kmlnode = null;
     
     return items;
 };
@@ -213,13 +199,13 @@ TimeMap.params.ExtendedDataParam = function(paramName, tagName) {
          */
         setConfigXML: function(config, node) {
             var util = TimeMap.util,
-                nList = util.getNodeList(node, "Data");
-            nList.forEach(function(n) {
-                if (n.getAttribute("name") == tagName) {
-                    this.setConfig(config, util.getTagValue(n, "value"));
+                param = this;
+            util.getNodeList(node, "Data").each(function() {
+                var $n = $(this);
+                if ($n.attr("name") == tagName) {
+                    param.setConfig(config, util.getTagValue($n, "value"));
                 }
             });
-            node = nList = null;
         },
         
         sourceName: tagName
