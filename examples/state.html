@@ -15,7 +15,7 @@
 	<script type="text/javascript">
 
 var tm;
-function onLoad() {
+$(function() {
     
     // If you include the state.js file (or use timemap_full.pack.js)
     // and have state information in the hash, it will be used for the configuration
@@ -71,16 +71,16 @@ function onLoad() {
             Timeline.DateTime.CENTURY
         ]
     });
-}
+});
     </script>
-	<link href="examples.css" type="text/css" rel="stylesheet"/>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
     <style>
     div#timelinecontainer{ height: 300px; }
     div#mapcontainer{ height: 300px; }
     </style>
   </head>
 
-  <body onload="onLoad();" onunload="GUnload();">
+  <body onload="onLoad();">
     <div id="help">
     <h1>Loading State from the URL</h1>
     In this example, we're getting the timemap state from the hash portion of the URL (the part after the "#"). This should work in all browsers the first time you come to the page, and in browsers that support the "onhashchange" event (IE8, FF3, Chrome), you should be able to use in-page links to set the state as well, e.g. <a href="#zoom=9&center=43.83,11.06&date=1500-01-21T12:15:49Z&selected=1">#zoom=9&amp;center=43.83,11.06&amp;date=1500-01-21T12:15:49Z&amp;selected=1</a> (if you're using another browser, try clicking this link then reloading).<br><br>

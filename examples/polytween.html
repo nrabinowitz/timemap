@@ -12,7 +12,7 @@
     <script src="../src/timemap.js" type="text/javascript"></script>
 	<script type="text/javascript">
 var tm;
-function onLoad() {
+$(function() {
 
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
@@ -111,16 +111,16 @@ function onLoad() {
         }
     });
     
-}
+});
     </script>
-	<link href="examples.css" type="text/css" rel="stylesheet"/>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
     <style>
     div#timelinecontainer{ height: 150px; }
     div#mapcontainer{ height: 450px; }
     </style>
   </head>
 
-  <body onload="onLoad();" onunload="GUnload();">
+  <body onload="onLoad();">
     <div id="help">
     <h1>On-the-fly Polygon Tweening</h1>
     This example uses a custom filter to smoothly tween a polygon between a beginning set of vertices and an ending set. I'm not sure I'd recommend this as an implementation - among other things it's rough on slow computers, especially as you increase the number of vertices - but you get the idea.

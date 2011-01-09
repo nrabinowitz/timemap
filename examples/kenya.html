@@ -16,7 +16,7 @@
 	<script type="text/javascript">
 
 var tm;
-function onLoad() {
+$(function() {
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
         timelineId: "timeline",     // Id of timeline div element (required) 
@@ -49,16 +49,16 @@ function onLoad() {
             }
         ]
     });
-}
+});
     </script>
-	<link href="examples.css" type="text/css" rel="stylesheet"/>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
     <style>
     div#timelinecontainer{ height: 310px; }
     div#mapcontainer{ height: 300px; }
     </style>
   </head>
 
-  <body onload="onLoad();" onunload="GUnload();">
+  <body onload="onLoad();">
     <div id="help">
     <h1>KML Dataset</h1>
     In this example, we're loading a KML file of reports of violence in Kenya (data courtesy <a href="http://www.ushahidi.com">www.ushahidi.com</a>, though it looks like the links no longer work). The bandInfo setting allows us to set a custom layout the timeline, and we've resized the timeline and map with CSS. (Note that some browsers will throw an error if if you're viewing this locally, due to cross-site scripting restrictions.)

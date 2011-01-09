@@ -13,7 +13,7 @@
 	<script type="text/javascript">
 
 var tm;
-function onLoad() {
+$(function() {
 
     tm = TimeMap.init({
                 mapId: "map",               // Id of map div element (required)
@@ -83,16 +83,16 @@ function onLoad() {
         ]
     });
     // manipulate the timemap further here if you like
-}
+});
     </script>
-	<link href="examples.css" type="text/css" rel="stylesheet"/>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
     <style>
     div#timelinecontainer{ height: 300px; }
     div#mapcontainer{ height: 300px; }
     </style>
   </head>
 
-  <body onload="onLoad();" onunload="GUnload();">
+  <body onload="onLoad();">
     <div id="help">
     <h1>Basic Example, Timeline 2.3.0</h1>
     This example uses the 2.3.0 version of the SIMILE Timeline API included with the timemap.js distribution. I recommend using this local version over the online API - among other things, it's been compressed and is much smaller than the SIMILE download. Timeline 2.3.0 has some more functionality than version 1.2, and fixes a few bugs, but is a much larger download, and you may find the earlier version quicker and simpler.

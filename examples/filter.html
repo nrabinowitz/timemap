@@ -14,7 +14,7 @@
 	<script type="text/javascript">
 
 var tm;
-function onLoad() {
+$(function() {
 
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
@@ -93,7 +93,7 @@ function onLoad() {
     // add our new function to the map and timeline filters
     tm.addFilter("map", TimeMap.filters.hasSelectedTag); // hide map markers on fail
     tm.addFilter("timeline", TimeMap.filters.hasSelectedTag); // hide timeline events on fail
-}
+});
 
 // filter function for tags
 TimeMap.filters.hasSelectedTag = function(item) {
@@ -132,7 +132,7 @@ function setSelectedTag(select) {
     </style>
   </head>
 
-  <body onload="onLoad();" onunload="GUnload();">
+  <body onload="onLoad();">
     <div id="help">
     <h1>Filters</h1>
     In this example, we've loaded a set of tags for each item, and can use this dropdown menu to filter based on tags:

@@ -56,6 +56,7 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
     <target name="jslint">
     
         <echo>Timemap.js: Running JSLint</echo>
+        <echo>(using ${jslint.js})</echo>
         
         <for param="file">
             <path refid="source.files"/>

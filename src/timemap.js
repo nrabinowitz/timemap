@@ -1528,7 +1528,7 @@ TimeMapTheme = function(options) {
         /** Opacity for polygon fill 
          * @name TimeMapTheme#fillOpacity 
          * @type Number */
-        fillOpacity:    0.25,
+        fillOpacity:    0.4,
         /** Text color for duration events 
          * @name TimeMapTheme#eventTextColor 
          * @type String */
@@ -1795,7 +1795,8 @@ TimeMapItem = function(data, dataset) {
     function createPlacemark(pdata) {
         var placemark = null, 
             type = "", 
-            point = null;
+            point = null,
+            pBounds;
         // point placemark
         if (pdata.point) {
             var lat = pdata.point.lat, 
@@ -1821,10 +1822,10 @@ TimeMapItem = function(data, dataset) {
         // polyline and polygon placemarks
         else if (pdata.polyline || pdata.polygon) {
             var points = [],
-                pBounds = new BoundingBox(),
                 isPolygon = "polygon" in pdata,
                 line = pdata.polyline || pdata.polygon,
-                x, ne, sw;
+                x;
+            pBounds = new BoundingBox();
             if (line && line.length) {
                 for (x=0; x<line.length; x++) {
                     point = new LatLonPoint(
@@ -1857,16 +1858,16 @@ TimeMapItem = function(data, dataset) {
             }
         } 
         // ground overlay placemark
-        // XXX: this isn't going to show/hide with mapstraction :(
         else if ("overlay" in pdata) {
-            sw = new LatLonPoint(
-                parseFloat(pdata.overlay.south), 
-                parseFloat(pdata.overlay.west)
-            );
-            ne = new LatLonPoint(
-                parseFloat(pdata.overlay.north), 
-                parseFloat(pdata.overlay.east)
-            );
+            var sw = new LatLonPoint(
+                    parseFloat(pdata.overlay.south), 
+                    parseFloat(pdata.overlay.west)
+                ),
+                ne = new LatLonPoint(
+                    parseFloat(pdata.overlay.north), 
+                    parseFloat(pdata.overlay.east)
+                );
+            pBounds = new BoundingBox(sw.lat, sw.lon, ne.lat, ne.lon);
             // add to visible bounds
             if (tm.opts.centerOnItems) {
                 bounds.extend(sw);
@@ -1874,9 +1875,8 @@ TimeMapItem = function(data, dataset) {
             }
             // mapstraction can only add it - there's no placemark type :(
             // XXX: look into extending Mapstraction here
-            tm.map.addImageOverlay("img" + (new Date()).getTime(), pdata.overlay.image, 
+            tm.map.addImageOverlay("img" + (new Date()).getTime(), pdata.overlay.image, theme.lineOpacity,
                 sw.lon, sw.lat, ne.lon, ne.lat);
-            // placemark = new GGroundOverlay(pdata.overlay.image, overlayBounds);
             type = "overlay";
             point = pBounds.getCenter();
         }
@@ -1910,11 +1910,13 @@ TimeMapItem = function(data, dataset) {
         // create the placemark
         var p = createPlacemark(pdata);
         // check that the placemark was valid
-        if (p && p.placemark) {
+        if (p) {
             // take the first point and type as a default
             point = point || p.point;
             type = type || p.type;
-            placemarks.push(p.placemark);
+            if (p.placemark) {
+                placemarks.push(p.placemark);
+            }
         }
     });
     // set type, overriding for arrays
@@ -2147,9 +2149,7 @@ TimeMapItem.prototype = {
             }
             item.placemarkVisible = false;
         }
-        if (item.isSelected()) {
-            item.closeInfoWindow();
-        }
+        item.closeInfoWindow();
     },
 
     /** 
@@ -2222,23 +2222,19 @@ TimeMapItem.openInfoWindowBasic = function() {
         item.dataset.timemap.scrollToDate(item.event.getStart());
     }
     // open window
-    // XXX: Probably this should always open from the info point, and set tm.selected
     if (item.getType() == "marker") {
         item.placemark.setInfoBubble(html);
         item.placemark.openBubble();
         // deselect when window is closed
-        // XXX: this should be map-level, defined in TimeMap#initMap,
-        // but depends on Mapstraction support for map-level windows
         item.closeHandler = item.placemark.closeInfoBubble.addHandler(function() { 
             // deselect
-            tm.setSelected(null);
+            item.dataset.timemap.setSelected(null);
             // kill self
             item.placemark.closeInfoBubble.removeHandler(item.closeHandler);
         });
     } else {
-        // XXX: This is going to fail with Mapstraction
-        // item.map.openInfoWindowHtml(item.getInfoPoint(), html);
-        console.log("If Mapstraction supported polylines, I'd be opening a window now");
+        item.map.openBubble(item.getInfoPoint(), html);
+        item.map.tmBubbleItem = item;
     }
 };
 
@@ -2257,7 +2253,7 @@ TimeMapItem.openInfoWindowAjax = function() {
     // fall back on basic function if content is loaded or URL is missing
     item.openInfoWindow = function() {
         TimeMapItem.openInfoWindowBasic.call(item);
-        tm.setSelected(item);
+        item.dataset.timemap.setSelected(item);
     };
     item.openInfoWindow();
 };
@@ -2270,14 +2266,10 @@ TimeMapItem.closeInfoWindowBasic = function() {
     if (item.getType() == "marker") {
         item.placemark.closeBubble();
     } else {
-        // console.log("If Mapstraction supported polylines, I'd be closing a window now");
-        /* XXX: this depends on a map-based info window, not available from mxn
-        var infoWindow = item.map.getInfoWindow();
-        // close info window if its point is the same as this item's point
-        // XXX: If we can reliably set tm.selected, that would be preferable here
-        if (infoWindow.getPoint() == item.getInfoPoint() && !infoWindow.isHidden()) {
-            item.map.closeInfoWindow();
-        } */
+        if (item == item.map.tmBubbleItem) {
+            item.map.closeBubble();
+            item.map.tmBubbleItem = null;
+        }
     }
 };
 
@@ -2383,10 +2375,10 @@ TimeMap.util.makePoint = function(coords, reversed) {
  */
 TimeMap.util.makePoly = function(coords, reversed) {
     var poly = [], 
-        latlon,
+        latlon, x,
         coordArr = $.trim(coords).split(/[\r\n\f ]+/);
     // loop through coordinates
-    for (var x=0; x<coordArr.length; x++) {
+    for (x=0; x<coordArr.length; x++) {
         latlon = (coordArr[x].indexOf(',') > 0) ?
             // comma-separated coordinates (KML-style lon/lat)
             coordArr[x].split(",") :

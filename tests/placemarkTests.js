@@ -25,9 +25,9 @@ function testAllPlacemarksExist() {
 function testPolyVertices() {
     var ds = tm.datasets["test"];
     var polyline = ds.getItems()[1].placemark;
-    assertEquals("polyline has 3 vertices", 3, polyline.getVertexCount());
+    assertEquals("polyline vertex count wrong", 3, polyline.points.length);
     var polygon = ds.getItems()[2].placemark;
-    assertEquals("polyline has 6 vertices", 6, polygon.getVertexCount());
+    assertEquals("polyline vertex count wrong", 6, polygon.points.length);
 }
 
 function testMultiplePlacemarks() {
@@ -42,10 +42,10 @@ function testMultiplePlacemarks() {
         assertEquals(item.getTitle() + " has 4 placemarks", 4, item.placemark.length);
     }
     item = ds.getItems()[3];
-    point = new GLatLng(23.456, 12.345);
+    point = new mxn.LatLonPoint(23.456, 12.345);
     assertTrue("First placemark point used", point.equals(item.getInfoPoint()));
     item = ds.getItems()[4];
-    point = new GLatLng(43.730473, 11.257896);
+    point = new mxn.LatLonPoint(43.730473, 11.257896);
     assertTrue("Option info point used", point.equals(item.getInfoPoint()));
 }
 
