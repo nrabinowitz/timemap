@@ -6,13 +6,15 @@
     <title>Filter Example</title>
     <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w"
       type="text/javascript"></script>
+    <script type="text/javascript" src="../lib/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript" src="../lib/mxn/mxn.js?(google)"></script>
     <script type="text/javascript" src="../lib/timeline-2.3.0.js"></script>
-    <script src="../timemap.js" type="text/javascript"></script>
-    <script src="../manipulation.js" type="text/javascript"></script>
+    <script src="../src/timemap.js" type="text/javascript"></script>
+    <script src="../src/manipulation.js" type="text/javascript"></script>
 	<script type="text/javascript">
 
 var tm;
-function onLoad() {
+$(function() {
 
     tm = TimeMap.init({
         mapId: "map",               // Id of map div element (required)
@@ -91,7 +93,7 @@ function onLoad() {
     // add our new function to the map and timeline filters
     tm.addFilter("map", TimeMap.filters.hasSelectedTag); // hide map markers on fail
     tm.addFilter("timeline", TimeMap.filters.hasSelectedTag); // hide timeline events on fail
-}
+});
 
 // filter function for tags
 TimeMap.filters.hasSelectedTag = function(item) {
@@ -130,7 +132,7 @@ function setSelectedTag(select) {
     </style>
   </head>
 
-  <body onload="onLoad();" onunload="GUnload();">
+  <body onload="onLoad();">
     <div id="help">
     <h1>Filters</h1>
     In this example, we've loaded a set of tags for each item, and can use this dropdown menu to filter based on tags:
