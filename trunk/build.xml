@@ -1,32 +1,27 @@
 <?xml version="1.0"?>
 <project name="timemap" default="build">
 <!--
-You will need to create your own build.properties file. Sample file contents:
-
-# core settings
-mxn.dir=../mxn
-yuicompressor.jar=C:/Program Files/yuicompressor/build/yuicompressor.jar
-jsdoc-toolkit.dir=C:/Program Files/jsdoc-toolkit
-
-# api settings for tests
-mxn.test.url.base=../lib/mxn/mxn.js
-timeline.test.url.12=../lib/timeline-1.2.js
-timeline.test.url.230=../lib/timeline-2.3.0.js
-map.test.url.google=http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w
-map.test.url.googlev3=http://maps.google.com/maps/api/js?sensor=false
-map.test.url.openlayers=openlayers': 'http://openlayers.org/api/OpenLayers.js
-map.test.url.yahoo=http://api.maps.yahoo.com/ajaxymap?v=3.8&appid=MJmMF_XV34Fbt9iTJluolVk7T80lw8lD.lykqztF7S9F8szGFR01um.Rg5Svbsg.eMmZ
-map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=6
-
+You will need to create your own build.properties file. 
+See build.properties.sample for example contents.
 -->
     <property name="props" value="build.properties"/>
     <property file="${props}"/>
     
+	<!-- define ant-contrib tasks -->
     <taskdef resource="net/sf/antcontrib/antlib.xml">
         <classpath>
             <pathelement location="lib/ant-contrib-1.0b3.jar"/>
         </classpath>
     </taskdef>
+	
+	<!-- define svnant tasks -->
+	<typedef resource="org/tigris/subversion/svnant/svnantlib.xml">
+		<classpath>
+			<fileset dir= "${ant.home}/lib/svnant-1.3.0" >
+				<include name= "*.jar" />
+			</fileset>
+		</classpath>
+	</typedef>
     
     <!-- common properties -->
     <property name="src.dir" value="src"/>
@@ -72,13 +67,13 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
     
     </target>
     
-    <target name="mxn-clean">
+    <target name="clean-mxn">
         <!-- delete old builds -->
         <delete dir="${mxn.build.base}" />
         <delete dir="${mxn.target}" />
     </target>
     
-    <target name="mxn" depends="mxn-clean">
+    <target name="mxn" depends="clean-mxn">
     
         <echo>Timemap.js: Building Mapstraction</echo>
         
@@ -92,7 +87,7 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
         
     </target>
     
-    <target name="docs-clean">
+    <target name="clean-docs">
         <delete includeemptydirs="true">
             <fileset dir="${docs.dir}">
                 <include name="**/*"/>
@@ -101,7 +96,7 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
         </delete>
     </target>
     
-    <target name="docs" depends="docs-clean">
+    <target name="docs" depends="clean-docs">
     
         <echo>Timemap.js: Creating Documentation</echo>
         
@@ -121,7 +116,7 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
         
     </target>
     
-    <target name="compress-clean">
+    <target name="clean-compress">
         <delete file="${core.packfile}"/>
         <delete file="${full.packfile}"/>
     </target>
@@ -159,14 +154,14 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
         
     </target>
     
-    <target name="tests-clean">
+    <target name="clean-tests">
         <!-- delete previous build -->
         <delete>
             <fileset dir="${test.dir}" includes="*${build.suffix}.html"/>
         </delete>
     </target>
     
-    <target name="tests" depends="tests-clean">
+    <target name="tests" depends="clean-tests">
         
         <echo>Timemap.js: Creating Tests</echo>
         
@@ -320,11 +315,26 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
     </target>
     
     
-    <target name="distro-clean">
+    <target name="clean-distro">
         <delete dir="${distro.dir}"/>
     </target>
     
-    <target name="distro" depends="distro-clean">
+    <target name="update-version">
+        
+        <echo>Timemap.js: Updating version to ${distro.version}</echo>
+        
+        <!-- update version number. This may require an svn commit afterwards -->
+        <replaceregexp file="${src.dir}/timemap.js"
+               match="@version (.*)"
+               replace="@version ${distro.version}"
+               byline="true"/>
+        <replaceregexp file="${src.dir}/timemap.js"
+               match="TimeMap.version = &quot;(.*)&quot;;"
+               replace="TimeMap.version = &quot;${distro.version}&quot;;"
+               byline="true"/>
+    </target>
+    
+    <target name="distro" depends="clean-distro, update-version">
         
         <echo>Timemap.js: Creating Distribution Packages</echo>
         
@@ -334,16 +344,6 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
         <property name="distro.zip" value="${distro.dir}/timemap.${distro.version}.zip"/>
         <property name="distro.tgz" value="${distro.dir}/timemap.${distro.version}.tar.gz"/>
         <property name="distro.tmp.dir" value="${distro.dir}/tmp"/>
-        
-        <!-- update version. This may require an svn commit afterwards -->
-        <replaceregexp file="${src.dir}/timemap.js"
-               match="@version (.*)"
-               replace="@version ${distro.version}"
-               byline="true"/>
-        <replaceregexp file="${src.dir}/timemap.js"
-               match="TimeMap.version = &quot;(.*)&quot;;"
-               replace="TimeMap.version = &quot;${distro.version}&quot;;"
-               byline="true"/>
                
         <!-- run build -->
         <ant target="build"/>
@@ -366,9 +366,9 @@ map.test.url.microsoft=http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=
     
     <!-- target suites -->
     
-    <target name="compress" depends="compress-clean,compress-core,compress-full"/>
+    <target name="compress" depends="clean-compress,compress-core,compress-full"/>
 
-    <target name="clean" depends="compress-clean,mxn-clean,tests-clean,docs-clean,distro-clean"/>
+    <target name="clean" depends="clean-compress,clean-mxn,clean-tests,clean-docs,clean-distro"/>
     
     <target name="build" depends="mxn,docs,compress,tests"/>
 
