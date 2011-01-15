@@ -394,17 +394,6 @@ TimeMap.prototype = {
          * @return {Object}     The native map object (e.g. GMap2)
          */
         tm.getNativeMap = function() { return map.getMap(); };
-        
-        /** 
-         * Bounds of the map 
-         * @name TimeMap#mapBounds
-         * @type BoundingBox
-         */
-        tm.mapBounds = options.mapZoom > 0 ?
-            // if the zoom has been set, use the map bounds
-            map.getBounds() :
-            // otherwise, start from scratch
-            new BoundingBox();
 
     },
 
@@ -620,13 +609,10 @@ TimeMap.prototype = {
         tm.datasets[id] = dataset;
         // add event listener
         if (tm.opts.centerOnItems) {
-            var map = tm.map, 
-                bounds = tm.mapBounds;
+            var map = tm.map;
             $(dataset).bind(E_ITEMS_LOADED, function() {
                 // determine the center and zoom level from the bounds
-                if (!bounds.isEmpty()) {
-                    map.setBounds(bounds);
-                }
+                map.autoCenterAndZoom();
             });
         }
         return dataset;
@@ -1448,11 +1434,13 @@ TimeMapDataset.prototype = {
      * @see TimeMapDataset#loadItem
      */
     loadItems: function(data, transform) {
-        var ds = this;
-        data.forEach(function(item) {
-            ds.loadItem(item, transform);
-        });
-        $(ds).trigger(E_ITEMS_LOADED);
+		if (data) {
+			var ds = this;
+			data.forEach(function(item) {
+				ds.loadItem(item, transform);
+			});
+			$(ds).trigger(E_ITEMS_LOADED);
+		}
     },
 
     /**
@@ -1718,7 +1706,6 @@ TimeMapItem = function(data, dataset) {
         title = options.title = data.title || 'Untitled',
         event = null,
         instant,
-        bounds = tm.mapBounds,
         // empty containers
         placemarks = [], 
         pdataArr = [], 
@@ -1820,10 +1807,6 @@ TimeMapItem = function(data, dataset) {
                 parseFloat(lat), 
                 parseFloat(lon)
             );
-            // add point to visible map bounds
-            if (options.centerOnItems) {
-                bounds.extend(point);
-            }
             // create marker
             placemark = new Marker(point);
             placemark.setLabel(pdata.title);
@@ -1846,10 +1829,6 @@ TimeMapItem = function(data, dataset) {
                     points.push(point);
                     // add point to visible map bounds
                     pBounds.extend(point);
-                }
-                if (options.centerOnItems) {
-                    bounds.extend(pBounds.getNorthEast());
-                    bounds.extend(pBounds.getSouthWest());
                 }
                 // make polyline or polygon
                 placemark = new Polyline(points);
@@ -1879,11 +1858,6 @@ TimeMapItem = function(data, dataset) {
                     parseFloat(pdata.overlay.east)
                 );
             pBounds = new BoundingBox(sw.lat, sw.lon, ne.lat, ne.lon);
-            // add to visible bounds
-            if (tm.opts.centerOnItems) {
-                bounds.extend(sw);
-                bounds.extend(ne);
-            }
             // mapstraction can only add it - there's no placemark type :(
             // XXX: look into extending Mapstraction here
             tm.map.addImageOverlay("img" + (new Date()).getTime(), pdata.overlay.image, theme.lineOpacity,
