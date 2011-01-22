@@ -371,5 +371,7 @@ See build.properties.sample for example contents.
     <target name="clean" depends="clean-compress,clean-mxn,clean-tests,clean-docs,clean-distro"/>
     
     <target name="build" depends="mxn,docs,compress,tests"/>
-
+    
+    <target name="post-distro" depends="update-version,clean-distro,build"/>
+    
 </project>
