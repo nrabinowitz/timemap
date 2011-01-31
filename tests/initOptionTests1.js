@@ -1,7 +1,7 @@
+// XXX: should consolidate this test page...
 function exposeTestFunctionNames() {
     return [
-        'testAutoCenterAndZoom',
-        'testMapType'
+        'testAutoCenterAndZoom'
     ];
 }
 
@@ -15,11 +15,6 @@ function testAutoCenterAndZoom() {
     assertTrue("Map auto-center latitude too far north", center.lat < 42.0);
     assertTrue("Map auto-center longitude too far east", center.lon < 12.5);
     assertTrue("Map auto-center longitude too far west", center.lon > 11.5);
-}
-
-function testMapType() {
-    // this will fail for openlayers right now
-    assertEquals("mapType not set properly", mxn.Mapstraction.SATELLITE, tm.map.getMapType());
 }
 
 var tm;

@@ -3,6 +3,7 @@
 <!--
 You will need to create your own build.properties file. 
 See build.properties.sample for example contents.
+Also required: ant-contrib, svnant
 -->
     <property name="props" value="build.properties"/>
     <property file="${props}"/>
@@ -17,7 +18,7 @@ See build.properties.sample for example contents.
 	<!-- define svnant tasks -->
 	<typedef resource="org/tigris/subversion/svnant/svnantlib.xml">
 		<classpath>
-			<fileset dir= "${ant.home}/lib/svnant-1.3.0" >
+			<fileset dir= "${svnant.dir}" >
 				<include name= "*.jar" />
 			</fileset>
 		</classpath>
@@ -30,8 +31,8 @@ See build.properties.sample for example contents.
     <property name="distro.dir" value="distro"/>
     <property name="core.packfile" value="timemap.pack.js"/>
     <property name="full.packfile" value="timemap_full.pack.js"/>
-    <property name="mxn.target" location="lib/mxn"/>
-    <property name="mxn.build.base" location="${mxn.dir}/build"/>
+    <property name="mxn.target" value="lib/mxn"/>
+    <property name="mxn.build.base" value="${mxn.dir}/build"/>
     <property name="build.suffix" value="_bld"/>
     
     <!-- define timemap.js source files -->
@@ -339,8 +340,8 @@ See build.properties.sample for example contents.
         <echo>Timemap.js: Creating Distribution Packages</echo>
         
         <!-- set distro-specific properties -->
-        <property name="tests.used.packed" value="${tests.used.packed.dev}"/>
-        <property name="mxn.test.url.base" value="${mxn.test.url.base.dev}"/>
+        <property name="tests.used.packed" value="${tests.used.packed.distro}"/>
+        <property name="mxn.test.url.base" value="${mxn.test.url.base.distro}"/>
         <property name="distro.zip" value="${distro.dir}/timemap.${distro.version}.zip"/>
         <property name="distro.tgz" value="${distro.dir}/timemap.${distro.version}.tar.gz"/>
         <property name="distro.tmp.dir" value="${distro.dir}/tmp"/>
@@ -354,7 +355,7 @@ See build.properties.sample for example contents.
         
         <copy todir="${distro.tmp.dir}">
             <fileset dir=".">
-                <exclude name="distro/"/>
+                <exclude name="${distro.dir}/"/>
                 <exclude name="build.*"/>
             </fileset>
         </copy>
@@ -362,6 +363,44 @@ See build.properties.sample for example contents.
         <zip destfile="${distro.zip}" basedir="${distro.tmp.dir}"/>
         <tar destfile="${distro.tgz}" basedir="${distro.tmp.dir}" compression="gzip"/>
         
+    </target>
+    
+    <target name="tag-and-release" depends="distro">
+        
+        <echo>Timemap.js: Tag and Release Version ${distro.version}</echo>
+        
+        <property name="svn.repo.trunk" value="${svn.repo.base}/trunk"/>
+        <property name="svn.repo.tag" value="${svn.repo.base}/tags/${distro.version}"/>
+        <property name="tag.dir" value="${distro.dir}/${distro.version}"/>
+        
+        <!-- populate properties, check if modified -->
+        <svn>
+            <wcVersion path="" prefix="svn."/>
+        </svn>
+        <!--
+        <fail if="${svn.modified}" message="The working copy is modified - shouldn't you commit first?"/>
+        -->
+        
+        <mkdir dir="${tag.dir}"/>
+        
+        <!-- XXX: Make tag -->
+        
+        <!-- get tag -->
+        <svn>
+            <checkout url="${svn.repo.trunk}" destPath="${tag.dir}"/>
+        </svn>
+        
+        <!-- copy files to tag dir -->
+        <copy todir="${tag.dir}/${mxn.target}">
+            <fileset dir="${mxn.target}"/>
+        </copy>
+        <copy todir="${tag.dir}/${docs.dir}">
+            <fileset dir="${docs.dir}"/>
+        </copy>
+        <copy todir="${tag.dir}/${test.dir}">
+            <fileset dir="${test.dir}" includes="*${build.suffix}.html"/>
+        </copy>
+    
     </target>
     
     <!-- target suites -->

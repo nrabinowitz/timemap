@@ -168,8 +168,8 @@ function setUpPage() {
                           "start" : "1980-01-02",
                           "end" : "1990-01-02",
                           "point" : {
-                              "lat" : 23.456,
-                              "lon" : 12.345
+                              "lat" : 40.0,
+                              "lon" : 12.0
                            },
                           "title" : "Test Event",
                           "options" : {

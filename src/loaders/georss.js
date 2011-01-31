@@ -68,7 +68,7 @@ TimeMap.loaders.georss = function(options) {
  * @return {TimeMapItem[]}  Array of TimeMapItems
  */
 TimeMap.loaders.georss.parse = function(node) {
-    var items = [], data, placemarks, pm, i;
+    var items = [], data, placemarks, pm, i, nList;
     
     // get TimeMap utilty functions
     // assigning to variables should compress better
@@ -100,7 +100,7 @@ TimeMap.loaders.georss.parse = function(node) {
         tName = (feedType == 'rss' ? "description" : "summary");
         data.options.description = getTagValue(pm, tName);
         // get time information, allowing KML-namespaced time elements
-        var nList = getNodeList(pm, "TimeStamp", "kml");
+        nList = getNodeList(pm, "TimeStamp", "kml");
         if (nList.length > 0) {
             data.start = getTagValue(nList[0], "when", "kml");
         }
