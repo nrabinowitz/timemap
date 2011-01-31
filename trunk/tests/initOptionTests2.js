@@ -1,6 +1,7 @@
 function exposeTestFunctionNames() {
     return [
-        'testManualCenterAndZoom'
+        'testManualCenterAndZoom',
+        'testMapType'
     ];
 }
 
@@ -14,6 +15,11 @@ function testManualCenterAndZoom() {
     assertTrue("Map zoom wrong", tm.map.getZoom() == 8);
 }
 
+function testMapType() {
+    // this will fail for openlayers right now
+    assertEquals("mapType not set properly", mxn.Mapstraction.SATELLITE, tm.map.getMapType());
+}
+
 var tm;
 // page setup script
 function setUpPage() {
@@ -23,7 +29,8 @@ function setUpPage() {
         options: {
             centerOnItems: false,
             mapZoom: 8,
-            mapCenter: new mxn.LatLonPoint(38, -123)
+            mapCenter: new mxn.LatLonPoint(38, -123),
+            mapType: 'satellite'
         },
         datasets: [
             {

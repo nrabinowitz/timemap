@@ -6,6 +6,7 @@ yuicompressor.jar=C:/Program Files/yuicompressor/build/yuicompressor.jar
 jsdoc-toolkit.dir=C:/Program Files/jsdoc-toolkit
 rhino.jar=${mxn.dir}/tools/rhino/js.jar
 jslint.js=${mxn.dir}/tools/jslint/jslint.js
+svnant.dir=C:/Program Files/apache-ant/lib/svnant-1.3.0
 
 # settings for tests
 test.names =basicLoadTests,jsonLoadTests,jsonpLoadTests,kmlLoadTests,\
