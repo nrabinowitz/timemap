@@ -112,7 +112,8 @@ TimeMap = function(tElement, mElement, options) {
             dateParser:         'hybrid',
             checkResize:        true,
             selected:           -1
-        };
+        }, 
+        mapCenter;
     
     // save DOM elements
     /**
@@ -148,6 +149,11 @@ TimeMap = function(tElement, mElement, options) {
      */
     tm.opts = options = $.extend(defaults, options);
     
+    // allow map center to be specified as a point object
+    mapCenter = options.mapCenter;
+    if (mapCenter.constructor != LatLonPoint && mapCenter.lat) {
+        options.mapCenter = new LatLonPoint(mapCenter.lat, mapCenter.lon);
+    }
     // allow map types to be specified by key
     options.mapType = util.lookup(options.mapType, TimeMap.mapTypes);
     // allow map filters to be specified by key
@@ -208,8 +214,8 @@ var util = TimeMap.util = {};
  *                                                  more details.
  * @param {String} [config.datasets[x].id]          Optional id for the dataset in the {@link TimeMap#datasets}
  *                                                  object, for future reference; otherwise "ds"+x is used
- * @param {String} [config.datasets[x][...]]         Other options for the {@link TimeMapDataset} object
- * @param {String|Array} [config.bandIntervals]     Intervals for the two default timeline bands. Can either be an 
+ * @param {String} [config.datasets[x][...]]        Other options for the {@link TimeMapDataset} object
+ * @param {String|Array} [config.bandIntervals=wk]  Intervals for the two default timeline bands. Can either be an 
  *                                                  array of interval constants or a key in {@link TimeMap.intervals}
  * @param {Object[]} [config.bandInfo]              Array of configuration objects for Timeline bands, to be passed to
  *                                                  Timeline.createBandInfo (see the <a href="http://code.google.com/p/simile-widgets/wiki/Timeline_GettingStarted">Timeline Getting Started tutorial</a>).
@@ -221,8 +227,8 @@ var util = TimeMap.util = {};
  *                                                  (this will override dataDisplayedFunction and scrollTo)
  * @param {Function} [config.dataDisplayedFunction] Function to be run as soon as all datasets are loaded and 
  *                                                  displayed on the map and timeline
- * @param {String|Date} [config.scrollTo]           Date to scroll to once data is loaded - see 
- *                                                  {@link TimeMap.parseDate} for options; default is "earliest"
+ * @param {String|Date} [config.scrollTo=earliest]  Date to scroll to once data is loaded - see 
+ *                                                  {@link TimeMap.parseDate} for options
  * @return {TimeMap}                                The initialized TimeMap object
  */
 TimeMap.init = function(config) {
@@ -312,6 +318,7 @@ TimeMap.init = function(config) {
                 band.eventSource = eventSource;
             }
         });
+        bands = config.bands;
     }
     // otherwise, make bands from band info
     else {
