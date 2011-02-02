@@ -400,6 +400,12 @@ Also required: ant-contrib, svnant
         <copy todir="${tag.dir}/${test.dir}">
             <fileset dir="${test.dir}" includes="*${build.suffix}.html"/>
         </copy>
+        
+        <!-- XXX: svn add new files --> 
+        
+        <!-- XXX: update svn props for docs --> 
+        
+        <!-- XXX: svn commit -->
     
     </target>
     
