@@ -6,6 +6,7 @@
     <title>Polygon Tweening</title>
     <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAASI0kCI-azC8RgbOZzWc3VRRarOQe_TKf_51Omf6UUSOFm7EABRRhO0PO4nBAO9FCmVDuowVwROLo3w"
       type="text/javascript"></script>
+    <script src="http://openlayers.org/api/OpenLayers.js"></script>
     <script type="text/javascript" src="../lib/jquery-1.4.4.min.js"></script>
     <script type="text/javascript" src="../lib/mxn/mxn.js?(google)"></script>
     <script type="text/javascript" src="../lib/timeline-1.2.js"></script>
@@ -54,7 +55,7 @@ $(function() {
                     // create tween if item is visible
                     if (item.visible) {
                         var theme = item.opts.theme || item.dataset.opts.theme;
-                        var pm = item.getNativePlacemark();
+                        var pm = item.placemark;
                         var ep = item.opts.endpoly;
                         // get tween percent
                         var now = item.dataset.timemap.timeline.getBand(0)
@@ -67,30 +68,33 @@ $(function() {
                         else percent = 1 - ((end - now) / (end - start));
                         // assume the same number of vertices
                         var points=[], pt1, pt2;
-                        for (var x=0; x<pm.getVertexCount(); x++) {
-                            pt1 = pm.getVertex(x);
+                        for (var x=0; x<pm.points.length; x++) {
+                            pt1 = pm.points[x];
                             pt2 = ep[x];
-                            points.push(new GLatLng(
-                                (pt1.lat() + ((parseFloat(pt2.lat) - pt1.lat()) * percent)),
-                                (pt1.lng() + ((parseFloat(pt2.lon) - pt1.lng()) * percent))
+                            points.push(new mxn.LatLonPoint(
+                                (pt1.lat + ((parseFloat(pt2.lat) - pt1.lat) * percent)),
+                                (pt1.lng + ((parseFloat(pt2.lon) - pt1.lng) * percent))
                             ));
                             // remove the old tween
-                            if (item.tween) item.map.getMap().removeOverlay(item.tween);
+                            if (item.tween) item.map.removePolyline(item.tween);
                             // hide the real placemark
                             item.placemark.hide();
                             // show the new tween
-                            item.tween = new GPolygon(points, 
-                                         theme.polygonLineColor, 
-                                         theme.polygonLineWeight,
-                                         theme.polygonLineOpacity,
-                                         theme.fillColor,
-                                         theme.fillOpacity);
-                            item.map.getMap().addOverlay(item.tween);
+                            item.tween = new mxn.Polyline(points), 
+                            item.tween.addData({
+                                color: theme.lineColor, 
+                                width: theme.lineWeight, 
+                                opacity: theme.lineOpacity, 
+                                closed: true, 
+                                fillColor: theme.fillColor,
+                                fillOpacity: theme.fillOpacity
+                            });
+                            item.map.addPolyline(item.tween);
                         }
                     } else {
                         // remove tween if any
                         if (item.tween) {
-                            item.map.getMap().removeOverlay(item.tween);
+                            item.map.removePolyline(item.tween);
                             item.tween = null;
                         }
                     }
