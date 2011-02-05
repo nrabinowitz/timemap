@@ -203,15 +203,18 @@ function setUpPage() {
         bandInfo: [
             {
                 width:          "30%", 
-                intervalUnit:   Timeline.DateTime.YEAR
+                intervalUnit:   Timeline.DateTime.YEAR,
+                intervalPixels: 100
             },
             {
                 width:          "30%", 
-                intervalUnit:   Timeline.DateTime.DECADE
+                intervalUnit:   Timeline.DateTime.DECADE,
+                intervalPixels: 100
             },
             {
                 width:          "20%", 
                 intervalUnit:   Timeline.DateTime.CENTURY,
+                intervalPixels: 100,
                 eventSource:    false
             }
         ],
