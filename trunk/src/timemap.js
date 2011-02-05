@@ -683,10 +683,20 @@ TimeMap.prototype = {
     
     /**
      * Get the index of the currently selected item
-     * @param {TimeMapItem} item    Item to select
+     * @return {Number} Index of selected item
      */
     getSelected: function() {
         return this.opts.selected;
+    },
+    
+    /**
+     * Get the currently selected item
+     * @return {TimeMapItem} item    Selected item
+     */
+    getSelectedItem: function() {
+        var tm = this,
+            sel = tm.getSelected();
+        return sel >= 0 ? tm.getItems()[sel] : null;
     },
     
     // Helper functions for dealing with filters
@@ -2055,7 +2065,7 @@ TimeMapItem = function(data, dataset) {
      * @return Boolean
      */
     item.isSelected = function() {
-        return tm.getSelected() == tm.getIndex(item);
+        return tm.getSelectedItem() == item;
     };
     
     /**
@@ -2483,7 +2493,7 @@ if (!([].indexOf)) {
     Array.prototype.indexOf = function(el) {
         var a = this,
             i = a.length;
-        while (--i) {
+        while (--i > 0) {
             if (a[i] === el) {
                 break;
             }
