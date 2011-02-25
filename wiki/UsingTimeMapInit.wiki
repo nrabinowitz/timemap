@@ -149,9 +149,12 @@ Use the `bands` parameter when you want to pass in fully instantiated band objec
 [http://code.google.com/p/simile-widgets/wiki/Timeline_CreatingHotzones Creating Hotzones]) or to do some other fancy stuff with the bands.
 
 {{{
-var myBands = Timeline.createHotZoneBandInfo({
-    // your special configuration settings here
-});
+var myBands = [
+    Timeline.createHotZoneBandInfo({
+        // your special configuration settings here
+    }),
+    // etc...
+];
 // maybe you could add some decorators here, etc...
 
 TimeMap.init({ 
