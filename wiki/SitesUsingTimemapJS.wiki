@@ -19,6 +19,8 @@ If you would like your site included on this list, please email the [http://grou
 
   * [http://www.texaslegacy.org/bb/maps/maps.html The Texas Legacy Project] - A wide variety of timemaps displaying various Texas historical datasets. 
 
+  * [http://digital.ncdcr.gov/cdm4/timemap/civil_war/index.php North Carolina Civil War Soldiers] - Displaying the stories and letters of 10 soldiers over the course of the Civil War.
+
   * [http://www.rihs.org/atlas/ Atlas of the Rhode Island Book Trade] - From the Rhode Island Historical Society. 
 
   * Global Voices: [http://threatened.globalvoicesonline.org/ Threatened Voices] and [http://transparency.globalvoicesonline.org/ Technology for Transparency] - two timemaps tracking suppression of free speech and civic engagement technology, respectively.
