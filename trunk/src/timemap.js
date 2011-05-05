@@ -84,7 +84,7 @@ var
  *                                              null or false for no filter.
  * @param {Boolean} [options.showMapTypeCtrl=true]  Whether to display the map type control
  * @param {Boolean} [options.showMapCtrl=true]      Whether to show map navigation control
- * @param {Boolean} [options.centerMapOnItems=true] Whether to center and zoom the map based on loaded item 
+ * @param {Boolean} [options.centerOnItems=true] Whether to center and zoom the map based on loaded item 
  * @param {String} [options.eventIconPath]      Path for directory holding event icons; if set at the TimeMap
  *                                              level, will override dataset and item defaults
  * @param {Boolean} [options.checkResize=true]  Whether to update the timemap display when the window is 
