@@ -144,18 +144,12 @@ TimeMap.prototype.refreshTimeline = function () {
  */
 TimeMap.prototype.changeTimeIntervals = function (intervals) {
     var tm = this;
-    // check for no change
-    if (intervals == tm.opts.bandIntervals) {
+    // check for no change or no intervals
+    if (!intervals || intervals == tm.opts.bandIntervals) {
         return;
     }
-    // look for intervals
-    if (typeof(intervals) == 'string') {
-        intervals = TimeMap.intervals[intervals];
-    }
-    // no intervals specified
-    if (!intervals) {
-        return;
-    }
+    // resolve string references if necessary
+    intervals = util.lookup(intervals, TimeMap.intervals);
     tm.opts.bandIntervals = intervals;
     // internal function - change band interval
     function changeInterval(band, interval) {
@@ -171,7 +165,9 @@ TimeMap.prototype.changeTimeIntervals = function (intervals) {
         changeInterval(tm.timeline.getBand(x), intervals[x]);
     }
     // re-layout timeline
-    topband.getEventPainter().getLayout()._laidout = false;
+    if (topband.getEventPainter().getLayout) {
+        topband.getEventPainter().getLayout()._laidout = false;
+    }
     tm.timeline.layout();
     topband.setCenterVisibleDate(centerDate);
 };
