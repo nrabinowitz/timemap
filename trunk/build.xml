@@ -279,6 +279,9 @@ Also required: ant-contrib, svnant
         <condition property="dependency.url" value="placemarkTests.js,">
             <contains string="${test.name}" substring="PlacemarkTests"/>
         </condition>
+        <condition property="dependency.url" value="infoWindowTests.js,">
+            <contains string="${test.name}" substring="InfoWindowTests"/>
+        </condition>
         <property name="dependency.url" value=""/>
         <!-- put in script tags -->
         <property name="script.url.list" value="${map.test.url},${mxn.test.url},${timeline.test.url},${source.test.urls},${dependency.url}${test.name}.js"/>

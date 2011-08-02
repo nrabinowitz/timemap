@@ -20,9 +20,11 @@ function assertBandInterval(timemap, bandIndex, interval) {
 }
 
 function assertMapType(timemap, type) {
-    assertEquals("mapType not " + type, 
-        mxn.Mapstraction[type], 
-        timemap.map.getMapType());
+    if (!tm.map.api == 'openlayers') {
+        assertEquals("mapType not " + type, 
+            mxn.Mapstraction[type], 
+            timemap.map.getMapType());
+    } // else pass - OpenLayers doesn't support other map types in Mapstraction
 }
 
 // tests: map types
