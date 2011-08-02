@@ -2194,30 +2194,40 @@ TimeMapItem.prototype = {
         if (item.event) {
             item.dataset.timemap.scrollToDate(item.getStart(), false, animated);
         }
+    },
+
+    /**
+     * Get the HTML for the info window, filling in the template if necessary
+     */
+    getInfoHtml: function() {
+        var opts = this.opts,
+            html = opts.infoHtml,
+            patt = opts.templatePattern,
+            match;
+        // create content for info window if none is provided
+        if (!html) {
+            // fill in template
+            html = opts.infoTemplate;
+            match = patt.exec(html);
+            while (match) {
+                html = html.replace(match[0], opts[match[1]]||'');
+                match = patt.exec(html);
+            }
+            // cache for future use
+            opts.infoHtml = html;
+        }
+        return html;
     }
 
 };
+
 
 /**
  * Standard open info window function, using static text in map window
  */
 TimeMapItem.openInfoWindowBasic = function() {
     var item = this,
-        opts = item.opts,
-        html = opts.infoHtml,
-        match;
-    // create content for info window if none is provided
-    if (!html) {
-        // fill in template
-        html = opts.infoTemplate;
-        match = opts.templatePattern.exec(html);
-        while (match) {
-            html = html.replace(match[0], opts[match[1]]);
-            match = opts.templatePattern.exec(html);
-        }
-        // cache for future use
-        opts.infoHtml = html;
-    }
+        html = item.getInfoHtml();
     // scroll timeline if necessary
     // XXX: this assumes hidePastFuture. Better to encapsulate the logic there and reuse here.
     if (item.placemark && !item.placemarkVisible && item.event) {
