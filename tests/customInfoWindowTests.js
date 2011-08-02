@@ -32,6 +32,23 @@ IWT.dataset = {
                         $('#custom2').remove();
                     }
                 }
+            },
+            {
+                "start" : "1980-01-02",
+                "point" : {
+                    "lat" : 23.456,
+                    "lon" : 12.345
+                },
+                "title" : "Test Event 3",
+                "options" : {
+                    "description": "Test Description",
+                    "openInfoWindow": function() {
+                        $('body').append('<div id="custom3">' + this.getInfoHtml() + '<div>');
+                    },
+                    "closeInfoWindow": function() {
+                        $('#custom3').remove();
+                    }
+                }
             }
         ]
     }
@@ -43,7 +60,8 @@ function exposeTestFunctionNames() {
     return [
         'testInfoTemplate',
         'testCloseOnHide',
-        'testCustomOpenFunction'
+        'testCustomOpenFunction',
+        'testCustomWithInfoHtml'
     ];
 }
 
@@ -80,4 +98,19 @@ function testCustomOpenFunction() {
     item.closeInfoWindow();
     assertEquals('Custom info window did not close properly',
         0, $('div#custom2').length);
+}
+
+function testCustomWithInfoHtml() {
+    var ds = IWT.tm.datasets['test'];
+    var item = ds.getItems()[2];
+    item.openInfoWindow();
+    assertEquals('Custom info window did not open properly',
+        1, $('div#custom3').length);
+    assertEquals('Custom info window title incorrect', 
+         'Test Event 3', $('div#custom3 div.infotitle').text());
+    assertEquals('Custom info window description incorrect', 
+        'Test Description', $('div#custom3 div.infodescription').text());
+    item.closeInfoWindow();
+    assertEquals('Custom info window did not close properly',
+        0, $('div#custom3').length);
 }

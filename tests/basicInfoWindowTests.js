@@ -42,9 +42,9 @@ IWT.setupTest = function() {
 function testDefaultOpen() {
     assertTrue('Timeout with no info window divs found', IWT.success);
     assertEquals('Info window title incorrect', 
-        $('div.infotitle').text(), 'Test Event');
+         'Test Event', $('div.infotitle').text());
     assertEquals('Info window description incorrect', 
-        $('div.infodescription').text(), 'Test Description');
+        'Test Description', $('div.infodescription').text());
 }
 
 function testDefaultClose() {
