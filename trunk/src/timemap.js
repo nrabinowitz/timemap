@@ -90,6 +90,8 @@ var
  * @param {Boolean} [options.checkResize=true]  Whether to update the timemap display when the window is 
  *                                              resized. Necessary for fluid layouts, but might be better set to
  *                                              false for absolutely-sized timemaps to avoid extra processing
+ * @param {Boolean} [options.multipleInfoWindows=false] Whether to allow multiple simultaneous info windows for 
+ *                                              map providers that allow this (Google v3, OpenLayers)
  * @param {mixed} [options[...]]                Any of the options for {@link TimeMapDataset}, 
  *                                              {@link TimeMapItem}, or {@link TimeMapTheme} may be set here,
  *                                              to cascade to the entire TimeMap, though they can be overridden
