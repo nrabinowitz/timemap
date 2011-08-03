@@ -1280,18 +1280,7 @@ TimeMap.filters = {
      * @return {Boolean}            Whether to show the item
      */
     hidePastFuture: function(item) {
-        var topband = item.timeline.getBand(0),
-            maxVisibleDate = topband.getMaxVisibleDate().getTime(),
-            minVisibleDate = topband.getMinVisibleDate().getTime(),
-            itemStart = item.getStartTime(),
-            itemEnd = item.getEndTime();
-        if (itemStart !== undefined) {
-            // hide items in the future
-            return itemStart < maxVisibleDate &&
-                // hide items in the past
-                (itemEnd > minVisibleDate || itemStart > minVisibleDate);
-        }
-        return true;
+        return item.onVisibleTimeline();
     },
 
     /**
@@ -2114,7 +2103,9 @@ TimeMapItem.prototype = {
         // XXX: Special case for overlay image (support for some providers)?
         var item = this,
             f = function(placemark) {
-                placemark.show();
+                if (placemark.api) {
+                    placemark.show();
+                }
             };
         if (item.placemark && !item.placemarkVisible) {
             if (item.getType() == "array") {
@@ -2133,7 +2124,9 @@ TimeMapItem.prototype = {
         // XXX: Special case for overlay image (support for some providers)?
         var item = this,
             f = function(placemark) {
-                placemark.hide();
+                if (placemark.api) {
+                    placemark.hide();
+                }
             };
         if (item.placemark && item.placemarkVisible) {
             if (item.getType() == "array") {
@@ -2190,6 +2183,7 @@ TimeMapItem.prototype = {
 
     /**
      * Get the HTML for the info window, filling in the template if necessary
+     * @return {String}     Info window HTML
      */
     getInfoHtml: function() {
         var opts = this.opts,
@@ -2209,6 +2203,28 @@ TimeMapItem.prototype = {
             opts.infoHtml = html;
         }
         return html;
+    },
+    
+    /**
+     * Determine if this item's event is in the current visible area
+     * of the top band of the timeline. Note that this only considers the
+     * dates, not whether the event is otherwise hidden.
+     * @return {Boolean}    Whether the item's event is visible
+     */
+    onVisibleTimeline: function() {
+        var item = this,
+            topband = item.timeline.getBand(0),
+            maxVisibleDate = topband.getMaxVisibleDate().getTime(),
+            minVisibleDate = topband.getMinVisibleDate().getTime(),
+            itemStart = item.getStartTime(),
+            itemEnd = item.getEndTime();
+        return itemStart !== undefined ? 
+            // item is in the future
+            itemStart < maxVisibleDate &&
+            // item is in the past
+            (itemEnd > minVisibleDate || itemStart > minVisibleDate) :
+            // item has no start date
+            true;
     }
 
 };
@@ -2219,22 +2235,23 @@ TimeMapItem.prototype = {
  */
 TimeMapItem.openInfoWindowBasic = function() {
     var item = this,
-        html = item.getInfoHtml();
+        html = item.getInfoHtml(),
+        ds = item.dataset,
+        placemark = item.placemark;
     // scroll timeline if necessary
-    // XXX: this assumes hidePastFuture. Better to encapsulate the logic there and reuse here.
-    if (item.placemark && !item.placemarkVisible && item.event) {
-        item.dataset.timemap.scrollToDate(item.event.getStart());
+    if (!item.onVisibleTimeline()) {
+        ds.timemap.scrollToDate(item.getStart());
     }
     // open window
-    if (item.getType() == "marker") {
-        item.placemark.setInfoBubble(html);
-        item.placemark.openBubble();
+    if (item.getType() == "marker" && placemark.api) {
+        placemark.setInfoBubble(html);
+        placemark.openBubble();
         // deselect when window is closed
-        item.closeHandler = item.placemark.closeInfoBubble.addHandler(function() { 
+        item.closeHandler = placemark.closeInfoBubble.addHandler(function() { 
             // deselect
-            item.dataset.timemap.setSelected(undefined);
+            ds.timemap.setSelected(undefined);
             // kill self
-            item.placemark.closeInfoBubble.removeHandler(item.closeHandler);
+            placemark.closeInfoBubble.removeHandler(item.closeHandler);
         });
     } else {
         item.map.openBubble(item.getInfoPoint(), html);
