@@ -110,7 +110,8 @@ TimeMap = function(tElement, mElement, options) {
             centerOnItems:      true,
             theme:              'red',
             dateParser:         'hybrid',
-            checkResize:        true
+            checkResize:        true,
+            multipleInfoWindows:false
         }, 
         mapCenter;
     
@@ -392,6 +393,11 @@ TimeMap.prototype = {
             map_type: options.showMapTypeCtrl
         });
         map.setMapType(options.mapType);
+        
+        // allow multiple windows if desired
+        if (options.multipleInfoWindows) {
+            map.setOption('enableMultipleBubbles', true);
+        }
         
         /**
          * Return the native map object (specific to the map provider)
