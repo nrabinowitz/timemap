@@ -88,15 +88,16 @@ TimeMap.loaders.kml.parse = function(kmlnode) {
     
     // recursive time data search
     function findNodeTime(n, data) {
-        var instantStart = getTagValue(n, "TimeStamp when"),
-            spanStart = getTagValue(n, "TimeSpan begin");
+        var tstamp = $(n).children("TimeStamp"),
+            tspan = $(n).children("TimeSpan");
         // set start if found
-        data.start = instantStart || spanStart;
-        // set end if span
-        if (spanStart) {
-            data.end = getTagValue(n, "TimeSpan end")  ||
+        if (tspan.length) {
+            data.start = getTagValue(tspan, 'begin');
+            data.end = getTagValue(tspan, 'end')  ||
                 // unbounded spans end at the present time
                 formatDate(new Date());
+        } else {
+            data.start = getTagValue(tstamp, 'when');
         }
         // try looking recursively at parent nodes
         if (!data.start) {

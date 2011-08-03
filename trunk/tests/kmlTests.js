@@ -4,14 +4,16 @@ function exposeTestFunctionNames() {
         'testEmptyTag',
         'testExtendedData',
         'testUnboundedSpan',
-        'testLongTagValue'
+        'testLongTagValue',
+        'testSiblingDate',
+        'testFolderDate'
     ];
 }
 
 function testLoaded() {
     var ds = tm.datasets["test"];
     assertNotUndefined("Dataset is defined", ds);
-    assertEquals("Correct number of items in item array", 4, ds.getItems().length);
+    assertEquals("Correct number of items in item array", 8, ds.getItems().length);
 }
 
 function testEmptyTag() {
@@ -47,6 +49,30 @@ function testLongTagValue() {
         items = ds.getItems(),
         item = items[3];
     assertEquals("Description char count correct", 5000, item.opts.description.length);
+}
+
+function testSiblingDate() {
+    var ds = tm.datasets["test"],
+        items = ds.getItems(),
+        item = items[5];
+    assertEquals("Start year matches", 1980, item.getStart().getUTCFullYear());
+    assertEquals("Start month matches", 0, item.getStart().getUTCMonth());
+    assertEquals("Start day matches", 2, item.getStart().getUTCDate());
+    item = items[4];
+    assertNull(item.getTitle() + " start is not null - inherited from sibling", item.getStart());
+}
+
+function testFolderDate() {
+    var ds = tm.datasets["test"],
+        items = ds.getItems(),
+        item = items[7];
+    assertEquals("Start year does not match", 1980, item.getStart().getUTCFullYear());
+    assertEquals("Start month does not match", 0, item.getStart().getUTCMonth());
+    assertEquals("Start day does not match", 2, item.getStart().getUTCDate());
+    item = items[6];
+    assertEquals("Start year does not match Folder", 1990, item.getStart().getUTCFullYear());
+    assertEquals("Start month does not match Folder", 0, item.getStart().getUTCMonth());
+    assertEquals("Start day does not match Folder", 2, item.getStart().getUTCDate());
 }
 
 
