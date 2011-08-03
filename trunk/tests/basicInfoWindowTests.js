@@ -51,6 +51,15 @@ function testDefaultClose() {
     var ds = IWT.tm.datasets['test'];
     var item = ds.getItems()[0];
     item.closeInfoWindow();
-    assertEquals('Info window div were found after the window was closed',
-        0, $('div.infotitle, div.infodescription').length);
+    if (IWT.tm.map.api == 'microsoft') {
+        // Bing just hides the divs
+        assertEquals('Info window title is not hidden', 
+            'hidden', $('div.infotitle').css('visibility'));
+        assertEquals('Info window description is not hidden', 
+            'hidden', $('div.infodescription').css('visibility'));
+    } else {
+        // everyone else seems to remove the divs from the DOM
+        assertEquals('Info window div were found after the window was closed',
+            0, $('div.infotitle, div.infodescription').length);
+    }
 }

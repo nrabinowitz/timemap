@@ -52,7 +52,6 @@
       </outerBoundaryIs>
     </Polygon>
     <!-- Can't include an overlay here -->
-    <Point><coordinates>12.345,23.456</coordinates></Point>
 </MultiGeometry>
 </Placemark>
 
@@ -79,7 +78,6 @@
       </outerBoundaryIs>
     </Polygon>
     <!-- Can't include an overlay here -->
-    <Point><coordinates>12.345,23.456</coordinates></Point>
 </MultiGeometry>
 </Placemark>
 

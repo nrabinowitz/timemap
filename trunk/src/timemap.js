@@ -110,8 +110,7 @@ TimeMap = function(tElement, mElement, options) {
             centerOnItems:      true,
             theme:              'red',
             dateParser:         'hybrid',
-            checkResize:        true,
-            selected:           -1
+            checkResize:        true
         }, 
         mapCenter;
     
@@ -613,6 +612,8 @@ TimeMap.prototype = {
     createDataset: function(id, options) {
         var tm = this,
             dataset = new TimeMapDataset(tm, options);
+        // save id reference
+        dataset.id = id;
         tm.datasets[id] = dataset;
         // add event listener
         if (tm.opts.centerOnItems) {
@@ -666,37 +667,20 @@ TimeMap.prototype = {
     },
     
     /**
-     * Find the index of an item in the current array of items
-     * @param {TimeMapItem} item    Item to find
-     */
-    getIndex: function(item) {
-        return this.getItems().indexOf(item);
-    },
-    
-    /**
-     * Save the index of the currently selected item
-     * @param {TimeMapItem} item    Item to select
+     * Save the currently selected item
+     * @param {TimeMapItem|String} item     Item to select, or undefined
+     *                                      to clear selection
      */
     setSelected: function(item) {
-        this.opts.selected = this.getIndex(item);
-    },
-    
-    /**
-     * Get the index of the currently selected item
-     * @return {Number} Index of selected item
-     */
-    getSelected: function() {
-        return this.opts.selected;
+        this.opts.selected = item;
     },
     
     /**
      * Get the currently selected item
-     * @return {TimeMapItem} item    Selected item
+     * @return {TimeMapItem} Selected item
      */
-    getSelectedItem: function() {
-        var tm = this,
-            sel = tm.getSelected();
-        return sel >= 0 ? tm.getItems()[sel] : null;
+    getSelected: function() {
+        return this.opts.selected;
     },
     
     // Helper functions for dealing with filters
@@ -2065,7 +2049,7 @@ TimeMapItem = function(data, dataset) {
      * @return Boolean
      */
     item.isSelected = function() {
-        return tm.getSelectedItem() == item;
+        return tm.getSelected() === item;
     };
     
     /**
@@ -2110,7 +2094,7 @@ TimeMapItem = function(data, dataset) {
      */
     item.closeInfoWindow = function() {
         options.closeInfoWindow.call(item);
-        tm.setSelected(null);
+        tm.setSelected(undefined);
     };
 };
 
@@ -2240,7 +2224,7 @@ TimeMapItem.openInfoWindowBasic = function() {
         // deselect when window is closed
         item.closeHandler = item.placemark.closeInfoBubble.addHandler(function() { 
             // deselect
-            item.dataset.timemap.setSelected(null);
+            item.dataset.timemap.setSelected(undefined);
             // kill self
             item.placemark.closeInfoBubble.removeHandler(item.closeHandler);
         });
