@@ -13,7 +13,8 @@ IWT.setUpEventually = function() {
             setUpPageStatus = "complete";
         }
         else {
-            timeoutId = window.setTimeout(look);
+            elapsed += timeoutInterval;
+            timeoutId = window.setTimeout(look, timeoutInterval);
         }
     }
     look();
