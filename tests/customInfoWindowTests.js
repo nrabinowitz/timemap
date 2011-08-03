@@ -1,4 +1,5 @@
 
+
 IWT.dataset = {
     id: "test",
     type: "basic",
@@ -85,8 +86,15 @@ function testCloseOnHide() {
     var ds = IWT.tm.datasets['test'];
     var item = ds.getItems()[0];
     item.hidePlacemark();
-    assertEquals('Info window element was found after the placemark was hidden',
-        0, $('span#custom').length);
+    if (IWT.tm.map.api == 'microsoft') {
+        // Bing just hides the divs
+        assertEquals('Info window content is not hidden', 
+            'hidden',$('span#custom').css('visibility'));
+    } else {
+        // everyone else seems to remove the divs from the DOM
+        assertEquals('Info window div were found after the window was closed',
+            0, $('span#custom').length);
+    }
 }
 
 function testCustomOpenFunction() {

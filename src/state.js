@@ -290,15 +290,33 @@ TimeMap.state.params = {
          */
         selected: new paramNS.OptionParam("selected", {
             set: function(tm, value) {
-                if (value >= 0) {
-                    var item = tm.getItems()[value];
+                var ds = value && tm.datasets[value.dataset],
+                    item;
+                if (ds) {
+                    item = ds.getItems()[value.index];
                     if (item) {
                         item.openInfoWindow();
                     }
                 }
             },
+            // this will return a value suitable for set(),
+            // but it won't return the item itself.
             fromStr: function(s) {
-                return parseInt(s, 10);
+                if (s) {
+                    var i = s.lastIndexOf('-'), 
+                        dsid, idx;
+                    if (i >= 0) {
+                        return {
+                            dataset: s.substr(0,i),
+                            index: parseInt(s.substr(i+1))
+                        };
+                    }
+                }
+            },
+            toStr: function(item) {
+                // serialize with dataset and index
+                var ds = item && item.dataset;
+                return item ? ds.id + '-' + ds.items.indexOf(item) : '';
             }
         })
 };
