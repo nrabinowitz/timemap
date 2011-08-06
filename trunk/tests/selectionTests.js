@@ -72,7 +72,7 @@ function setUpPage() {
                               "lat" : 40.0,
                               "lon" : 12.0
                            },
-                          "title" : "Test Event 1",
+                          "title" : "Test Event 1"
                         },
                         {
                           "start" : "1980-01-02",
@@ -81,7 +81,7 @@ function setUpPage() {
                               "lat" : 41.0,
                               "lon" : 13.0
                            },
-                          "title" : "Test Event 2",
+                          "title" : "Test Event 2"
                         },
                         {
                           "start" : "1980-01-02",

@@ -11,7 +11,8 @@ Version 2.0.1
 - Made multiple info windows an option, not the default, for Google v3 and OpenLayers
 - Added TimeMapItem#getInfoHtml and TimeMapItem#onVisibleTimeline
 - Refactored TimeMap selection functions (setSelected, getSelected)
-- Updated to newest jQuery and Mapstraction
+- Merged latest Mapstraction
+- Updated and tested newest jQuery (1.6.2), OpenLayers (2.10)
 - Added tests for info windows
 - Fixed a number of small bugs
 
