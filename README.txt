@@ -48,7 +48,7 @@ Supporting Libraries (in lib/)
   * mxn/*               Mapstraction library - fork found here: https://github.com/nrabinowitz/mxn
                         This version is *required* for timemap.js, until my changes get pulled into the
                         official library
-  * jquery-1.4.4.min.js jQuery. Just for convenience - use a CDN version if you prefer
+  * jquery-1.x.x.min.js jQuery. Just for convenience - use a CDN version if you prefer
   * json2.pack.js       JSON library - usually not required
   
 Source files (in src/)

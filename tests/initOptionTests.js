@@ -54,32 +54,33 @@ function testCustomMapType() {
 function testAutoCenterAndZoom() {
     assertTrue("centerOnItems not set as default", tm.opts.centerOnItems);
     // okay, let's do this with broad strokes
-    assertTrue("Map auto-zoom too high", tm.map.getZoom() <= 8);
-    assertTrue("Map auto-zoom too low", tm.map.getZoom() >= 6);
+    var mapZoom = tm.map.getZoom();
+    assertTrue("Map auto-zoom too high - expected ~7, got " + mapZoom, mapZoom <= 8);
+    assertTrue("Map auto-zoom too low - expected ~7, got " + mapZoom, mapZoom >= 6);
     var center = tm.map.getCenter();
-    assertTrue("Map auto-center latitude too far south", center.lat > 40.0);
-    assertTrue("Map auto-center latitude too far north", center.lat < 42.0);
-    assertTrue("Map auto-center longitude too far east", center.lon < 12.5);
-    assertTrue("Map auto-center longitude too far west", center.lon > 11.5);
+    assertTrue("Map auto-center latitude too far south - expected ~41, got " + center.lat, center.lat > 40.0);
+    assertTrue("Map auto-center latitude too far north - expected ~41, got " + center.lat, center.lat < 42.0);
+    assertTrue("Map auto-center longitude too far east - expected ~12, got " + center.lon, center.lon < 12.5);
+    assertTrue("Map auto-center longitude too far west - expected ~12, got " + center.lon, center.lon > 11.5);
 }
 
 function testCustomCenterAndZoom() {
     assertFalse("centerOnItems incorrectly set as default", tm2.opts.centerOnItems);
     var center = tm2.map.getCenter();
-    assertTrue("Map center latitude too far south", center.lat > 37.9);
-    assertTrue("Map center latitude too far north", center.lat < 38.1);
-    assertTrue("Map center longitude too far east", center.lon < -122.9);
-    assertTrue("Map center longitude too far west", center.lon > -123.1);
+    assertTrue("Map center latitude too far south - expected ~38, got " + center.lat, center.lat > 37.9);
+    assertTrue("Map center latitude too far north - expected ~38, got " + center.lat, center.lat < 38.1);
+    assertTrue("Map center longitude too far east - expected ~-123, got " + center.lon, center.lon < -122.9);
+    assertTrue("Map center longitude too far west - expected ~-123, got " + center.lon, center.lon > -123.1);
     assertEquals("Map zoom wrong", 8, tm2.map.getZoom());
 }
 
 function testPointCenterAndZoom() {
     assertFalse("centerOnItems incorrectly set as default", tm3.opts.centerOnItems);
     var center = tm3.map.getCenter();
-    assertTrue("Map center latitude too far south", center.lat > 37.9);
-    assertTrue("Map center latitude too far north", center.lat < 38.1);
-    assertTrue("Map center longitude too far east", center.lon < -122.9);
-    assertTrue("Map center longitude too far west", center.lon > -123.1);
+    assertTrue("Map center latitude too far south - expected ~38, got " + center.lat, center.lat > 37.9);
+    assertTrue("Map center latitude too far north - expected ~38, got " + center.lat, center.lat < 38.1);
+    assertTrue("Map center longitude too far east - expected ~-123, got " + center.lon, center.lon < -122.9);
+    assertTrue("Map center longitude too far west - expected ~-123, got " + center.lon, center.lon > -123.1);
     assertEquals("Map zoom wrong", 8, tm3.map.getZoom());
 }
 
@@ -244,7 +245,7 @@ function setUpPage() {
                                     end:      "1480",
                                     magnify:  5,
                                     unit:     Timeline.DateTime.MONTH
-                                }],
+                                }]
             }),
             Timeline.createHotZoneBandInfo({
                 width:          "25%",
@@ -256,7 +257,7 @@ function setUpPage() {
                                     end:      "1480",
                                     magnify:  5,
                                     unit:     Timeline.DateTime.YEAR
-                                }],
+                                }]
             })
         ],
         datasets: [

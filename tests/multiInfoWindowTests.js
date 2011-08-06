@@ -13,7 +13,7 @@ IWT.dataset = {
                 },
                 "title" : "Test Event 1",
                 "options" : {
-                    "description": "Test Description",
+                    "description": "Test Description"
                 }
             },
             {
