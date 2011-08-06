@@ -90,42 +90,33 @@ $(function() {
             Timeline.DateTime.CENTURY
         ]
     });
+    
+    // filter function for tags
+    var hasSelectedTag = function(item) {
+        // if no tag was selected, everything passes
+        return !window.selectedTag || (
+                // item has tags?
+                item.opts.tags && 
+                // tag found? (note - will work in IE; Timemap extends the Array prototype if necessary)
+                item.opts.tags.indexOf(window.selectedTag) >= 0
+            );
+    };
+    
     // add our new function to the map and timeline filters
-    tm.addFilter("map", TimeMap.filters.hasSelectedTag); // hide map markers on fail
-    tm.addFilter("timeline", TimeMap.filters.hasSelectedTag); // hide timeline events on fail
+    tm.addFilter("map", hasSelectedTag); // hide map markers on fail
+    tm.addFilter("timeline", hasSelectedTag); // hide timeline events on fail
+
+    // onChange handler for pulldown menu
+    $('#tag_select').change(function() {
+        window.selectedTag = $(this).val();
+        // run filters
+        tm.filter('map');
+        tm.filter('timeline');
+    });
 });
 
-// filter function for tags
-TimeMap.filters.hasSelectedTag = function(item) {
-    // backwards-compatible indexOf
-    function indexOf(arr, item) {
-        if (arr.indexOf) return arr.indexOf(item);
-        // otherwise, do it the hard way
-        var i = arr.length;
-        while (i--) if (arr[i]==item) break;
-        // not found
-        return i;
-    }
-    return !window.selectedTag || // if no tag was selected, everything passes
-        (
-            // item has tags?
-            item.opts.tags && 
-            // tag found?
-            indexOf(item.opts.tags, window.selectedTag) >= 0
-        );
-};
-
-// onChange handler for pulldown menu
-function setSelectedTag(select) {
-    var idx = select.selectedIndex;
-    window.selectedTag = select.options[idx].value;
-    // run filters
-    tm.filter('map');
-    tm.filter('timeline');
-}
-
     </script>
-	<link href="examples.css" type="text/css" rel="stylesheet"/>
+    <link href="examples.css" type="text/css" rel="stylesheet"/>
     <style>
     div#timelinecontainer{ height: 300px; }
     div#mapcontainer{ height: 300px; }
@@ -137,7 +128,7 @@ function setSelectedTag(select) {
     <h1>Filters</h1>
     In this example, we've loaded a set of tags for each item, and can use this dropdown menu to filter based on tags:
     <form>
-        <select onChange="setSelectedTag(this);">
+        <select id="tag_select">
             <option value="">All tags</option>
             <option value="painter">painter</option>
             <option value="sculptor">sculptor</option>

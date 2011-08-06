@@ -29,7 +29,7 @@
  *
  * @name timemap.js
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
- * @version 2.0.1pre
+ * @version 2.0.1
  */
 
 // for jslint
@@ -174,7 +174,7 @@ TimeMap = function(tElement, mElement, options) {
  * @constant
  * @type String
  */
-TimeMap.version = "2.0.1pre";
+TimeMap.version = "2.0.1";
 
 /**
  * @name TimeMap.util
@@ -2512,7 +2512,7 @@ if (!([].indexOf)) {
     Array.prototype.indexOf = function(el) {
         var a = this,
             i = a.length;
-        while (--i > 0) {
+        while (--i >= 0) {
             if (a[i] === el) {
                 break;
             }
