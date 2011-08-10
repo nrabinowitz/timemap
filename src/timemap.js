@@ -29,7 +29,7 @@
  *
  * @name timemap.js
  * @author Nick Rabinowitz (www.nickrabinowitz.com)
- * @version 2.0.1
+ * @version 2.1pre
  */
 
 // for jslint
@@ -174,7 +174,7 @@ TimeMap = function(tElement, mElement, options) {
  * @constant
  * @type String
  */
-TimeMap.version = "2.0.1";
+TimeMap.version = "2.1pre";
 
 /**
  * @name TimeMap.util
