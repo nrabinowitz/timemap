@@ -425,13 +425,13 @@ Also required: ant-contrib, svnant
     </target>
     
     <target name="svn-prop-set">
-        <path id="doc.html.files">
+        <path id="html.files">
             <fileset dir="${tag.dir.docs}">
                 <include name="**/*.html"/>
             </fileset>
         </path>
         <for param="file">
-            <path refid="doc.html.files"/>
+            <path refid="html.files"/>
             <sequential>
                 <echo>Setting props on @{file}</echo>
                 <path refid="docs.html"/>
@@ -442,7 +442,7 @@ Also required: ant-contrib, svnant
             </sequential>
         </for>
         <svn username="${svn.username}" password="${svn.password}">
-            <commit dir="${tag.dir}" message="Setting svn properties on generated docs"/>
+            <commit dir="${tag.dir}" message="Setting svn properties on HTML files"/>
         </svn>
     </target>
     
