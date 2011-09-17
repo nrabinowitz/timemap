@@ -1432,13 +1432,13 @@ TimeMapDataset.prototype = {
      * @see TimeMapDataset#loadItem
      */
     loadItems: function(data, transform) {
-		if (data) {
-			var ds = this;
-			data.forEach(function(item) {
-				ds.loadItem(item, transform);
-			});
-			$(ds).trigger(E_ITEMS_LOADED);
-		}
+        if (data) {
+            var ds = this;
+            data.forEach(function(item) {
+                ds.loadItem(item, transform);
+            });
+            $(ds).trigger(E_ITEMS_LOADED);
+        }
     },
 
     /**
