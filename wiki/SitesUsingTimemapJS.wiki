@@ -27,6 +27,9 @@ If you would like your site included on this list, please email the [http://grou
 
   *  [http://basetrack.org Basetrack 1/8] - A wordpress-based site for journalists embedded with a marine batallion in Afghanistan.
 
+
+  * [http://www.wired.com/threatlevel/2012/01/10000-control-systems-online/ Critical Infrastructure Vulnerabilities] - Wired story on a researcher using timemap.js to visualize vulnerabilities in industrial control systems.
+
   * [http://projects.latimes.com/mapping-la/neighborhoods/neighborhood/boyle-heights/crime/ L.A. Times: Mapping L.A.] - Using timemap.js to show crimes in 200+ L.A. neighborhoods.
 
   * Timemaps of the [http://wholemeal.co.nz/~malc/darfield-earthquake-timeline/ September 2010 Darfield, NZ earthquake] and the [http://geonet.org.nz/canterbury-quakes/timeline.html February 2011 Darfield, NZ earthquake]. The code for these applications has been [https://github.com/malclocke/darfield-earthquake-timeline released as Open Source here].
@@ -38,8 +41,6 @@ If you would like your site included on this list, please email the [http://grou
   * [http://www.dataviz.org/ VIDI] and [http://drupal.org/project/timelinemap Timelinemap] - Suite of Drupal data visualization plugins, including one using timemap.js.
  
   * [http://itn.co.uk/earth.html ITN Story Map] - Timemap of news items from the ITN website.
-
-  * [http://www.amazonwatch.org/tm/ Amazon Watch] - Timemap of news items from the !AmazonWatch website.
 
   * [http://www.dalli.it/kk/it/proj/index.html Trifolium] - Timemap of environmental projects (Italian)
 
