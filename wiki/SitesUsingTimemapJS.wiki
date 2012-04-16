@@ -11,6 +11,8 @@ If you would like your site included on this list, please email the [http://grou
 
   * [http://code.google.com/p/geodia/ GeoDia] - Archaeological timemap of the ancient Mediterranean. This was the initial inspiration for timemap.js, and is still a work in progress.
 
+  * [http://gap.alexandriaarchive.org/gapvis/index.html GapVis] - An interface for exploring and reading texts that reference ancient places.
+
   * [http://legacy.ushahidi.com/timeline.asp Ushahidi] - The initial deployment of Ushahidi used a timemap to display events surrounding the post-election crisis in Kenya.
 
   * [http://www.open.ac.uk/Arts/hestia/herodotus/basic.html The Hestia Project] - Display of the History of Herodotus using the timeline to display narrative sequence, rather than chronological time.
