@@ -52,4 +52,6 @@ If you would like your site included on this list, please email the [http://grou
 
   * [http://sites.google.com/site/mapadofutebol/ Mapa do Futebol] - Timemap of football history (Portuguese)
 
+ * [http://riders.geolocator.co/timeline.php Live Riders Geolocation] - Timemap of current/upcoming European bicycle races
+
   
