@@ -27,8 +27,9 @@ If you would like your site included on this list, please email the [http://grou
 
   * Global Voices: [http://threatened.globalvoicesonline.org/ Threatened Voices] and [http://transparency.globalvoicesonline.org/ Technology for Transparency] - two timemaps tracking suppression of free speech and civic engagement technology, respectively.
 
-  *  [http://basetrack.org Basetrack 1/8] - A wordpress-based site for journalists embedded with a marine batallion in Afghanistan.
+  * [http://basetrack.org Basetrack 1/8] - A wordpress-based site for journalists embedded with a marine batallion in Afghanistan.
 
+  * [http://arthix.nixiweb.com/ OTTO Line] - A site allowing you to make your own timemaps and search those of other users (in Spanish)
 
   * [http://www.wired.com/threatlevel/2012/01/10000-control-systems-online/ Critical Infrastructure Vulnerabilities] - Wired story on a researcher using timemap.js to visualize vulnerabilities in industrial control systems.
 
